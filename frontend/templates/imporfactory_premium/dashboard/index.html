@@ -1,0 +1,148 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard ejecutivo{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Dashboard ejecutivo</h1>
+        <p class="imf-page-subtitle">Vista general de IMPORFACTORY · Fase 0 (Foundation) — los módulos se irán activando en los próximos sprints</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <button class="imf-btn imf-btn--secondary">Filtros</button>
+        <button class="imf-btn imf-btn--ai">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Generar reporte con IA
+        </button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom: 32px">
+    <div class="imf-kpi">
+        <div class="imf-kpi__label">MRR</div>
+        <div class="imf-kpi__value">—</div>
+        <div class="imf-kpi__delta imf-kpi__delta--flat">Pendiente Sprint 3 · Finanzas</div>
+    </div>
+    <div class="imf-kpi">
+        <div class="imf-kpi__label">Alumnos activos</div>
+        <div class="imf-kpi__value">—</div>
+        <div class="imf-kpi__delta imf-kpi__delta--flat">Pendiente Sprint 3 · Finanzas</div>
+    </div>
+    <div class="imf-kpi">
+        <div class="imf-kpi__label">Clases programadas</div>
+        <div class="imf-kpi__value">—</div>
+        <div class="imf-kpi__delta imf-kpi__delta--flat">Pendiente Sprint 4 · Clases</div>
+    </div>
+    <div class="imf-kpi">
+        <div class="imf-kpi__label">Artículos publicados</div>
+        <div class="imf-kpi__value">—</div>
+        <div class="imf-kpi__delta imf-kpi__delta--flat">Pendiente Sprint 5 · Blog</div>
+    </div>
+</div>
+
+<div class="imf-grid-2">
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-0.01em">Roadmap del sistema</h2>
+        <p style="color:var(--imf-text-secondary);font-size:13.5px;margin:0 0 24px">Plan aprobado el 2026-05-27 · 7 sprints (~3 semanas)</p>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border)">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-success);display:grid;place-items:center;color:#0B1426;font-weight:700;font-size:12px">1</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Infraestructura subdominio</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">Apache vhost · SSL · host_resolver · CSS premium</div>
+                </div>
+                <span class="imf-badge imf-badge--success">En curso</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">2</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Schema BD</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">8 tablas nuevas + ALTER whatsapp_queue</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">3</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Dashboard financiero</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">MRR · LTV · churn · cuentas por cobrar · ApexCharts</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">4</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Calendario clases + WhatsApp</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">Zoom · recordatorios 24h/1h/5min · asistencia</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">5</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Blog + AI (SEO + LLM)</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">Editor Tiptap · Claude API · DALL-E · schema.org</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">6</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">YouTube integration</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">OAuth · upload · programar publicaciones</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--imf-bg-base);border-radius:var(--rd-md);border:1px solid var(--imf-border);opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--imf-text-muted);display:grid;place-items:center;color:var(--imf-bg-base);font-weight:700;font-size:12px">7</div>
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:13.5px">Pulido + hardening</div>
+                    <div style="font-size:12px;color:var(--imf-text-muted)">Broadcast · costo AI · runbook · regresión</div>
+                </div>
+                <span class="imf-badge imf-badge--info">Pendiente</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-0.01em">Sistema actual</h2>
+        <p style="color:var(--imf-text-secondary);font-size:13.5px;margin:0 0 24px">Estado de las piezas que ya viven en producción</p>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Subdominio</div>
+                <div style="font-family:var(--ff-mono);font-size:14px;color:var(--imf-cyan)">impor.imporchina.com</div>
+                <div style="font-size:12px;color:var(--imf-text-muted);margin-top:2px">SSL Let's Encrypt activo · HTTP/1.1 forzado</div>
+            </div>
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Backend</div>
+                <div style="font-family:var(--ff-mono);font-size:14px;color:var(--imf-text-primary)">FastAPI · uvicorn :8000</div>
+                <div style="font-size:12px;color:var(--imf-text-muted);margin-top:2px">empresa_id=5 · MySQL grupo_impor</div>
+            </div>
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Frontend</div>
+                <div style="font-family:var(--ff-mono);font-size:14px;color:var(--imf-text-primary)">Jinja2 · CSS premium aislado</div>
+                <div style="font-size:12px;color:var(--imf-text-muted);margin-top:2px">templates/imporfactory_premium/ · sin acoplamiento al ERP legacy</div>
+            </div>
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Mensajería</div>
+                <div style="font-family:var(--ff-mono);font-size:14px;color:var(--imf-text-primary)">wacli-imporfactory · whatsapp_queue</div>
+                <div style="font-size:12px;color:var(--imf-text-muted);margin-top:2px">Worker con rate-limit anti-baneo activo</div>
+            </div>
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Integraciones disponibles</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+                    <span class="imf-badge imf-badge--success">Zoom OAuth</span>
+                    <span class="imf-badge imf-badge--success">Stripe</span>
+                    <span class="imf-badge imf-badge--success">Datil SRI</span>
+                    <span class="imf-badge imf-badge--warn">Claude API (pendiente)</span>
+                    <span class="imf-badge imf-badge--warn">DALL-E (pendiente)</span>
+                    <span class="imf-badge imf-badge--warn">YouTube (pendiente)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

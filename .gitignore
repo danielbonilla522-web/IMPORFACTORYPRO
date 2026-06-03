@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+*.log
+*.bak*
+.DS_Store
+node_modules/
+uploads/blog/miniaturas/*.png
+uploads/blog/fotos_base_daniel/*.png

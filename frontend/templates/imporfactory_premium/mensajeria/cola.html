@@ -1,0 +1,226 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Mensajería WhatsApp{% endblock %}
+{% block topbar_title %}Operación › Mensajería WhatsApp{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Mensajería WhatsApp</h1>
+        <p class="imf-page-subtitle">Cola wacli-imporfactory · recordatorios automáticos · broadcasts</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+        <button class="imf-btn imf-btn--primary" id="btn-broadcast">+ Broadcast</button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom: 24px" id="estado-cards"></div>
+
+<div class="imf-grid-2" style="margin-bottom: 24px">
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px">Trigger origen (30d)</h2>
+        <div id="triggers-list"></div>
+    </div>
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px">Costos AI (30d)</h2>
+        <div id="costos-ai-list"></div>
+    </div>
+</div>
+
+<div class="imf-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Cola de mensajes</h2>
+        <div style="display:flex;gap:8px">
+            <select id="filter-estado" style="padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                <option value="">Todos los estados</option>
+                <option value="PENDIENTE">Pendientes</option>
+                <option value="ENVIANDO">Enviando</option>
+                <option value="ENVIADO">Enviados</option>
+                <option value="FALLIDO">Fallidos</option>
+            </select>
+            <select id="filter-origen" style="padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                <option value="">Todos los orígenes</option>
+                <option value="clase_recordatorio">Clase recordatorio</option>
+                <option value="broadcast_manual">Broadcast manual</option>
+            </select>
+        </div>
+    </div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Destino</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Mensaje</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Origen</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Estado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Programado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cola-tbody">
+            <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal broadcast -->
+<div id="modal-broadcast" style="display:none;position:fixed;inset:0;background:var(--imf-bg-overlay);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:24px">
+    <div style="background:var(--imf-bg-elevated);border:1px solid var(--imf-border-strong);border-radius:var(--rd-lg);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:var(--imf-shadow-lg)">
+        <h2 style="font-family:var(--ff-serif);font-size:22px;font-weight:700;margin:0 0 8px">Broadcast a alumnos</h2>
+        <p style="color:var(--imf-text-secondary);font-size:13px;margin:0 0 24px">Usa {nombre} en el mensaje. Se respeta rate-limit anti-baneo.</p>
+        <div style="margin-bottom:16px">
+            <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Mensaje</label>
+            <textarea id="bc-mensaje" rows="5" placeholder="Hola {nombre}, ..." style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:inherit;resize:vertical"></textarea>
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Segmento</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px"><input type="checkbox" name="bc-mem" value="importacion"> Importación</label>
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px"><input type="checkbox" name="bc-mem" value="ecommerce"> Ecommerce</label>
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px"><input type="checkbox" name="bc-mem" value="infoaduana"> Infoaduana</label>
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px"><input type="checkbox" name="bc-mem" value="kit"> Kit</label>
+            </div>
+            <p style="font-size:11px;color:var(--imf-text-muted);margin:6px 0 0">Sin selección = TODOS los alumnos activos con WhatsApp</p>
+        </div>
+        <div style="margin-bottom:16px">
+            <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Rate-limit (mensajes/minuto)</label>
+            <input type="number" id="bc-rate" value="30" min="5" max="60" style="width:120px;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+            <span style="font-size:11px;color:var(--imf-text-muted);margin-left:8px">(recomendado: 30, anti-baneo WhatsApp)</span>
+        </div>
+        <div id="bc-result" style="display:none;padding:12px;background:var(--imf-cyan-dim);border:1px solid var(--imf-cyan);border-radius:var(--rd-md);margin-bottom:16px;font-size:13px"></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button class="imf-btn imf-btn--ghost" id="bc-cancel">Cancelar</button>
+            <button class="imf-btn imf-btn--secondary" id="bc-dryrun">Vista previa (dry-run)</button>
+            <button class="imf-btn imf-btn--primary" id="bc-send" disabled>Enviar broadcast</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const ESTADO_BADGE = {
+  PENDIENTE: 'imf-badge imf-badge--info',
+  ENVIANDO: 'imf-badge imf-badge--warn',
+  ENVIADO: 'imf-badge imf-badge--success',
+  FALLIDO: 'imf-badge imf-badge--danger',
+};
+
+async function cargarStats() {
+  const r = await fetch('/api/imporfactory/wa/5/cola/stats', { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  const cards = document.getElementById('estado-cards');
+  const counts = { PENDIENTE:0, ENVIANDO:0, ENVIADO:0, FALLIDO:0 };
+  (d.estados_7d || []).forEach(e => counts[e.estado] = e.n);
+  cards.innerHTML = ['PENDIENTE','ENVIANDO','ENVIADO','FALLIDO'].map(e =>
+    `<div class="imf-kpi"><div class="imf-kpi__label">${e}</div><div class="imf-kpi__value">${counts[e]}</div><div class="imf-kpi__delta imf-kpi__delta--flat">últimos 7 días</div></div>`
+  ).join('');
+
+  const triggers = d.triggers_30d || [];
+  document.getElementById('triggers-list').innerHTML = triggers.length === 0 ?
+    '<div style="color:var(--imf-text-muted);font-size:13px">Sin actividad 30d</div>' :
+    triggers.map(t => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--imf-divider);font-size:13px"><span>${t.trigger_origen}</span><span><strong>${t.enviados}</strong> / ${t.n}</span></div>`).join('');
+}
+
+async function cargarCostosAI() {
+  const r = await fetch('/api/imporfactory/wa/5/costos-ai', { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  const items = d.items || [];
+  document.getElementById('costos-ai-list').innerHTML = items.length === 0 ?
+    '<div style="color:var(--imf-text-muted);font-size:13px">Sin uso AI 30d</div>' :
+    `<div style="font-size:24px;font-weight:700;margin-bottom:12px;color:var(--imf-cyan);font-family:var(--ff-mono)">$${d.total_30d_usd.toFixed(4)}</div>` +
+    items.map(it => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--imf-divider);font-size:12px"><span>${it.modelo_usado || '—'} · ${it.tipo}</span><span style="font-family:var(--ff-mono);color:var(--imf-text-secondary)">$${Number(it.total_usd || 0).toFixed(4)} (${it.n})</span></div>`).join('');
+}
+
+async function cargarCola() {
+  const params = new URLSearchParams();
+  const est = document.getElementById('filter-estado').value;
+  const org = document.getElementById('filter-origen').value;
+  if (est) params.set('estado', est);
+  if (org) params.set('trigger_origen', org);
+  const r = await fetch('/api/imporfactory/wa/5/cola?' + params, { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  const items = d.items || [];
+  if (items.length === 0) {
+    document.getElementById('cola-tbody').innerHTML = '<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Sin mensajes</td></tr>';
+    return;
+  }
+  document.getElementById('cola-tbody').innerHTML = items.map(it => {
+    return `<tr style="border-bottom:1px solid var(--imf-divider)">
+      <td style="padding:10px 12px;font-family:var(--ff-mono);font-size:12px">${escapeHtml(it.telefono)}</td>
+      <td style="padding:10px 12px"><span title="${escapeHtml(it.mensaje_preview || '')}" style="color:var(--imf-text-secondary)">${escapeHtml((it.mensaje_preview || '').substring(0, 80))}${(it.mensaje_preview || '').length > 80 ? '...' : ''}</span></td>
+      <td style="padding:10px 12px"><span style="font-size:11px;color:var(--imf-text-muted)">${escapeHtml(it.trigger_origen || 'manual')}</span></td>
+      <td style="padding:10px 12px"><span class="${ESTADO_BADGE[it.estado] || 'imf-badge'}">${it.estado}</span></td>
+      <td style="padding:10px 12px;font-family:var(--ff-mono);font-size:11px;color:var(--imf-text-muted)">${(it.scheduled_at || '').substring(0, 16).replace('T', ' ')}</td>
+      <td style="padding:10px 12px;text-align:right">${it.estado === 'FALLIDO' ? `<button onclick="reintentar(${it.id})" class="imf-btn imf-btn--ghost">↻ Reintentar</button>` : ''}${it.estado === 'PENDIENTE' ? `<button onclick="cancelar(${it.id})" class="imf-btn imf-btn--ghost">✕</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function reintentar(id) {
+  const r = await fetch('/api/imporfactory/wa/5/cola/' + id + '/reintentar', { method:'POST', credentials:'include' });
+  if (r.ok) cargarCola();
+}
+async function cancelar(id) {
+  if (!confirm('¿Cancelar mensaje?')) return;
+  const r = await fetch('/api/imporfactory/wa/5/cola/' + id + '/cancelar', { method:'POST', credentials:'include' });
+  if (r.ok) cargarCola();
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── Modal broadcast ──
+const modal = document.getElementById('modal-broadcast');
+document.getElementById('btn-broadcast').addEventListener('click', () => { modal.style.display = 'flex'; });
+document.getElementById('bc-cancel').addEventListener('click', () => { modal.style.display = 'none'; document.getElementById('bc-result').style.display='none'; });
+
+document.getElementById('bc-dryrun').addEventListener('click', async () => {
+  const mensaje = document.getElementById('bc-mensaje').value.trim();
+  if (!mensaje) { alert('Mensaje requerido'); return; }
+  const filtro = Array.from(document.querySelectorAll('input[name="bc-mem"]:checked')).map(c => c.value);
+  const max_per_minute = parseInt(document.getElementById('bc-rate').value, 10) || 30;
+  const r = await fetch('/api/imporfactory/wa/5/broadcast', {
+    method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ mensaje, filtro_membresia: filtro, dry_run: true, max_per_minute }),
+  });
+  if (!r.ok) { alert('Error: ' + r.status); return; }
+  const d = await r.json();
+  document.getElementById('bc-result').innerHTML =
+    `<strong>${d.total_destinatarios}</strong> destinatarios · tiempo estimado: <strong>${d.tiempo_estimado_min} min</strong><br>` +
+    `Preview destinatarios: ${(d.primeros_5 || []).map(p => p.nombre).join(', ')}...`;
+  document.getElementById('bc-result').style.display = 'block';
+  document.getElementById('bc-send').disabled = false;
+});
+
+document.getElementById('bc-send').addEventListener('click', async () => {
+  if (!confirm('¿Enviar broadcast a los destinatarios? Esto va a la cola WhatsApp real.')) return;
+  const mensaje = document.getElementById('bc-mensaje').value.trim();
+  const filtro = Array.from(document.querySelectorAll('input[name="bc-mem"]:checked')).map(c => c.value);
+  const max_per_minute = parseInt(document.getElementById('bc-rate').value, 10) || 30;
+  const r = await fetch('/api/imporfactory/wa/5/broadcast', {
+    method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ mensaje, filtro_membresia: filtro, dry_run: false, max_per_minute }),
+  });
+  if (!r.ok) { alert('Error: ' + r.status); return; }
+  const d = await r.json();
+  alert('✓ Batch ' + d.batch_id + ': ' + d.encolados + ' mensajes encolados (tiempo estimado ' + d.tiempo_estimado_min + ' min)');
+  modal.style.display = 'none';
+  cargarCola();
+});
+
+document.getElementById('filter-estado').addEventListener('change', cargarCola);
+document.getElementById('filter-origen').addEventListener('change', cargarCola);
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  cargarStats();
+  cargarCostosAI();
+  cargarCola();
+});
+
+cargarStats();
+cargarCostosAI();
+cargarCola();
+</script>
+{% endblock %}

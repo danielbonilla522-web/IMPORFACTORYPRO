@@ -1,0 +1,719 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Editor{% endblock %}
+{% block topbar_title %}Blog › Editor{% endblock %}
+
+{% block extra_head %}
+<style>
+.editor-split { display: grid; grid-template-columns: 1fr 380px; gap: 24px; min-height: 600px; }
+@media (max-width: 1100px) { .editor-split { grid-template-columns: 1fr; } }
+.editor-main { background: var(--imf-bg-surface); border: 1px solid var(--imf-border); border-radius: var(--rd-lg); padding: 24px; }
+.editor-main textarea { width: 100%; min-height: 600px; background: transparent; border: none; color: var(--imf-text-primary); font-family: var(--ff-serif); font-size: 17px; line-height: 1.65; resize: vertical; outline: none; }
+.editor-main input.title { font-family: var(--ff-serif); font-size: 32px; font-weight: 700; letter-spacing: -0.02em; background: transparent; border: none; color: var(--imf-text-primary); width: 100%; margin-bottom: 8px; outline: none; }
+.editor-main input.subtitle { font-size: 16px; color: var(--imf-text-secondary); background: transparent; border: none; width: 100%; margin-bottom: 16px; outline: none; }
+.panel-tabs { display: flex; gap: 4px; margin-bottom: 16px; padding: 4px; background: var(--imf-bg-base); border-radius: var(--rd-md); }
+.panel-tab { flex: 1; padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; border-radius: var(--rd-sm); color: var(--imf-text-secondary); transition: all 140ms ease; }
+.panel-tab.active { background: var(--imf-bg-surface); color: var(--imf-text-primary); box-shadow: var(--imf-shadow-sm); }
+.panel-body { background: var(--imf-bg-surface); border: 1px solid var(--imf-border); border-radius: var(--rd-lg); padding: 20px; height: calc(100vh - 240px); overflow-y: auto; }
+.panel-section { margin-bottom: 24px; }
+.panel-section h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--imf-text-muted); font-weight: 600; margin: 0 0 10px; }
+.chip-btn { display: inline-block; padding: 6px 12px; background: var(--imf-bg-base); border: 1px solid var(--imf-border); border-radius: var(--rd-md); font-size: 12px; color: var(--imf-text-secondary); cursor: pointer; margin: 0 6px 6px 0; transition: all 140ms ease; }
+.chip-btn:hover { border-color: var(--imf-cyan); color: var(--imf-cyan); }
+.chip-btn--ai { background: linear-gradient(135deg, var(--imf-violet), var(--imf-cyan)); color: white; border: none; font-weight: 600; }
+.score-bar { height: 8px; background: var(--imf-bg-base); border-radius: var(--rd-pill); overflow: hidden; }
+.score-bar__fill { height: 100%; background: linear-gradient(90deg, var(--imf-success), var(--imf-cyan)); transition: width 400ms ease; }
+.autosave { font-size: 11px; color: var(--imf-text-muted); display: flex; align-items: center; gap: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px">
+        <a href="/blog" class="imf-btn imf-btn--ghost">← Volver</a>
+        <span id="estado-badge" class="imf-badge imf-badge--info">Borrador</span>
+        <span class="autosave" id="autosave-status"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Guardado</span>
+    </div>
+    <div style="display:flex;gap:8px">
+        <button class="imf-btn imf-btn--ghost" id="btn-save">Guardar</button>
+        <button class="imf-btn imf-btn--secondary" id="btn-preview">Vista previa</button>
+        <button class="imf-btn imf-btn--primary" id="btn-publicar">Publicar</button>
+    </div>
+</div>
+
+<div class="editor-split">
+    <div class="editor-main">
+        <input class="title" id="inp-titulo" placeholder="Título del artículo (60 chars máx para SEO)">
+        <input class="subtitle" id="inp-subtitulo" placeholder="Subtítulo opcional">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+            <select id="inp-categoria" style="padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:12px">
+                <option value="">Sin categoría</option>
+            </select>
+            <span id="inp-stats" style="font-size:11px;color:var(--imf-text-muted);align-self:center"></span>
+        </div>
+        <textarea id="inp-contenido" placeholder="Escribe en Markdown...
+
+# H1: Título principal del artículo
+
+## H2: Sección
+
+Tu contenido aquí. Soporta **negrita**, *cursiva*, [enlaces](https://example.com), código `inline`, listas, tablas, y más.
+
+Usa el panel derecho para generar contenido con AI (Claude) o miniaturas (DALL-E)."></textarea>
+    </div>
+
+    <div>
+        <div class="panel-tabs">
+            <div class="panel-tab active" data-tab="ai">AI</div>
+            <div class="panel-tab" data-tab="seo">SEO</div>
+            <div class="panel-tab" data-tab="llm">LLM</div>
+            <div class="panel-tab" data-tab="img">Imagen</div>
+            <div class="panel-tab" data-tab="video">Video</div>
+        </div>
+
+        <div class="panel-body" id="panel-ai">
+            <div class="panel-section">
+                <h3>Generar outline</h3>
+                <input type="text" id="ai-tema" placeholder="Tema del artículo" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;margin-bottom:8px">
+                <input type="text" id="ai-keyword" placeholder="Keyword principal" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;margin-bottom:8px">
+                <button class="imf-btn imf-btn--ai" id="btn-outline" style="width:100%">⚡ Generar outline (Claude)</button>
+            </div>
+
+            <div class="panel-section">
+                <h3>Acciones rápidas</h3>
+                <div>
+                    <button class="chip-btn chip-btn--ai" data-ai="continuar">Continuar escribiendo</button>
+                    <button class="chip-btn chip-btn--ai" data-ai="resumir">Generar TL;DR</button>
+                    <button class="chip-btn chip-btn--ai" data-ai="cta">Generar CTA final</button>
+                    <button class="chip-btn chip-btn--ai" data-ai="faq">Generar FAQ (5 preguntas)</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Reescribir tono</h3>
+                <div>
+                    <button class="chip-btn" data-tono="directo">Directo (Daniel)</button>
+                    <button class="chip-btn" data-tono="casual">Casual</button>
+                    <button class="chip-btn" data-tono="profesional">Profesional</button>
+                    <button class="chip-btn" data-tono="conversacional">Conversacional</button>
+                </div>
+                <p style="font-size:11px;color:var(--imf-text-muted);margin:6px 0 0">Selecciona texto en el editor y luego un tono</p>
+            </div>
+
+            <div class="panel-section">
+                <h3 style="display:flex;justify-content:space-between;align-items:center">
+                    Historial generaciones
+                    <span id="ai-cost-total" style="color:var(--imf-cyan);font-family:var(--ff-mono);font-weight:600">$0.00</span>
+                </h3>
+                <div id="ai-history" style="font-size:12px;color:var(--imf-text-secondary)">Sin generaciones aún</div>
+            </div>
+        </div>
+
+        <div class="panel-body" id="panel-seo" style="display:none">
+            <div class="panel-section">
+                <h3>Title tag (Google SERP)</h3>
+                <input type="text" id="seo-titulo" maxlength="60" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;margin-bottom:4px">
+                <div id="seo-titulo-count" style="font-size:11px;color:var(--imf-text-muted);text-align:right">0/60</div>
+            </div>
+            <div class="panel-section">
+                <h3>Meta description</h3>
+                <textarea id="seo-descripcion" maxlength="160" rows="3" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;font-family:inherit;resize:vertical"></textarea>
+                <div id="seo-desc-count" style="font-size:11px;color:var(--imf-text-muted);text-align:right">0/160</div>
+            </div>
+            <div class="panel-section">
+                <button class="imf-btn imf-btn--ai" id="btn-seo-auto" style="width:100%">⚡ Auto-generar SEO meta (Claude)</button>
+            </div>
+
+            <div class="panel-section">
+                <h3>Preview Google</h3>
+                <div style="background:var(--imf-bg-base);padding:12px;border-radius:var(--rd-md);border:1px solid var(--imf-border)">
+                    <div id="preview-title" style="color:#8AB4F8;font-size:14px;line-height:1.3;margin-bottom:2px">Título del artículo</div>
+                    <div style="color:#6E7894;font-size:11px;margin-bottom:4px">https://impor.imporchina.com/blog/<span id="preview-slug">slug-articulo</span></div>
+                    <div id="preview-desc" style="color:var(--imf-text-secondary);font-size:12px;line-height:1.45">Meta descripción del artículo aparecerá aquí...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body" id="panel-llm" style="display:none">
+            <div class="panel-section">
+                <h3>LLM Citability Score</h3>
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+                    <span id="llm-score" style="font-size:36px;font-weight:700;color:var(--imf-cyan);font-family:var(--ff-sans)">—</span>
+                    <span style="font-size:12px;color:var(--imf-text-muted)">/100</span>
+                </div>
+                <div class="score-bar"><div class="score-bar__fill" id="llm-score-bar" style="width:0%"></div></div>
+                <p style="font-size:11px;color:var(--imf-text-muted);margin:8px 0 0">Qué tan probable es que ChatGPT/Claude/Perplexity cite este artículo</p>
+            </div>
+
+            <div class="panel-section">
+                <button class="imf-btn imf-btn--ai" id="btn-llm-analyze" style="width:100%">⚡ Analizar citability (Claude)</button>
+            </div>
+
+            <div class="panel-section">
+                <h3>Sugerencias accionables</h3>
+                <div id="llm-suggestions" style="font-size:13px;color:var(--imf-text-secondary)">Aún sin análisis</div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Schema.org JSON-LD</h3>
+                <button class="imf-btn imf-btn--ai" id="btn-schema" style="width:100%">⚡ Generar schema.org</button>
+                <textarea id="schema-org" rows="6" placeholder="JSON-LD generado..." style="width:100%;margin-top:8px;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-family:var(--ff-mono);font-size:11px"></textarea>
+            </div>
+        </div>
+
+        <div class="panel-body" id="panel-img" style="display:none">
+            <div style="display:flex;gap:4px;margin-bottom:16px;padding:4px;background:var(--imf-bg-base);border-radius:var(--rd-md)">
+                <div class="img-mode-tab active" data-mode="gemini" style="flex:1;padding:8px 10px;text-align:center;font-size:12px;font-weight:600;border-radius:var(--rd-sm);cursor:pointer;background:linear-gradient(135deg, var(--imf-violet), var(--imf-cyan));color:#fff">🎨 Gemini · Daniel</div>
+                <div class="img-mode-tab" data-mode="dalle" style="flex:1;padding:8px 10px;text-align:center;font-size:12px;font-weight:600;border-radius:var(--rd-sm);cursor:pointer;color:var(--imf-text-secondary)">DALL-E puro</div>
+            </div>
+
+            <!-- ─── MODO GEMINI (estilo Daniel) ─── -->
+            <div id="img-mode-gemini">
+                <div class="panel-section">
+                    <h3>Foto base de Daniel</h3>
+                    <div id="gem-fotos-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px"></div>
+                    <p id="gem-foto-selected-label" style="font-size:11px;color:var(--imf-cyan);margin:8px 0 0;font-family:var(--ff-mono)">Selecciona una foto</p>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Texto KICKER (arriba)</h3>
+                    <input id="gem-kicker" type="text" placeholder="Ej: GUIA PASO A PASO" maxlength="40" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                </div>
+
+                <div class="panel-section">
+                    <h3>Texto HEADLINE (grande abajo)</h3>
+                    <textarea id="gem-headline" rows="2" placeholder="Ej: Importar de China barato" maxlength="60" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-weight:600;font-family:inherit;resize:none"></textarea>
+                    <div id="gem-headline-count" style="font-size:11px;color:var(--imf-text-muted);text-align:right;margin-top:2px">0/60</div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Badge esquina (opcional)</h3>
+                    <input id="gem-badge" type="text" placeholder="Ej: RETO IMPORTADOR" maxlength="30" style="width:100%;padding:8px 10px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:12px">
+                </div>
+
+                <div class="panel-section">
+                    <h3>Escena / Mood</h3>
+                    <select id="gem-mood" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                        <option value="bodega-cajas">📦 Bodega con cajas chinas</option>
+                        <option value="bodega-productos">🏭 Bodega con productos (drones, audífonos)</option>
+                        <option value="puerto-contenedores">🚢 Puerto con contenedores</option>
+                        <option value="money-fuego">🔥 Billete en fuego</option>
+                        <option value="alibaba-pantalla">💻 Pantalla Alibaba/1688</option>
+                        <option value="dropi-app">📱 App Dropi</option>
+                        <option value="studio-neon">🎙 Studio neon premium</option>
+                        <option value="estudio-premium">✨ Estudio gradient premium</option>
+                    </select>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Ratio</h3>
+                    <select id="gem-aspect" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                        <option value="16:9">16:9 — YouTube + blog hero</option>
+                        <option value="1:1">1:1 — Instagram / OG</option>
+                        <option value="9:16">9:16 — Reels / Shorts / Stories</option>
+                    </select>
+                </div>
+
+                <button class="imf-btn imf-btn--ai" id="btn-gem-gen" style="width:100%">⚡ Generar miniatura estilo Daniel ($0.039)</button>
+
+                <div class="panel-section" style="margin-top:16px">
+                    <div id="gem-preview"></div>
+                </div>
+            </div>
+
+            <!-- ─── MODO DALL-E ─── -->
+            <div id="img-mode-dalle" style="display:none">
+                <div class="panel-section">
+                    <h3>Miniatura del artículo</h3>
+                    <textarea id="img-prompt" rows="3" placeholder="Describe la imagen: ej. 'puerto de Guayaquil con contenedores azules al amanecer, neblina, estilo cinematográfico'" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;font-family:inherit"></textarea>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Estilo</h3>
+                    <select id="img-style" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                        <option value="editorial photography, dramatic lighting, cinematic">Editorial photography</option>
+                        <option value="3D illustration, isometric, vibrant colors">3D illustration</option>
+                        <option value="flat illustration, minimal, bold colors">Flat illustration</option>
+                        <option value="bold gradient art, abstract, premium magazine cover">Bold gradient</option>
+                        <option value="photorealistic, ultra-detailed, golden hour">Photorealistic</option>
+                    </select>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Ratio</h3>
+                    <select id="img-size" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                        <option value="1792x1024">16:9 — Hero blog</option>
+                        <option value="1024x1024">1:1 — Social</option>
+                        <option value="1024x1792">9:16 — Reels / Stories</option>
+                    </select>
+                </div>
+
+                <button class="imf-btn imf-btn--ai" id="btn-img-gen" style="width:100%">⚡ Generar miniatura ($0.08 DALL-E HD)</button>
+
+                <div class="panel-section" style="margin-top:16px">
+                    <div id="img-preview"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="panel-body" id="panel-video" style="display:none">
+            <div class="panel-section">
+                <h3>Script para YouTube</h3>
+                <p style="font-size:12px;color:var(--imf-text-secondary);margin:0 0 12px">Genera script + título + descripción + tags + thumbnail prompt basado en este artículo.</p>
+                <select id="video-duracion" style="width:100%;padding:8px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;margin-bottom:12px">
+                    <option value="60">60 segundos (Short)</option>
+                    <option value="180">3 minutos</option>
+                    <option value="480" selected>8 minutos</option>
+                    <option value="900">15 minutos</option>
+                </select>
+                <button class="imf-btn imf-btn--ai" id="btn-video-script" style="width:100%">⚡ Generar paquete YouTube</button>
+            </div>
+
+            <div class="panel-section">
+                <div id="video-output" style="font-size:12px;color:var(--imf-text-secondary);background:var(--imf-bg-base);padding:12px;border-radius:var(--rd-md);max-height:400px;overflow-y:auto"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const ARTICULO_ID = {{ articulo_id|tojson if articulo_id else 'null' }};
+let costoAcumulado = 0;
+
+// ── Tabs ──
+document.querySelectorAll('.panel-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.panel-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    ['ai','seo','llm','img','video'].forEach(p => {
+      document.getElementById('panel-' + p).style.display = (p === t.dataset.tab) ? 'block' : 'none';
+    });
+  });
+});
+
+// ── Cargar categorías ──
+async function loadCategorias() {
+  const r = await fetch('/api/imporfactory/blog/5/categorias', { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  const sel = document.getElementById('inp-categoria');
+  (d.items || []).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.icon + ' ' + c.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Cargar artículo existente ──
+async function loadArticulo() {
+  if (!ARTICULO_ID) return;
+  const r = await fetch('/api/imporfactory/blog/5/articulos/' + ARTICULO_ID, { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  document.getElementById('inp-titulo').value = d.titulo || '';
+  document.getElementById('inp-subtitulo').value = d.subtitulo || '';
+  document.getElementById('inp-contenido').value = d.contenido_md || '';
+  document.getElementById('inp-categoria').value = d.categoria_id || '';
+  document.getElementById('seo-titulo').value = d.seo_titulo || '';
+  document.getElementById('seo-descripcion').value = d.seo_descripcion || '';
+  if (d.llm_optimization_score != null) {
+    document.getElementById('llm-score').textContent = d.llm_optimization_score;
+    document.getElementById('llm-score-bar').style.width = d.llm_optimization_score + '%';
+  }
+  if (d.schema_org) document.getElementById('schema-org').value = typeof d.schema_org === 'string' ? d.schema_org : JSON.stringify(d.schema_org, null, 2);
+
+  const badge = document.getElementById('estado-badge');
+  badge.textContent = d.estado;
+  badge.className = 'imf-badge ' + (d.estado === 'publicado' ? 'imf-badge--success' : 'imf-badge--info');
+
+  // Costo acumulado
+  if (d.generaciones_ai && d.generaciones_ai.length) {
+    costoAcumulado = d.generaciones_ai.reduce((s, g) => s + Number(g.costo_usd || 0), 0);
+    document.getElementById('ai-cost-total').textContent = '$' + costoAcumulado.toFixed(4);
+    renderHistorialAI(d.generaciones_ai);
+  }
+  updateStats();
+  updatePreview();
+}
+
+function renderHistorialAI(gens) {
+  const html = gens.map(g => {
+    return '<div style="padding:8px;border-bottom:1px solid var(--imf-divider)">' +
+      '<div style="display:flex;justify-content:space-between"><strong>' + g.tipo + '</strong>' +
+      '<span style="color:var(--imf-cyan);font-family:var(--ff-mono)">$' + Number(g.costo_usd || 0).toFixed(4) + '</span></div>' +
+      '<div style="color:var(--imf-text-muted);font-size:11px">' + g.modelo_usado + ' · ' + (g.tokens_input + g.tokens_output) + ' tokens · ' + (g.duracion_ms/1000).toFixed(1) + 's</div>' +
+      '</div>';
+  }).join('');
+  document.getElementById('ai-history').innerHTML = html || 'Sin generaciones';
+}
+
+// ── Auto-save (debounced) ──
+let saveTimer;
+let unsavedChanges = false;
+function setUnsaved() {
+  unsavedChanges = true;
+  document.getElementById('autosave-status').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Sin guardar';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(autoSave, 4000);
+  updateStats();
+  updatePreview();
+}
+
+async function autoSave() {
+  const payload = {
+    titulo: document.getElementById('inp-titulo').value,
+    subtitulo: document.getElementById('inp-subtitulo').value,
+    contenido_md: document.getElementById('inp-contenido').value,
+    categoria_id: document.getElementById('inp-categoria').value ? Number(document.getElementById('inp-categoria').value) : null,
+    seo_titulo: document.getElementById('seo-titulo').value,
+    seo_descripcion: document.getElementById('seo-descripcion').value,
+  };
+  if (!payload.titulo) return;
+
+  document.getElementById('autosave-status').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Guardando...';
+
+  if (!ARTICULO_ID) {
+    // Crear primero
+    const r = await fetch('/api/imporfactory/blog/5/articulos', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (r.ok) {
+      const d = await r.json();
+      window.history.replaceState({}, '', '/blog/editor/' + d.id);
+      window.ARTICULO_ID_LOCAL = d.id;
+      // Recargar para tener todo limpio
+      setTimeout(() => location.reload(), 600);
+      return;
+    }
+  } else {
+    const r = await fetch('/api/imporfactory/blog/5/articulos/' + ARTICULO_ID, {
+      method:'PUT', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (r.ok) {
+      document.getElementById('autosave-status').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Guardado';
+      unsavedChanges = false;
+    }
+  }
+}
+
+['inp-titulo','inp-subtitulo','inp-contenido','inp-categoria','seo-titulo','seo-descripcion'].forEach(id => {
+  document.getElementById(id).addEventListener('input', setUnsaved);
+});
+
+function updateStats() {
+  const md = document.getElementById('inp-contenido').value;
+  const words = md.split(/\s+/).filter(w => w.length > 0).length;
+  const chars = md.length;
+  document.getElementById('inp-stats').textContent = `${words} palabras · ${chars} chars · ~${Math.max(1, Math.round(words/200))} min lectura`;
+
+  // SEO counters
+  const st = document.getElementById('seo-titulo').value;
+  document.getElementById('seo-titulo-count').textContent = `${st.length}/60`;
+  document.getElementById('seo-titulo-count').style.color = st.length > 60 ? 'var(--imf-danger)' : st.length > 50 ? 'var(--imf-warn)' : 'var(--imf-text-muted)';
+  const sd = document.getElementById('seo-descripcion').value;
+  document.getElementById('seo-desc-count').textContent = `${sd.length}/160`;
+  document.getElementById('seo-desc-count').style.color = sd.length > 160 ? 'var(--imf-danger)' : sd.length > 150 ? 'var(--imf-warn)' : 'var(--imf-text-muted)';
+}
+
+function updatePreview() {
+  document.getElementById('preview-title').textContent = document.getElementById('seo-titulo').value || document.getElementById('inp-titulo').value || 'Título del artículo';
+  document.getElementById('preview-desc').textContent = document.getElementById('seo-descripcion').value || 'Meta descripción del artículo aparecerá aquí...';
+  document.getElementById('preview-slug').textContent = slugify(document.getElementById('inp-titulo').value) || 'slug-articulo';
+}
+
+function slugify(s) {
+  return (s || '').toLowerCase().replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,120);
+}
+
+// ── AI calls ──
+async function aiCall(endpoint, body) {
+  const r = await fetch('/api/imporfactory/blog/5/ai/' + endpoint, {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    alert('Error AI: ' + (err.detail || r.status));
+    return null;
+  }
+  const d = await r.json();
+  if (d.cost_usd) {
+    costoAcumulado += Number(d.cost_usd);
+    document.getElementById('ai-cost-total').textContent = '$' + costoAcumulado.toFixed(4);
+  }
+  return d;
+}
+
+document.getElementById('btn-outline').addEventListener('click', async () => {
+  const tema = document.getElementById('ai-tema').value;
+  const keyword = document.getElementById('ai-keyword').value;
+  if (!tema || !keyword) { alert('Tema y keyword obligatorios'); return; }
+  const btn = document.getElementById('btn-outline');
+  btn.disabled = true; btn.textContent = '⏳ Generando outline...';
+  const d = await aiCall('generar-outline', { articulo_id: ARTICULO_ID, tema, keyword, longitud_palabras: 1500 });
+  btn.disabled = false; btn.textContent = '⚡ Generar outline (Claude)';
+  if (d) {
+    document.getElementById('inp-contenido').value = (document.getElementById('inp-contenido').value || '') + '\n\n' + d.text;
+    if (!document.getElementById('inp-titulo').value) document.getElementById('inp-titulo').value = tema;
+    setUnsaved();
+  }
+});
+
+document.getElementById('btn-seo-auto').addEventListener('click', async () => {
+  if (!ARTICULO_ID) { alert('Guarda primero el artículo'); return; }
+  const keyword = document.getElementById('ai-keyword').value || 'keyword principal';
+  const btn = document.getElementById('btn-seo-auto');
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+  const d = await aiCall('generar-seo-meta', { articulo_id: ARTICULO_ID, keyword });
+  btn.disabled = false; btn.textContent = '⚡ Auto-generar SEO meta (Claude)';
+  if (d && d.text) {
+    try {
+      const m = JSON.parse(d.text.replace(/```json|```/g, '').trim());
+      if (m.seo_titulo) document.getElementById('seo-titulo').value = m.seo_titulo;
+      if (m.seo_descripcion) document.getElementById('seo-descripcion').value = m.seo_descripcion;
+      setUnsaved();
+    } catch (e) { alert('Respuesta no parseable: ' + d.text.substring(0, 200)); }
+  }
+});
+
+document.getElementById('btn-llm-analyze').addEventListener('click', async () => {
+  if (!ARTICULO_ID) { alert('Guarda primero el artículo'); return; }
+  const btn = document.getElementById('btn-llm-analyze');
+  btn.disabled = true; btn.textContent = '⏳ Analizando...';
+  const d = await aiCall('optimizar-llm', { articulo_id: ARTICULO_ID });
+  btn.disabled = false; btn.textContent = '⚡ Analizar citability (Claude)';
+  if (d && d.text) {
+    try {
+      const analysis = JSON.parse(d.text.replace(/```json|```/g, '').trim());
+      document.getElementById('llm-score').textContent = analysis.score;
+      document.getElementById('llm-score-bar').style.width = analysis.score + '%';
+      const sugs = (analysis.sugerencias || []).map(s => '<li>' + escapeHtml(s) + '</li>').join('');
+      const forts = (analysis.fortalezas || []).map(s => '<li style="color:var(--imf-success)">' + escapeHtml(s) + '</li>').join('');
+      document.getElementById('llm-suggestions').innerHTML =
+        '<strong>Sugerencias:</strong><ul style="padding-left:18px;margin:4px 0 12px">' + sugs + '</ul>' +
+        '<strong>Fortalezas:</strong><ul style="padding-left:18px;margin:4px 0">' + forts + '</ul>';
+      // Persist score
+      await fetch('/api/imporfactory/blog/5/articulos/' + ARTICULO_ID, {
+        method:'PUT', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ llm_optimization_score: analysis.score }),
+      });
+    } catch (e) { alert('Respuesta no parseable'); }
+  }
+});
+
+document.getElementById('btn-schema').addEventListener('click', async () => {
+  if (!ARTICULO_ID) { alert('Guarda primero el artículo'); return; }
+  const btn = document.getElementById('btn-schema');
+  btn.disabled = true; btn.textContent = '⏳ Generando schema...';
+  const d = await aiCall('generar-schema-org', { articulo_id: ARTICULO_ID, tipo: 'Article' });
+  btn.disabled = false; btn.textContent = '⚡ Generar schema.org';
+  if (d && d.text) {
+    document.getElementById('schema-org').value = d.text.replace(/```json|```/g, '').trim();
+  }
+});
+
+document.getElementById('btn-img-gen').addEventListener('click', async () => {
+  const prompt = document.getElementById('img-prompt').value;
+  if (!prompt) { alert('Describe la imagen'); return; }
+  const btn = document.getElementById('btn-img-gen');
+  btn.disabled = true; btn.textContent = '⏳ Generando con DALL-E HD (~10s)...';
+  const d = await aiCall('generar-miniatura', {
+    articulo_id: ARTICULO_ID,
+    prompt: prompt,
+    style: document.getElementById('img-style').value,
+    size: document.getElementById('img-size').value,
+    quality: 'hd',
+  });
+  btn.disabled = false; btn.textContent = '⚡ Generar miniatura ($0.08 DALL-E HD)';
+  if (d && d.url) {
+    document.getElementById('img-preview').innerHTML =
+      '<img src="' + d.url + '" alt="miniatura" style="width:100%;border-radius:var(--rd-md);border:1px solid var(--imf-border)">' +
+      '<div style="font-size:11px;color:var(--imf-text-muted);margin-top:6px">Generada en ' + (d.duracion_ms/1000).toFixed(1) + 's · $' + d.cost_usd + '</div>' +
+      '<button class="imf-btn imf-btn--primary" style="margin-top:8px;width:100%" onclick="usarMiniatura(\'' + d.url + '\')">Usar como portada</button>';
+    costoAcumulado += Number(d.cost_usd || 0);
+    document.getElementById('ai-cost-total').textContent = '$' + costoAcumulado.toFixed(4);
+  }
+});
+
+async function usarMiniatura(url) {
+  if (!ARTICULO_ID) { alert('Guarda primero'); return; }
+  await fetch('/api/imporfactory/blog/5/articulos/' + ARTICULO_ID, {
+    method:'PUT', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ miniatura_url: url }),
+  });
+  alert('✓ Miniatura asignada');
+}
+
+document.getElementById('btn-video-script').addEventListener('click', async () => {
+  if (!ARTICULO_ID) { alert('Guarda primero el artículo'); return; }
+  const duracion = parseInt(document.getElementById('video-duracion').value, 10);
+  const btn = document.getElementById('btn-video-script');
+  btn.disabled = true; btn.textContent = '⏳ Generando paquete YouTube...';
+  const d = await aiCall('generar-script-video', { articulo_id: ARTICULO_ID, duracion_target_seg: duracion });
+  btn.disabled = false; btn.textContent = '⚡ Generar paquete YouTube';
+  if (d && d.text) {
+    document.getElementById('video-output').innerHTML = '<pre style="white-space:pre-wrap;margin:0">' + escapeHtml(d.text) + '</pre>';
+  }
+});
+
+// ── Publicar ──
+document.getElementById('btn-publicar').addEventListener('click', async () => {
+  if (!ARTICULO_ID) { await autoSave(); return; }
+  if (unsavedChanges) await autoSave();
+  if (!confirm('¿Publicar este artículo ahora?')) return;
+  const r = await fetch('/api/imporfactory/blog/5/articulos/' + ARTICULO_ID + '/publicar', {
+    method:'POST', credentials:'include',
+  });
+  if (r.ok) {
+    alert('✓ Publicado');
+    location.href = '/blog';
+  }
+});
+
+document.getElementById('btn-save').addEventListener('click', autoSave);
+
+document.getElementById('btn-preview').addEventListener('click', () => {
+  const slug = slugify(document.getElementById('inp-titulo').value);
+  if (!ARTICULO_ID) { alert('Guarda primero'); return; }
+  window.open('/api/blog/public/articulos/' + slug, '_blank');
+});
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadCategorias();
+loadArticulo();
+
+// ═══ GEMINI: Banco fotos + Generar estilo Daniel ═══
+let gemFotoSelected = null;
+let gemFotos = [];
+
+async function loadGemFotosBase() {
+  try {
+    const r = await fetch('/api/imporfactory/blog/5/fotos-base', { credentials:'include' });
+    if (!r.ok) return;
+    const d = await r.json();
+    gemFotos = d.items || [];
+    const grid = document.getElementById('gem-fotos-grid');
+    grid.innerHTML = gemFotos.map(f => `
+      <div class="gem-foto-card" data-id="${f.id}" data-archivo="${f.archivo}" data-label="${escapeHtml(f.label)}"
+           style="position:relative;cursor:pointer;border-radius:var(--rd-md);overflow:hidden;border:2px solid transparent;transition:all 140ms ease">
+        <img src="${f.url}" alt="${escapeHtml(f.label)}" style="width:100%;aspect-ratio:9/16;object-fit:cover;display:block">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.85));padding:6px 8px;color:#fff;font-size:10px;font-weight:600">${escapeHtml(f.label)}</div>
+        ${f.es_default ? '<div style="position:absolute;top:4px;right:4px;background:var(--imf-cyan);color:var(--imf-navy);font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--rd-pill)">DEFAULT</div>' : ''}
+      </div>
+    `).join('');
+
+    // Click handler
+    grid.querySelectorAll('.gem-foto-card').forEach(card => {
+      card.addEventListener('click', () => {
+        grid.querySelectorAll('.gem-foto-card').forEach(c => c.style.borderColor = 'transparent');
+        card.style.borderColor = 'var(--imf-cyan)';
+        gemFotoSelected = parseInt(card.dataset.id, 10);
+        document.getElementById('gem-foto-selected-label').textContent = '✓ ' + card.dataset.label;
+      });
+    });
+
+    // Auto-seleccionar default
+    const defCard = grid.querySelector('.gem-foto-card[data-id]');
+    if (defCard) defCard.click();
+  } catch (e) { console.error(e); }
+}
+
+// Tabs Gemini / DALL-E
+document.querySelectorAll('.img-mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.img-mode-tab').forEach(t => {
+      t.classList.remove('active');
+      t.style.background = 'transparent';
+      t.style.color = 'var(--imf-text-secondary)';
+    });
+    tab.classList.add('active');
+    if (tab.dataset.mode === 'gemini') {
+      tab.style.background = 'linear-gradient(135deg, var(--imf-violet), var(--imf-cyan))';
+      tab.style.color = '#fff';
+      document.getElementById('img-mode-gemini').style.display = 'block';
+      document.getElementById('img-mode-dalle').style.display = 'none';
+    } else {
+      tab.style.background = 'var(--imf-bg-surface)';
+      tab.style.color = 'var(--imf-text-primary)';
+      document.getElementById('img-mode-gemini').style.display = 'none';
+      document.getElementById('img-mode-dalle').style.display = 'block';
+    }
+  });
+});
+
+// Char counter headline
+document.getElementById('gem-headline').addEventListener('input', () => {
+  const v = document.getElementById('gem-headline').value;
+  const c = document.getElementById('gem-headline-count');
+  c.textContent = v.length + '/60';
+  c.style.color = v.length > 50 ? 'var(--imf-warn)' : v.length > 60 ? 'var(--imf-danger)' : 'var(--imf-text-muted)';
+});
+
+// Generate Gemini
+document.getElementById('btn-gem-gen').addEventListener('click', async () => {
+  if (!gemFotoSelected) { alert('Selecciona una foto base'); return; }
+  const headline = document.getElementById('gem-headline').value.trim();
+  if (!headline) { alert('Headline obligatorio'); return; }
+
+  const payload = {
+    articulo_id: ARTICULO_ID,
+    foto_base_id: gemFotoSelected,
+    headline: headline,
+    kicker: document.getElementById('gem-kicker').value.trim() || null,
+    badge: document.getElementById('gem-badge').value.trim() || null,
+    mood: document.getElementById('gem-mood').value,
+    aspect: document.getElementById('gem-aspect').value,
+  };
+
+  const btn = document.getElementById('btn-gem-gen');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generando con Gemini (~10s)...';
+
+  const r = await fetch('/api/imporfactory/blog/5/ai/generar-miniatura-gemini', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload),
+  });
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Generar miniatura estilo Daniel ($0.039)';
+
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    alert('Error Gemini: ' + (err.detail || r.status));
+    return;
+  }
+
+  const d = await r.json();
+  if (d.cost_usd) {
+    costoAcumulado += Number(d.cost_usd);
+    document.getElementById('ai-cost-total').textContent = '$' + costoAcumulado.toFixed(4);
+  }
+
+  document.getElementById('gem-preview').innerHTML = `
+    <img src="${d.url}" alt="miniatura Gemini" style="width:100%;border-radius:var(--rd-md);border:1px solid var(--imf-border);box-shadow:var(--imf-shadow-md)">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--imf-text-muted);margin-top:6px">
+      <span>⚡ ${(d.duracion_ms/1000).toFixed(1)}s · $${d.cost_usd}</span>
+      <a href="${d.url}" target="_blank" style="color:var(--imf-cyan)">Abrir ↗</a>
+    </div>
+    <button class="imf-btn imf-btn--primary" style="margin-top:8px;width:100%" onclick="usarMiniatura('${d.url}')">Usar como portada del artículo</button>
+    <button class="imf-btn imf-btn--secondary" style="margin-top:4px;width:100%;font-size:12px" onclick="document.getElementById('btn-gem-gen').click()">↻ Generar otra variante</button>
+  `;
+});
+
+loadGemFotosBase();
+
+updateStats();
+updatePreview();
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Finanzas — Dashboard ejecutivo{% endblock %}
+{% block topbar_title %}Finanzas › Dashboard ejecutivo{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.2/dist/apexcharts.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Dashboard ejecutivo</h1>
+        <p class="imf-page-subtitle">IMPORFACTORY · KPIs financieros · datos vivos desde la BD</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+        <button class="imf-btn imf-btn--primary" id="btn-snapshot">Recalcular ahora</button>
+    </div>
+</div>
+
+<div id="kpi-grid" class="imf-grid-4" style="margin-bottom: 24px">
+    <div class="imf-kpi" data-kpi="mrr">
+        <div class="imf-kpi__label">MRR (mensual recurrente)</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta imf-kpi__delta--flat" data-sub>USD · estimado</div>
+    </div>
+    <div class="imf-kpi" data-kpi="ingresos">
+        <div class="imf-kpi__label">Ingresos del mes</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>vs mes anterior</div>
+    </div>
+    <div class="imf-kpi" data-kpi="utilidad">
+        <div class="imf-kpi__label">Utilidad del mes</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>margen</div>
+    </div>
+    <div class="imf-kpi" data-kpi="alumnos">
+        <div class="imf-kpi__label">Alumnos activos</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>nuevos del mes</div>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom: 24px">
+    <div class="imf-kpi" data-kpi="churn">
+        <div class="imf-kpi__label">Churn 30d</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>%</div>
+    </div>
+    <div class="imf-kpi" data-kpi="ltv">
+        <div class="imf-kpi__label">LTV promedio</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>USD por alumno</div>
+    </div>
+    <div class="imf-kpi" data-kpi="cxc">
+        <div class="imf-kpi__label">Cuentas por cobrar</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>pendiente de cobro</div>
+    </div>
+    <div class="imf-kpi" data-kpi="costo_ai">
+        <div class="imf-kpi__label">Costo AI 30d</div>
+        <div class="imf-kpi__value" data-value>—</div>
+        <div class="imf-kpi__delta" data-sub>Claude + DALL-E</div>
+    </div>
+</div>
+
+<div class="imf-grid-2" style="margin-bottom: 24px">
+    <div class="imf-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0;letter-spacing:-0.01em">MRR — últimos 90 días</h2>
+            <span class="imf-badge imf-badge--info" id="mrr-current">—</span>
+        </div>
+        <div id="chart-mrr" style="height:300px"></div>
+        <p id="mrr-empty-msg" style="display:none;color:var(--imf-text-muted);font-size:13px;text-align:center;padding:48px 0">
+            Aún no hay histórico — los snapshots se generan cada 6h via cron.<br>
+            <a href="#" id="genfirst-snap" style="color:var(--imf-cyan)">Recalcular ahora →</a>
+        </p>
+    </div>
+
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px;letter-spacing:-0.01em">Distribución de membresías</h2>
+        <div id="chart-membresias" style="height:300px"></div>
+    </div>
+</div>
+
+<div class="imf-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px">
+        <div>
+            <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0;letter-spacing:-0.01em">Cuentas por cobrar</h2>
+            <p style="color:var(--imf-text-secondary);font-size:13px;margin:4px 0 0">Alumnos con saldo pendiente — usa la acción "Recordar" para enviar WhatsApp</p>
+        </div>
+        <span class="imf-badge imf-badge--warn" id="cxc-total-badge">—</span>
+    </div>
+    <table style="width:100%;font-size:13.5px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Alumno</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Email</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Saldo pendiente</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cxc-tbody">
+            <tr><td colspan="4" style="padding:32px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top:48px;padding:16px;background:var(--imf-bg-surface);border:1px solid var(--imf-border);border-radius:var(--rd-md);font-size:12px;color:var(--imf-text-muted);text-align:center">
+    Snapshot calculado: <span id="snap-fecha">—</span> · IMPORFACTORY empresa_id=5 ·
+    <a href="/api/imporfactory/finanzas/5/dashboard" style="color:var(--imf-cyan)">JSON crudo</a>
+</div>
+
+<script>
+const FMT_USD = (n) => '$' + Number(n || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const FMT_INT = (n) => Number(n || 0).toLocaleString('es-EC');
+const FMT_PCT = (n) => (Number(n || 0) * 100).toFixed(1) + '%';
+
+const CHART_THEME = {
+  chart: {
+    background: 'transparent',
+    foreColor: getComputedStyle(document.documentElement).getPropertyValue('--imf-text-secondary').trim(),
+    toolbar: { show: false },
+    fontFamily: 'Inter, sans-serif',
+  },
+  colors: ['#00BFFF'],
+  grid: {
+    borderColor: 'rgba(255,255,255,0.06)',
+    strokeDashArray: 4,
+  },
+  stroke: { width: 2, curve: 'smooth' },
+  tooltip: { theme: 'dark' },
+};
+
+let mrrChart = null;
+let memChart = null;
+
+async function loadDashboard(forzar=false) {
+  const url = '/api/imporfactory/finanzas/5/dashboard' + (forzar ? '?forzar=true' : '');
+  const r = await fetch(url, { credentials: 'include' });
+  if (!r.ok) { console.error('Dashboard fetch failed', r.status); return; }
+  const d = await r.json();
+
+  setKpi('mrr', FMT_USD(d.mrr), d.suscripciones_stripe_activas + ' subs Stripe');
+  setKpi('ingresos', FMT_USD(d.ingresos_mes), deltaPct(d.ingresos_mes, d.ingresos_mes_pasado));
+  setKpi('utilidad', FMT_USD(d.utilidad), 'margen ' + Number(d.margen_pct || 0).toFixed(1) + '%');
+  setKpi('alumnos', FMT_INT(d.alumnos_activos), '+' + FMT_INT(d.alumnos_nuevos_mes) + ' del mes');
+  setKpi('churn', FMT_PCT(d.churn_rate_30d), d.alumnos_vencidos_30d + ' vencidos / ' + d.alumnos_proximos_vencer_30d + ' por vencer');
+  setKpi('ltv', FMT_USD(d.ltv), 'monto pagado promedio');
+  setKpi('cxc', FMT_USD(d.cuentas_por_cobrar), 'pendiente de cobro');
+  setKpi('costo_ai', FMT_USD(d.costo_ai_30d), 'últimos 30 días');
+
+  document.getElementById('snap-fecha').textContent = d.fecha + ' (calculado: ' + (d.calculado_en || '—').substring(0, 19).replace('T', ' ') + ')';
+  document.getElementById('mrr-current').textContent = 'Actual: ' + FMT_USD(d.mrr);
+
+  // Donut membresías
+  const breakdown = d.breakdown_membresias_json || {};
+  renderMembresiasChart(breakdown);
+}
+
+async function loadMrrHistorico() {
+  const r = await fetch('/api/imporfactory/finanzas/5/mrr-historico?dias=90', { credentials: 'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  renderMrrChart(d.series || []);
+}
+
+async function loadCxc() {
+  const r = await fetch('/api/imporfactory/finanzas/5/cuentas-por-cobrar', { credentials: 'include' });
+  const tbody = document.getElementById('cxc-tbody');
+  if (!r.ok) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--imf-danger)">Error cargando datos</td></tr>';
+    return;
+  }
+  const d = await r.json();
+  const items = d.items || [];
+  let total = 0;
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:32px;text-align:center;color:var(--imf-success)">✓ Sin cuentas pendientes</td></tr>';
+    document.getElementById('cxc-total-badge').textContent = FMT_USD(0);
+    document.getElementById('cxc-total-badge').className = 'imf-badge imf-badge--success';
+    return;
+  }
+  tbody.innerHTML = items.map(it => {
+    total += Number(it.cuotas_monto_pendiente || 0);
+    return '<tr style="border-bottom:1px solid var(--imf-divider)">' +
+      '<td style="padding:10px 12px;font-weight:500">' + escapeHtml(it.nombre || '—') + '</td>' +
+      '<td style="padding:10px 12px;color:var(--imf-text-secondary)">' + escapeHtml(it.email || '—') + '</td>' +
+      '<td style="padding:10px 12px;text-align:right;font-family:var(--ff-mono);color:var(--imf-warn);font-weight:600">' + FMT_USD(it.cuotas_monto_pendiente) + '</td>' +
+      '<td style="padding:10px 12px;text-align:right"><button class="imf-btn imf-btn--ghost" disabled title="Disponible Sprint 7">Recordar</button></td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('cxc-total-badge').textContent = FMT_USD(total);
+}
+
+function setKpi(key, value, sub) {
+  const card = document.querySelector('[data-kpi="' + key + '"]');
+  if (!card) return;
+  card.querySelector('[data-value]').textContent = value;
+  card.querySelector('[data-sub]').textContent = sub;
+}
+
+function deltaPct(actual, anterior) {
+  if (!anterior || anterior === 0) return 'sin histórico';
+  const pct = ((actual - anterior) / anterior) * 100;
+  const sign = pct >= 0 ? '↗ +' : '↘ ';
+  return sign + pct.toFixed(1) + '% vs mes anterior';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMrrChart(series) {
+  const empty = document.getElementById('mrr-empty-msg');
+  if (!series || series.length === 0) {
+    empty.style.display = 'block';
+    document.getElementById('chart-mrr').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('chart-mrr').style.display = 'block';
+
+  if (mrrChart) mrrChart.destroy();
+  mrrChart = new ApexCharts(document.getElementById('chart-mrr'), {
+    ...CHART_THEME,
+    chart: { ...CHART_THEME.chart, type: 'area', height: 300 },
+    series: [{ name: 'MRR', data: series.map(s => ({ x: s.fecha, y: s.mrr })) }],
+    xaxis: { type: 'datetime', labels: { style: { colors: CHART_THEME.chart.foreColor } } },
+    yaxis: { labels: { formatter: v => '$' + Number(v).toLocaleString() }, },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+    dataLabels: { enabled: false },
+  });
+  mrrChart.render();
+}
+
+function renderMembresiasChart(breakdown) {
+  const labels = Object.keys(breakdown);
+  const values = labels.map(k => breakdown[k]);
+  if (labels.length === 0) {
+    document.getElementById('chart-membresias').innerHTML = '<div style="text-align:center;color:var(--imf-text-muted);padding:48px 0;font-size:13px">Sin datos</div>';
+    return;
+  }
+  if (memChart) memChart.destroy();
+  memChart = new ApexCharts(document.getElementById('chart-membresias'), {
+    ...CHART_THEME,
+    chart: { ...CHART_THEME.chart, type: 'donut', height: 300 },
+    colors: ['#00BFFF', '#7C5CFF', '#E6B800', '#2BD9A0', '#FF6B6B'],
+    series: values,
+    labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+    legend: { position: 'bottom', labels: { colors: CHART_THEME.chart.foreColor } },
+    plotOptions: { pie: { donut: { size: '68%', labels: { show: true, total: { show: true, label: 'Total activas', formatter: () => values.reduce((a,b)=>a+b,0) } } } } },
+    dataLabels: { enabled: true, formatter: (v) => v.toFixed(0) + '%', style: { fontSize: '12px' } },
+  });
+  memChart.render();
+}
+
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  loadDashboard();
+  loadMrrHistorico();
+  loadCxc();
+});
+
+document.getElementById('btn-snapshot').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-snapshot');
+  btn.disabled = true;
+  btn.textContent = 'Calculando...';
+  try {
+    await fetch('/api/imporfactory/finanzas/5/snapshot-now', { method: 'POST', credentials: 'include' });
+    await loadDashboard(true);
+    await loadMrrHistorico();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Recalcular ahora';
+  }
+});
+
+document.getElementById('genfirst-snap').addEventListener('click', async (e) => {
+  e.preventDefault();
+  document.getElementById('btn-snapshot').click();
+});
+
+loadDashboard();
+loadMrrHistorico();
+loadCxc();
+</script>
+{% endblock %}

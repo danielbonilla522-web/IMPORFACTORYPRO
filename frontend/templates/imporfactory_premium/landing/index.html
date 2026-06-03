@@ -1,0 +1,58 @@
+{# ────────────────────────────────────────────────────────────────────
+   Landing pública IMPORFACTORY Premium
+   Sirve cuando GET / desde host impor.imporchina.com (sin auth)
+   2026-05-27 Fase 0
+   ──────────────────────────────────────────────────────────────────── #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% include "_shared/_imporfactory_premium_head.html" %}
+    <title>IMPORFACTORY — Sistema de Gestión Premium</title>
+    <meta name="description" content="Plataforma de gestión interna para IMPORFACTORY: clases en vivo, blog SEO+LLM, KPIs financieros, mensajería automatizada.">
+</head>
+<body>
+<div class="imf-landing">
+    <div class="imf-landing__inner">
+        <span class="imf-landing__eyebrow">Sistema de Gestión Premium</span>
+        <h1 class="imf-landing__title">IMPORFACTORY OS</h1>
+        <p class="imf-landing__subtitle">
+            Plataforma editorial para gestionar clases en vivo, contenido SEO + LLM, finanzas ejecutivas y mensajería automatizada en un solo lugar.
+        </p>
+        <div class="imf-landing__cta-group">
+            <a href="/login" class="imf-btn imf-btn--primary">Iniciar sesión</a>
+            <a href="/dashboard" class="imf-btn imf-btn--secondary">Ir al dashboard</a>
+        </div>
+
+        <div class="imf-landing__features">
+            <div class="imf-feature">
+                <div class="imf-feature__icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                </div>
+                <div class="imf-feature__title">Clases en vivo</div>
+                <div class="imf-feature__desc">Programa masterclasses Zoom con recordatorios automáticos por WhatsApp (24h · 1h · 5min antes) y registro de asistencia.</div>
+            </div>
+
+            <div class="imf-feature">
+                <div class="imf-feature__icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <div class="imf-feature__title">Blog SEO + LLM</div>
+                <div class="imf-feature__desc">Editor con asistente Claude para producir contenido que Google indexa y ChatGPT/Perplexity citan. Miniaturas DALL-E, videos YouTube.</div>
+            </div>
+
+            <div class="imf-feature">
+                <div class="imf-feature__icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </div>
+                <div class="imf-feature__title">KPIs ejecutivos</div>
+                <div class="imf-feature__desc">MRR, ingresos, utilidad, churn, LTV y cuentas por cobrar al instante. Dashboard visual con datos vivos desde Stripe y la BD interna.</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 48px; font-size: 12px; color: var(--imf-text-muted); letter-spacing: 0.5px;">
+            GRUPO IMPOR · Daniel Bonilla · 2026
+        </div>
+    </div>
+</div>
+</body>
+</html>

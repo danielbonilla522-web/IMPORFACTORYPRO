@@ -1,0 +1,245 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Clases en vivo{% endblock %}
+{% block topbar_title %}Academia › Clases en vivo{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Clases en vivo</h1>
+        <p class="imf-page-subtitle">Masterclasses y webinars con recordatorios automáticos por WhatsApp</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <button class="imf-btn imf-btn--secondary" id="btn-encolar-ahora" title="Forzar drenado del cron de recordatorios">⏰ Encolar pendientes</button>
+        <button class="imf-btn imf-btn--primary" id="btn-nueva">+ Programar clase</button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom: 24px">
+    <div class="imf-kpi"><div class="imf-kpi__label">Programadas</div><div class="imf-kpi__value" id="kpi-programadas">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">En vivo ahora</div><div class="imf-kpi__value" id="kpi-en-vivo">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">Finalizadas</div><div class="imf-kpi__value" id="kpi-finalizadas">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">Recordatorios pendientes</div><div class="imf-kpi__value" id="kpi-rec-pend">—</div></div>
+</div>
+
+<div class="imf-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Lista de clases</h2>
+        <div style="display:flex;gap:8px">
+            <select id="filter-estado" class="imf-input" style="padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+                <option value="">Todos los estados</option>
+                <option value="programada">Programadas</option>
+                <option value="en_vivo">En vivo</option>
+                <option value="finalizada">Finalizadas</option>
+                <option value="cancelada">Canceladas</option>
+            </select>
+        </div>
+    </div>
+    <table style="width:100%;font-size:13.5px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Título</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Fecha</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Instructor</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:center">Inscritos</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:center">Recordatorios</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Estado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="clases-tbody">
+            <tr><td colspan="7" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal nueva clase -->
+<div id="modal-nueva" style="display:none;position:fixed;inset:0;background:var(--imf-bg-overlay);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:24px">
+    <div style="background:var(--imf-bg-elevated);border:1px solid var(--imf-border-strong);border-radius:var(--rd-lg);max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:var(--imf-shadow-lg)">
+        <h2 style="font-family:var(--ff-serif);font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em">Programar clase en vivo</h2>
+        <p style="color:var(--imf-text-secondary);font-size:13px;margin:0 0 24px">Los recordatorios (24h · 1h · 5min) se programan automáticamente para los inscritos</p>
+
+        <form id="form-nueva" style="display:flex;flex-direction:column;gap:14px">
+            <div>
+                <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Título *</label>
+                <input name="titulo" required class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px">
+            </div>
+            <div>
+                <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Descripción</label>
+                <textarea name="descripcion" rows="2" class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:inherit;resize:vertical"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 120px;gap:12px">
+                <div>
+                    <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Fecha y hora *</label>
+                    <input name="fecha_inicio" type="datetime-local" required class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px">
+                </div>
+                <div>
+                    <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Duración (min)</label>
+                    <input name="duracion_min" type="number" value="60" min="15" max="600" class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px">
+                </div>
+            </div>
+            <div>
+                <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Instructor</label>
+                <input name="instructor" value="Daniel Bonilla" class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px">
+            </div>
+            <div>
+                <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Link Zoom (opcional, lo puedes pegar después)</label>
+                <input name="zoom_join_url" placeholder="https://zoom.us/j/..." class="imf-input" style="width:100%;padding:10px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px">
+            </div>
+            <div>
+                <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--imf-text-muted);font-weight:600;margin-bottom:6px">Dirigida a (audiencia auto-inscrita)</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px">
+                        <input type="checkbox" name="dirigida_a" value="importacion" checked> Importación
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px">
+                        <input type="checkbox" name="dirigida_a" value="ecommerce"> Ecommerce
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px">
+                        <input type="checkbox" name="dirigida_a" value="infoaduana"> Infoaduana
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-pill);cursor:pointer;font-size:13px">
+                        <input type="checkbox" name="dirigida_a" value="kit"> Kit
+                    </label>
+                </div>
+                <p style="font-size:11px;color:var(--imf-text-muted);margin:6px 0 0">Los alumnos con alguna de estas membresías activas se inscriben automáticamente</p>
+            </div>
+            <div id="form-error" style="display:none;padding:10px 12px;background:rgba(255,77,79,0.1);border:1px solid var(--imf-danger);border-radius:var(--rd-md);font-size:12px;color:var(--imf-danger)"></div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+                <button type="button" class="imf-btn imf-btn--ghost" id="btn-cancelar">Cancelar</button>
+                <button type="submit" class="imf-btn imf-btn--primary" id="btn-submit">Programar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const FMT_DATE = (iso) => {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('es-EC', { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+};
+const ESTADO_BADGE = {
+  programada: { class: 'imf-badge--info', label: 'Programada' },
+  en_vivo: { class: 'imf-badge--success', label: '🔴 EN VIVO' },
+  finalizada: { class: 'imf-badge--info', label: 'Finalizada' },
+  cancelada: { class: 'imf-badge--danger', label: 'Cancelada' },
+};
+
+async function cargarClases() {
+  const estado = document.getElementById('filter-estado').value;
+  const url = '/api/imporfactory/clases/5' + (estado ? '?estado=' + estado : '');
+  const r = await fetch(url, { credentials: 'include' });
+  if (!r.ok) {
+    document.getElementById('clases-tbody').innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--imf-danger)">Error ' + r.status + ' (¿login?)</td></tr>';
+    return;
+  }
+  const d = await r.json();
+  const items = d.items || [];
+
+  // KPIs
+  const counts = { programada: 0, en_vivo: 0, finalizada: 0, cancelada: 0 };
+  let rec_pend = 0;
+  items.forEach(it => {
+    counts[it.estado] = (counts[it.estado] || 0) + 1;
+    rec_pend += Number(it.recordatorios_pendientes || 0);
+  });
+  document.getElementById('kpi-programadas').textContent = counts.programada;
+  document.getElementById('kpi-en-vivo').textContent = counts.en_vivo;
+  document.getElementById('kpi-finalizadas').textContent = counts.finalizada;
+  document.getElementById('kpi-rec-pend').textContent = rec_pend;
+
+  if (items.length === 0) {
+    document.getElementById('clases-tbody').innerHTML = '<tr><td colspan="7" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Sin clases. Crea la primera con "+ Programar clase"</td></tr>';
+    return;
+  }
+  document.getElementById('clases-tbody').innerHTML = items.map(it => {
+    const badge = ESTADO_BADGE[it.estado] || { class: 'imf-badge--info', label: it.estado };
+    const zoom = it.zoom_join_url ? '<a href="' + it.zoom_join_url + '" target="_blank" style="font-size:11px;color:var(--imf-cyan)">Zoom ↗</a>' : '<span style="font-size:11px;color:var(--imf-text-muted)">sin link</span>';
+    return '<tr style="border-bottom:1px solid var(--imf-divider)">' +
+      '<td style="padding:12px"><div style="font-weight:600">' + escapeHtml(it.titulo) + '</div>' + zoom + '</td>' +
+      '<td style="padding:12px;font-family:var(--ff-mono);font-size:12px">' + FMT_DATE(it.fecha_inicio) + '</td>' +
+      '<td style="padding:12px;color:var(--imf-text-secondary)">' + escapeHtml(it.instructor || '—') + '</td>' +
+      '<td style="padding:12px;text-align:center;font-weight:600;font-family:var(--ff-mono)">' + it.inscritos + '</td>' +
+      '<td style="padding:12px;text-align:center"><span class="imf-badge imf-badge--warn">' + it.recordatorios_pendientes + ' pend</span></td>' +
+      '<td style="padding:12px"><span class="imf-badge ' + badge.class + '">' + badge.label + '</span></td>' +
+      '<td style="padding:12px;text-align:right"><button onclick="cancelarClase(' + it.id + ')" class="imf-btn imf-btn--ghost" title="Cancelar">✕</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function cancelarClase(id) {
+  if (!confirm('¿Cancelar la clase #' + id + '? Los recordatorios pendientes se desactivan.')) return;
+  const r = await fetch('/api/imporfactory/clases/5/' + id, { method:'DELETE', credentials:'include' });
+  if (r.ok) cargarClases();
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('btn-nueva').addEventListener('click', () => {
+  const modal = document.getElementById('modal-nueva');
+  modal.style.display = 'flex';
+});
+document.getElementById('btn-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-nueva').style.display = 'none';
+  document.getElementById('form-nueva').reset();
+});
+document.getElementById('filter-estado').addEventListener('change', cargarClases);
+
+document.getElementById('btn-encolar-ahora').addEventListener('click', async () => {
+  const r = await fetch('/api/imporfactory/clases/5/recordatorios/encolar-ahora', { method:'POST', credentials:'include' });
+  if (r.ok) {
+    const d = await r.json();
+    alert('✓ ' + d.encolados + ' recordatorios encolados a WhatsApp');
+    cargarClases();
+  }
+});
+
+document.getElementById('form-nueva').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const errBox = document.getElementById('form-error');
+  errBox.style.display = 'none';
+
+  const dirigida_a = Array.from(f.querySelectorAll('input[name="dirigida_a"]:checked')).map(c => c.value);
+  const payload = {
+    titulo: f.titulo.value.trim(),
+    descripcion: f.descripcion.value.trim() || null,
+    instructor: f.instructor.value.trim() || 'Daniel Bonilla',
+    fecha_inicio: f.fecha_inicio.value,
+    duracion_min: parseInt(f.duracion_min.value, 10) || 60,
+    zoom_join_url: f.zoom_join_url.value.trim() || null,
+    dirigida_a,
+  };
+  const submitBtn = document.getElementById('btn-submit');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Creando...';
+  try {
+    const r = await fetch('/api/imporfactory/clases/5', {
+      method:'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      credentials: 'include',
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      errBox.textContent = 'Error ' + r.status + ': ' + (err.detail || JSON.stringify(err));
+      errBox.style.display = 'block';
+      return;
+    }
+    const d = await r.json();
+    alert('✓ Clase #' + d.clase_id + ' creada. Inscritos y recordatorios programados.');
+    document.getElementById('modal-nueva').style.display = 'none';
+    f.reset();
+    cargarClases();
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Programar';
+  }
+});
+
+cargarClases();
+</script>
+{% endblock %}

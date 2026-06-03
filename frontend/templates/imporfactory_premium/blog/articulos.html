@@ -1,0 +1,521 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Blog — Control de contenido{% endblock %}
+{% block topbar_title %}Contenido › Blog{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.2/dist/apexcharts.min.js"></script>
+<style>
+  /* ═══ Hero featured ═══ */
+  .blog-hero {
+    position: relative;
+    min-height: 360px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    background: var(--imf-bg-surface);
+    border: 1px solid var(--imf-border);
+  }
+  .blog-hero__bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    filter: brightness(0.45) saturate(1.2);
+    transition: transform 600ms ease;
+  }
+  .blog-hero:hover .blog-hero__bg { transform: scale(1.04); }
+  .blog-hero__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(11,20,38,0.85) 0%, rgba(11,20,38,0.55) 50%, rgba(11,20,38,0.92) 100%);
+  }
+  .blog-hero__glow {
+    position: absolute; top: -100px; right: -100px; width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--imf-cyan-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .blog-hero__content {
+    position: relative; z-index: 1; padding: 48px;
+    display: flex; flex-direction: column; gap: 16px; max-width: 720px;
+  }
+  .blog-hero__kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--imf-cyan); font-weight: 700;
+    padding: 6px 14px; border: 1px solid rgba(0,191,255,0.4);
+    border-radius: 999px; background: rgba(0,191,255,0.08);
+    width: fit-content;
+  }
+  .blog-hero__title {
+    font-family: var(--ff-serif); font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+    color: #fff; margin: 0;
+  }
+  .blog-hero__meta {
+    display: flex; gap: 20px; font-size: 13px; color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+
+  /* ═══ KPI cards brutales ═══ */
+  .kpi-brutal {
+    background: linear-gradient(145deg, var(--imf-bg-surface), var(--imf-bg-elevated));
+    border: 1px solid var(--imf-border);
+    border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .kpi-brutal:hover { transform: translateY(-3px); border-color: var(--imf-cyan-glow); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .kpi-brutal::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--imf-cyan), transparent);
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .kpi-brutal:hover::after { opacity: 1; }
+  .kpi-brutal__label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--imf-text-muted); font-weight: 700; margin-bottom: 12px; }
+  .kpi-brutal__value { font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; }
+  .kpi-brutal__sub { font-size: 12px; color: var(--imf-text-secondary); margin-top: 8px; }
+
+  /* ═══ Post card masivo ═══ */
+  .post-card-brutal {
+    position: relative; border-radius: 16px; overflow: hidden;
+    background: var(--imf-bg-surface); border: 1px solid var(--imf-border);
+    transition: all 300ms cubic-bezier(.2,.8,.2,1); cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .post-card-brutal:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: var(--imf-cyan-glow);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 1px var(--imf-cyan-glow), 0 0 40px var(--imf-cyan-glow);
+  }
+  .post-card-brutal__media {
+    aspect-ratio: 16/9; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--imf-bg-base), var(--imf-bg-elevated));
+  }
+  .post-card-brutal__media img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 500ms ease;
+  }
+  .post-card-brutal:hover .post-card-brutal__media img { transform: scale(1.08); }
+  .post-card-brutal__no-image {
+    height: 100%; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px; color: var(--imf-text-muted); font-size: 11px;
+  }
+  .post-card-brutal__badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .post-card-brutal__badge-ai {
+    background: linear-gradient(135deg, var(--imf-violet), var(--imf-cyan));
+    color: #fff; padding: 3px 10px; border-radius: 999px;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+    box-shadow: 0 4px 12px rgba(124,92,255,0.3);
+  }
+  .post-card-brutal__viewcount {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(11,20,38,0.85); backdrop-filter: blur(8px);
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; color: var(--imf-cyan);
+    display: flex; align-items: center; gap: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .post-card-brutal__body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .post-card-brutal__cat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .post-card-brutal__title { font-family: var(--ff-serif); font-size: 16px; font-weight: 700; line-height: 1.3; margin: 0; letter-spacing: -0.01em; }
+  .post-card-brutal__footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: auto; padding-top: 12px; border-top: 1px solid var(--imf-divider);
+    font-size: 11px; color: var(--imf-text-muted);
+  }
+  .post-card-brutal__estado-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+  /* ═══ Skeletons ═══ */
+  .skel { background: linear-gradient(90deg, var(--imf-bg-surface) 0%, var(--imf-bg-elevated) 50%, var(--imf-bg-surface) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skel-line { height: 14px; margin-bottom: 8px; }
+  .skel-card { aspect-ratio: 16/9; border-radius: 16px; }
+
+  /* ═══ Chip filtros ═══ */
+  .chip-filter {
+    padding: 6px 14px; background: var(--imf-bg-base); border: 1px solid var(--imf-border);
+    border-radius: 999px; color: var(--imf-text-secondary); font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: all 140ms ease;
+  }
+  .chip-filter:hover { color: var(--imf-text-primary); border-color: var(--imf-border-strong); }
+  .chip-filter.active { background: var(--imf-cyan-dim); color: var(--imf-cyan); border-color: var(--imf-cyan); }
+
+  /* ═══ Error banner ═══ */
+  .error-banner {
+    padding: 18px 24px; background: rgba(255,77,79,0.08); border: 1px solid var(--imf-danger);
+    border-radius: 14px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+  }
+
+  /* ═══ Animations ═══ */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-in { animation: fadeUp 400ms ease both; }
+  .anim-in:nth-child(1) { animation-delay: 0ms; }
+  .anim-in:nth-child(2) { animation-delay: 60ms; }
+  .anim-in:nth-child(3) { animation-delay: 120ms; }
+  .anim-in:nth-child(4) { animation-delay: 180ms; }
+  .anim-in:nth-child(5) { animation-delay: 240ms; }
+  .anim-in:nth-child(6) { animation-delay: 300ms; }
+
+  /* ═══ Top posts list ═══ */
+  .top-post-row { display: flex; gap: 12px; padding: 10px; border-radius: 10px; transition: background 140ms ease; cursor: pointer; align-items: center; }
+  .top-post-row:hover { background: var(--imf-cyan-dim); }
+  .top-post-rank { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+  .top-post-rank--1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #0B1426; }
+  .top-post-rank--2 { background: linear-gradient(135deg, #C0C0C0, #808080); color: #0B1426; }
+  .top-post-rank--3 { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; }
+  .top-post-rank--other { background: var(--imf-bg-base); color: var(--imf-text-muted); }
+  .top-post-thumb { width: 60px; height: 36px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--imf-bg-base); }
+  .top-post-info { flex: 1; min-width: 0; }
+  .top-post-title { font-size: 12.5px; font-weight: 600; line-height: 1.3; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top-post-bar { height: 4px; background: var(--imf-bg-base); border-radius: 999px; overflow: hidden; }
+  .top-post-bar__fill { height: 100%; background: linear-gradient(90deg, var(--imf-cyan), var(--imf-violet)); }
+  .top-post-views { font-family: var(--ff-mono); color: var(--imf-cyan); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Blog · Control de contenido</h1>
+        <p class="imf-page-subtitle">Posts publicados · vistas en vivo · miniaturas Gemini · SEO + LLM</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <select id="filter-dominio" style="padding:8px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:10px;color:var(--imf-text-primary);font-size:13px;font-weight:600">
+            <option value="danytravel">🌐 danytraveloficial.com</option>
+            <option value="imporfactory" disabled>🚀 blog.imporfactory.com (pronto)</option>
+        </select>
+        <span id="ai-status" class="imf-badge imf-badge--info">AI…</span>
+        <a href="/blog/editor" class="imf-btn imf-btn--ai">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Nuevo artículo
+        </a>
+    </div>
+</div>
+
+<div id="err-auth" class="error-banner" style="display:none">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--imf-danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div style="flex:1">
+        <div style="font-weight:700;color:var(--imf-danger);margin-bottom:2px">Tu sesión caducó</div>
+        <div style="font-size:13px;color:var(--imf-text-secondary)">Iniciá sesión otra vez para ver los KPIs en vivo, miniaturas y stats del blog.</div>
+    </div>
+    <a href="/login" class="imf-btn imf-btn--primary">Login</a>
+</div>
+
+<!-- HERO featured post -->
+<div id="hero-featured" class="blog-hero anim-in" style="display:none">
+    <div id="hero-bg" class="blog-hero__bg"></div>
+    <div class="blog-hero__overlay"></div>
+    <div class="blog-hero__glow"></div>
+    <div class="blog-hero__content">
+        <span class="blog-hero__kicker">🔥 Top performer · 30 días</span>
+        <h2 id="hero-title" class="blog-hero__title">—</h2>
+        <div class="blog-hero__meta">
+            <span id="hero-views"></span>
+            <span id="hero-cat"></span>
+            <span id="hero-date"></span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+            <a id="hero-edit" href="#" class="imf-btn imf-btn--primary">Editar</a>
+            <a id="hero-view" href="#" target="_blank" rel="noopener" class="imf-btn imf-btn--secondary">Ver público ↗</a>
+        </div>
+    </div>
+</div>
+
+<!-- KPIs -->
+<div class="imf-grid-4" style="margin-bottom:24px">
+    <div class="kpi-brutal anim-in">
+        <div class="kpi-brutal__label">Posts publicados</div>
+        <div class="kpi-brutal__value" id="kpi-total" style="color:var(--imf-text-primary)">—</div>
+        <div class="kpi-brutal__sub" id="kpi-total-sub">cargando…</div>
+    </div>
+    <div class="kpi-brutal anim-in">
+        <div class="kpi-brutal__label">Vistas totales</div>
+        <div class="kpi-brutal__value" id="kpi-vistas-tot" style="color:var(--imf-cyan)">—</div>
+        <div class="kpi-brutal__sub">acumulado todo el tiempo</div>
+    </div>
+    <div class="kpi-brutal anim-in">
+        <div class="kpi-brutal__label">Vistas hoy</div>
+        <div class="kpi-brutal__value" id="kpi-vistas-hoy" style="color:var(--imf-success)">—</div>
+        <div class="kpi-brutal__sub">en vivo · tracker beacon</div>
+    </div>
+    <div class="kpi-brutal anim-in">
+        <div class="kpi-brutal__label">Vistas 30 días</div>
+        <div class="kpi-brutal__value" id="kpi-vistas-mes" style="color:var(--imf-gold)">—</div>
+        <div class="kpi-brutal__sub" id="kpi-vistas-mes-sub">últimos 30 días</div>
+    </div>
+</div>
+
+<!-- Chart + Top posts -->
+<div class="imf-grid-2" style="margin-bottom:32px;align-items:stretch">
+    <div class="imf-card anim-in" style="display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Visitas diarias (30d)</h2>
+            <span id="chart-status" style="font-size:11px;color:var(--imf-text-muted)"></span>
+        </div>
+        <div id="chart-visits" style="height:260px"></div>
+        <div id="chart-empty" style="display:none;text-align:center;padding:60px 0;color:var(--imf-text-muted);font-size:13px">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="opacity:0.4;margin-bottom:12px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <div style="font-weight:600;color:var(--imf-text-secondary);margin-bottom:4px">Tracker activo, esperando primeras visitas</div>
+            <div style="font-size:12px">El tracker se instaló hace minutos. Los datos aparecen acá cuando entren visitas reales al blog público.</div>
+        </div>
+    </div>
+    <div class="imf-card anim-in">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 12px">Top posts (30d)</h2>
+        <div id="top-posts-list" style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:48px 0;text-align:center;color:var(--imf-text-muted);font-size:13px">Esperando datos…</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros + posts grid -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:16px;flex-wrap:wrap">
+    <h2 style="font-family:var(--ff-serif);font-size:24px;font-weight:800;margin:0;letter-spacing:-0.01em">Todos los artículos</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="search" id="search" placeholder="🔍 Buscar..." style="padding:8px 14px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:10px;color:var(--imf-text-primary);font-size:13px;width:220px;font-weight:500">
+        <div id="chips-categoria" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        <select id="sort" style="padding:8px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:10px;color:var(--imf-text-primary);font-size:13px;font-weight:600">
+            <option value="recientes">↓ Más recientes</option>
+            <option value="vistas">👁 Más vistas</option>
+        </select>
+    </div>
+</div>
+
+<div id="articulos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
+    <!-- Skeletons -->
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-card"></div>
+</div>
+
+<script>
+const FMT_INT = (n) => Number(n || 0).toLocaleString('es-EC');
+const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const FMT_DATE = (s) => { if (!s) return ''; try { return new Date(s).toLocaleDateString('es-EC',{month:'short',day:'numeric',year:'numeric'}); } catch(e){return ''} };
+
+const ESTADO_COLOR = { borrador:'#94A3B8', revision:'#F5A524', programado:'#33D6FF', publicado:'#2BD9A0', archivado:'#FF4D4F' };
+const ESTADO_LABEL = { borrador:'Borrador', revision:'Revisión', programado:'Programado', publicado:'Publicado', archivado:'Archivado' };
+
+const CHART_THEME = {
+  chart: { background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 600 } },
+  colors: ['#00BFFF'],
+  grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
+  stroke: { width: 3, curve: 'smooth' },
+  tooltip: { theme: 'dark', x: { format: 'dd MMM' } },
+};
+
+let chart = null;
+let articulos = [];
+let _animatedKPIs = false;
+let authOk = true;
+
+function showAuthError() {
+  authOk = false;
+  document.getElementById('err-auth').style.display = 'flex';
+  // Limpiar KPIs y skeletons feos
+  document.getElementById('kpi-total').textContent = '—';
+  document.getElementById('kpi-vistas-tot').textContent = '—';
+  document.getElementById('kpi-vistas-hoy').textContent = '—';
+  document.getElementById('kpi-vistas-mes').textContent = '—';
+  document.getElementById('kpi-total-sub').textContent = 'login requerido';
+  document.getElementById('articulos-grid').innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;color:var(--imf-text-muted)">⚠ Login requerido para ver miniaturas y stats</div>';
+  document.getElementById('top-posts-list').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--imf-text-muted);font-size:13px">Login requerido</div>';
+  document.getElementById('ai-status').textContent = '⚠ Sin sesión';
+  document.getElementById('ai-status').className = 'imf-badge imf-badge--danger';
+}
+
+async function safeFetch(url) {
+  try {
+    const r = await fetch(url, { credentials: 'include' });
+    if (r.status === 401 || r.status === 403) { showAuthError(); return null; }
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+function animateCount(el, target) {
+  if (!el) return;
+  if (target == null || isNaN(target)) { el.textContent = '—'; return; }
+  const start = 0; const dur = 900; const t0 = performance.now();
+  const fmt = n => Number(Math.round(n)).toLocaleString('es-EC');
+  function step(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(start + (target - start) * eased);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+async function checkAi() {
+  const d = await safeFetch('/api/imporfactory/blog/5/ai/health');
+  const el = document.getElementById('ai-status');
+  if (!d) return;
+  if (d.ready_for_ai) { el.className = 'imf-badge imf-badge--success'; el.textContent = '✓ AI lista'; }
+  else if (d.anthropic_configured) { el.className = 'imf-badge imf-badge--success'; el.textContent = '✓ Claude OK · Gemini local'; }
+  else { el.className = 'imf-badge imf-badge--warn'; el.textContent = '⚠ AI parcial'; }
+}
+
+async function loadStats() {
+  const dom = document.getElementById('filter-dominio').value;
+  const d = await safeFetch('/api/imporfactory/blog/5/stats?dominio=' + dom);
+  if (!d) return;
+  animateCount(document.getElementById('kpi-total'), d.total_articulos);
+  animateCount(document.getElementById('kpi-vistas-tot'), d.vistas_total);
+  animateCount(document.getElementById('kpi-vistas-hoy'), d.vistas_hoy);
+  animateCount(document.getElementById('kpi-vistas-mes'), d.vistas_mes);
+  document.getElementById('kpi-total-sub').textContent = `${d.con_miniatura}/${d.total_articulos} con miniatura Gemini`;
+  const avg = d.total_articulos > 0 ? Math.round(d.vistas_mes / d.total_articulos) : 0;
+  document.getElementById('kpi-vistas-mes-sub').textContent = `${avg} promedio por post`;
+}
+
+async function loadChart() {
+  const dom = document.getElementById('filter-dominio').value;
+  const d = await safeFetch('/api/imporfactory/blog/5/stats/timeseries?dias=30&dominio=' + dom);
+  if (!d) return;
+  const series = d.series || [];
+  if (series.length === 0) {
+    document.getElementById('chart-visits').style.display = 'none';
+    document.getElementById('chart-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('chart-visits').style.display = 'block';
+  document.getElementById('chart-empty').style.display = 'none';
+  if (chart) chart.destroy();
+  chart = new ApexCharts(document.getElementById('chart-visits'), {
+    ...CHART_THEME,
+    chart: { ...CHART_THEME.chart, type: 'area', height: 260 },
+    series: [{ name: 'Visitas', data: series.map(s => ({ x: s.fecha, y: s.visitas })) }],
+    xaxis: { type: 'datetime', labels: { style: { colors: 'rgba(255,255,255,0.5)', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { labels: { formatter: v => FMT_INT(v), style: { colors: 'rgba(255,255,255,0.5)', fontSize: '11px' } } },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.02, stops: [0,100] } },
+    dataLabels: { enabled: false },
+    markers: { size: 0, hover: { size: 5 } },
+  });
+  chart.render();
+  document.getElementById('chart-status').textContent = `${series.length} días con tráfico`;
+}
+
+async function loadTopPosts() {
+  const dom = document.getElementById('filter-dominio').value;
+  const d = await safeFetch('/api/imporfactory/blog/5/stats/top-posts?dias=30&limit=8&dominio=' + dom);
+  if (!d) return;
+  const items = d.items || [];
+  const cont = document.getElementById('top-posts-list');
+  if (items.length === 0) {
+    cont.innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--imf-text-muted);font-size:13px">Aún sin tráfico registrado</div>';
+    return;
+  }
+  const max = Math.max(...items.map(it => it.vistas_periodo || 0), 1);
+  cont.innerHTML = items.map((it, i) => {
+    const pct = Math.max(3, (it.vistas_periodo / max) * 100);
+    const rankClass = i === 0 ? 'top-post-rank--1' : i === 1 ? 'top-post-rank--2' : i === 2 ? 'top-post-rank--3' : 'top-post-rank--other';
+    const thumb = it.miniatura_url ? `<img src="${it.miniatura_url}" alt="" class="top-post-thumb">` : `<div class="top-post-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--imf-text-muted);font-size:14px">—</div>`;
+    return `<a href="/blog/editor/${it.id}" class="top-post-row" style="text-decoration:none;color:inherit">
+      <div class="top-post-rank ${rankClass}">${i+1}</div>
+      ${thumb}
+      <div class="top-post-info">
+        <div class="top-post-title">${escapeHtml(it.titulo)}</div>
+        <div class="top-post-bar"><div class="top-post-bar__fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="top-post-views">${FMT_INT(it.vistas_periodo)}</div>
+    </a>`;
+  }).join('');
+
+  // Hero = top 1
+  if (items[0]) renderHero(items[0]);
+}
+
+function renderHero(p) {
+  const hero = document.getElementById('hero-featured');
+  hero.style.display = 'block';
+  if (p.miniatura_url) {
+    document.getElementById('hero-bg').style.backgroundImage = `url(${p.miniatura_url})`;
+  }
+  document.getElementById('hero-title').textContent = p.titulo;
+  document.getElementById('hero-views').innerHTML = `👁 ${FMT_INT(p.vistas_periodo)} visitas (30d)`;
+  document.getElementById('hero-cat').textContent = p.categoria || '';
+  document.getElementById('hero-edit').href = '/blog/editor/' + p.id;
+  document.getElementById('hero-view').href = p.seo_canonical_url || '#';
+}
+
+let _categorias = [];
+async function loadCategorias() {
+  const d = await safeFetch('/api/imporfactory/blog/5/categorias');
+  if (!d) return;
+  _categorias = d.items || [];
+  const cont = document.getElementById('chips-categoria');
+  cont.innerHTML = '<div class="chip-filter active" data-cat="">Todas</div>' +
+    _categorias.map(c => `<div class="chip-filter" data-cat="${c.id}">${c.icon||''} ${escapeHtml(c.nombre)}</div>`).join('');
+  cont.querySelectorAll('.chip-filter').forEach(chip => {
+    chip.addEventListener('click', () => {
+      cont.querySelectorAll('.chip-filter').forEach(x => x.classList.remove('active'));
+      chip.classList.add('active');
+      loadArticulos();
+    });
+  });
+}
+
+async function loadArticulos() {
+  const params = new URLSearchParams();
+  const cat = document.querySelector('.chip-filter.active')?.dataset?.cat || '';
+  const s = document.getElementById('search').value.trim();
+  if (cat) params.set('categoria_id', cat);
+  if (s) params.set('search', s);
+  params.set('limit', '100');
+  const d = await safeFetch('/api/imporfactory/blog/5/articulos?' + params);
+  if (!d) return;
+  articulos = d.items || [];
+  const sort = document.getElementById('sort').value;
+  if (sort === 'vistas') articulos.sort((a,b)=>(b.vistas||0)-(a.vistas||0));
+
+  const grid = document.getElementById('articulos-grid');
+  if (articulos.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;color:var(--imf-text-muted)">Sin artículos. <a href="/blog/editor" style="color:var(--imf-cyan);font-weight:600">Crear primero →</a></div>';
+    return;
+  }
+  grid.innerHTML = articulos.map((it, i) => {
+    const dot = ESTADO_COLOR[it.estado] || '#94A3B8';
+    const lab = ESTADO_LABEL[it.estado] || it.estado;
+    const catColor = it.categoria_color || '#00BFFF';
+    const aiBadge = it.generado_con_ai ? '<span class="post-card-brutal__badge-ai">⚡ AI</span>' : '';
+    const noMini = !it.miniatura_url;
+    const media = it.miniatura_url
+      ? `<img src="${it.miniatura_url}" alt="${escapeHtml(it.titulo)}" loading="lazy">`
+      : `<div class="post-card-brutal__no-image"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Pendiente miniatura</span></div>`;
+    const pendingBadge = noMini ? '<span class="imf-badge imf-badge--warn" style="font-size:9px;font-weight:700">PENDIENTE</span>' : '';
+    return `<a href="/blog/editor/${it.id}" class="post-card-brutal anim-in" style="text-decoration:none;color:inherit;animation-delay:${Math.min(i*30, 300)}ms">
+      <div class="post-card-brutal__media">
+        ${media}
+        <div class="post-card-brutal__badges">${aiBadge}${pendingBadge}</div>
+        <div class="post-card-brutal__viewcount">👁 ${FMT_INT(it.vistas)}</div>
+      </div>
+      <div class="post-card-brutal__body">
+        <div class="post-card-brutal__cat" style="color:${catColor}">${escapeHtml(it.categoria_nombre || '—')}</div>
+        <h3 class="post-card-brutal__title">${escapeHtml(it.titulo)}</h3>
+        <div class="post-card-brutal__footer">
+          <span><span class="post-card-brutal__estado-dot" style="background:${dot}"></span>${lab}</span>
+          <span>${it.tiempo_lectura_min || '—'} min</span>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+document.getElementById('filter-dominio').addEventListener('change', () => { loadStats(); loadChart(); loadTopPosts(); loadArticulos(); });
+document.getElementById('sort').addEventListener('change', loadArticulos);
+let st;
+document.getElementById('search').addEventListener('input', () => { clearTimeout(st); st = setTimeout(loadArticulos, 300); });
+
+// init
+checkAi();
+loadCategorias().then(() => loadArticulos());
+loadStats();
+loadChart();
+loadTopPosts();
+
+// auto refresh KPIs cada 30s (silencioso si auth fallo)
+setInterval(() => { if (authOk) loadStats(); }, 30000);
+</script>
+{% endblock %}

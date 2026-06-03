@@ -1,0 +1,145 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Videos YouTube{% endblock %}
+{% block topbar_title %}Contenido › Videos YouTube{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Videos YouTube</h1>
+        <p class="imf-page-subtitle">Gestor de videos del canal IMPORFACTORY. Sync stats, programar publicaciones.</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+        <span id="yt-status" class="imf-badge imf-badge--info">Verificando conexión...</span>
+        <button class="imf-btn imf-btn--secondary" id="btn-sync">↻ Sync con YouTube</button>
+        <button class="imf-btn imf-btn--primary" id="btn-connect" style="display:none">Conectar YouTube</button>
+    </div>
+</div>
+
+<div id="setup-banner" style="display:none;padding:20px;background:var(--imf-bg-surface);border:1px solid var(--imf-warn);border-radius:var(--rd-lg);margin-bottom:24px">
+    <h3 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 8px;color:var(--imf-warn)">⚠ YouTube no configurado</h3>
+    <p style="color:var(--imf-text-secondary);margin:0 0 16px;font-size:13.5px">Para usar este módulo, primero configura las credenciales OAuth en Google Cloud Console:</p>
+    <ol style="color:var(--imf-text-secondary);font-size:13px;padding-left:24px;margin:0">
+        <li>Crea un proyecto en <a href="https://console.cloud.google.com" target="_blank" style="color:var(--imf-cyan)">console.cloud.google.com</a></li>
+        <li>Activa la API <strong>YouTube Data API v3</strong></li>
+        <li>Crea credenciales OAuth 2.0 Client ID (tipo Web application)</li>
+        <li>Agrega como redirect URI: <code style="background:var(--imf-bg-base);padding:2px 6px;border-radius:4px;font-family:var(--ff-mono);font-size:11px">https://impor.imporchina.com/api/imporfactory/youtube/5/oauth/callback</code></li>
+        <li>Guarda <code>YOUTUBE_OAUTH_CLIENT_ID</code> y <code>YOUTUBE_OAUTH_CLIENT_SECRET</code> en /configuracion</li>
+        <li>Vuelve aquí y haz click en <strong>Conectar YouTube</strong></li>
+    </ol>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom: 24px">
+    <div class="imf-kpi"><div class="imf-kpi__label">Total videos</div><div class="imf-kpi__value" id="kpi-total">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">Publicados</div><div class="imf-kpi__value" id="kpi-pub">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">Views totales</div><div class="imf-kpi__value" id="kpi-views">—</div></div>
+    <div class="imf-kpi"><div class="imf-kpi__label">Likes totales</div><div class="imf-kpi__value" id="kpi-likes">—</div></div>
+</div>
+
+<div class="imf-card">
+    <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px">Videos del canal</h2>
+    <div id="videos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+        <div style="grid-column:1/-1;padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</div>
+    </div>
+</div>
+
+<script>
+const FMT_INT = (n) => Number(n || 0).toLocaleString('es-EC');
+
+async function checkHealth() {
+  try {
+    const r = await fetch('/api/imporfactory/youtube/5/health', { credentials:'include' });
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    const el = document.getElementById('yt-status');
+    const banner = document.getElementById('setup-banner');
+    const btnConnect = document.getElementById('btn-connect');
+
+    if (d.ready) {
+      el.className = 'imf-badge imf-badge--success';
+      el.textContent = '✓ Conectado';
+      banner.style.display = 'none';
+    } else if (d.client_configured && !d.oauth_connected) {
+      el.className = 'imf-badge imf-badge--warn';
+      el.textContent = '⚠ Pendiente conectar';
+      banner.style.display = 'block';
+      btnConnect.style.display = 'inline-flex';
+    } else {
+      el.className = 'imf-badge imf-badge--danger';
+      el.textContent = '⚠ Credenciales no configuradas';
+      banner.style.display = 'block';
+    }
+    return d.ready;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function cargarVideos() {
+  const r = await fetch('/api/imporfactory/youtube/5/videos', { credentials:'include' });
+  if (!r.ok) return;
+  const d = await r.json();
+  const items = d.items || [];
+
+  let totalViews = 0, totalLikes = 0, pub = 0;
+  items.forEach(v => { totalViews += v.views || 0; totalLikes += v.likes || 0; if (v.estado === 'publicado') pub++; });
+  document.getElementById('kpi-total').textContent = items.length;
+  document.getElementById('kpi-pub').textContent = pub;
+  document.getElementById('kpi-views').textContent = FMT_INT(totalViews);
+  document.getElementById('kpi-likes').textContent = FMT_INT(totalLikes);
+
+  const grid = document.getElementById('videos-grid');
+  if (items.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:48px;text-align:center;color:var(--imf-text-muted)">Sin videos. Conecta YouTube y haz click en <strong>Sync con YouTube</strong>.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(v => {
+    const thumb = v.thumbnail_url || 'https://via.placeholder.com/480x270?text=Video';
+    const ytUrl = v.video_id_yt ? 'https://youtu.be/' + v.video_id_yt : '#';
+    return `<div class="imf-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
+      <a href="${ytUrl}" target="_blank" style="display:block">
+        <img src="${thumb}" alt="${escapeHtml(v.titulo)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">
+      </a>
+      <div style="padding:14px;flex:1;display:flex;flex-direction:column">
+        <h3 style="font-size:14px;font-weight:600;margin:0 0 6px;line-height:1.4">${escapeHtml(v.titulo)}</h3>
+        <div style="display:flex;gap:10px;font-size:12px;color:var(--imf-text-muted);margin-top:auto">
+          <span>👁 ${FMT_INT(v.views)}</span>
+          <span>👍 ${FMT_INT(v.likes)}</span>
+          <span>💬 ${FMT_INT(v.comments)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('btn-sync').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-sync');
+  btn.disabled = true; btn.textContent = '⏳ Sincronizando...';
+  const r = await fetch('/api/imporfactory/youtube/5/videos/sync', { method:'POST', credentials:'include' });
+  btn.disabled = false; btn.textContent = '↻ Sync con YouTube';
+  if (r.ok) {
+    const d = await r.json();
+    alert('✓ ' + d.synced + ' videos sincronizados');
+    cargarVideos();
+  } else {
+    const err = await r.json().catch(() => ({}));
+    alert('Error: ' + (err.detail || r.status));
+  }
+});
+
+document.getElementById('btn-connect').addEventListener('click', () => {
+  window.location.href = '/api/imporfactory/youtube/5/oauth/start';
+});
+
+if (new URLSearchParams(location.search).get('youtube_connected')) {
+  alert('✓ YouTube conectado correctamente');
+  history.replaceState({}, '', '/videos');
+}
+
+checkHealth().then(() => cargarVideos());
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{# ────────────────────────────────────────────────────────────────────
+   <head> común IMPORFACTORY Premium — included desde _imporfactory_premium_layout.html
+   2026-05-27 Fase 0
+   ──────────────────────────────────────────────────────────────────── #}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0E1A">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300BFFF'/><text x='16' y='22' font-family='Inter,sans-serif' font-size='18' font-weight='700' text-anchor='middle' fill='%230B1426'>IF</text></svg>">
+
+<link rel="stylesheet" href="/static/css/imporfactory_premium.css?v=20260527a-fase0">
+
+<script>
+  // Dark default. Toggle persistido en localStorage.
+  (function() {
+    var stored = localStorage.getItem('imf-theme');
+    if (stored === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    else document.documentElement.setAttribute('data-theme', 'dark');
+  })();
+</script>
