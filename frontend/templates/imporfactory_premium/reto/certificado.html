@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎓 Tu Certificado · Reto Importador Rentable</title>
+<meta name="robots" content="noindex,follow">
+<meta property="og:title" content="🎓 Certificado · Reto Importador Rentable">
+<meta property="og:image" content="https://danytraveloficial.com/img/blog-thumbs/gemini-46e2fabecad0410fa6b149847a433451.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23E6B800'/><text x='16' y='22' font-size='18' text-anchor='middle'>🎓</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=Cinzel:wght@600;700;800;900&family=Spectral:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --gold:#E6B800; --gold-light:#FFD700; --gold-dark:#A88800;
+    --navy:#0B1426; --bg:#0A0E1A; --cyan:#00BFFF;
+    --text:#F5F7FA; --text-mut:#B4BDD3;
+  }
+  html,body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  body{
+    background:
+      radial-gradient(at 20% 5%,rgba(230,184,0,0.10),transparent 50%),
+      radial-gradient(at 85% 90%,rgba(0,191,255,0.08),transparent 55%),
+      linear-gradient(180deg,#000 0%,#070A12 100%);
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:880px;margin:0 auto}
+
+  /* SUCCESS BANNER */
+  .success{display:flex;align-items:center;gap:14px;padding:16px 20px;background:linear-gradient(135deg,rgba(43,217,160,0.18),rgba(0,191,255,0.08));border:1px solid rgba(43,217,160,0.45);border-radius:14px;margin-bottom:24px}
+  .success-icon{width:44px;height:44px;border-radius:50%;background:rgba(43,217,160,0.25);display:grid;place-items:center;font-size:24px;flex-shrink:0}
+  .success-text strong{font-size:15px;color:#2BD9A0;display:block;margin-bottom:2px}
+  .success-text small{font-size:12px;color:var(--text-mut)}
+
+  /* CERTIFICADO */
+  .cert{
+    position:relative;
+    background:
+      radial-gradient(at 50% 100%,rgba(230,184,0,0.18),transparent 60%),
+      linear-gradient(135deg,#0F1729,#1a2440 50%,#0F1729);
+    border:3px solid transparent;
+    background-clip:padding-box;
+    border-radius:22px;
+    padding:60px 48px 56px;
+    text-align:center;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(230,184,0,0.3);
+  }
+  /* Gold double border */
+  .cert::before{content:"";position:absolute;inset:8px;border:1px solid rgba(230,184,0,0.5);border-radius:14px;pointer-events:none}
+  .cert::after{content:"";position:absolute;inset:14px;border:1px solid rgba(230,184,0,0.25);border-radius:8px;pointer-events:none}
+
+  /* Decorative corners */
+  .cert-corner{position:absolute;width:32px;height:32px;border:2px solid var(--gold);pointer-events:none}
+  .cert-corner.tl{top:20px;left:20px;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
+  .cert-corner.tr{top:20px;right:20px;border-left:none;border-bottom:none;border-radius:0 8px 0 0}
+  .cert-corner.bl{bottom:20px;left:20px;border-right:none;border-top:none;border-radius:0 0 0 8px}
+  .cert-corner.br{bottom:20px;right:20px;border-left:none;border-top:none;border-radius:0 0 8px 0}
+
+  /* Stamp emoji */
+  .cert-stamp{font-size:54px;line-height:1;margin-bottom:18px;filter:drop-shadow(0 6px 18px rgba(230,184,0,0.6))}
+
+  .cert-eyebrow{font-family:Cinzel,serif;font-size:11px;letter-spacing:5px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:10px}
+  .cert-title{font-family:Cinzel,serif;font-size:clamp(28px,5vw,40px);font-weight:900;line-height:1.1;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-bottom:6px;background:linear-gradient(135deg,#FFFFFF 0%,#F5E7B8 50%,#FFFFFF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .cert-sub{font-family:Cinzel,serif;font-size:13px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-weight:600;margin-bottom:38px}
+
+  .cert-text{font-size:15px;color:var(--text-mut);max-width:520px;margin:0 auto 18px;line-height:1.6}
+  .cert-name{font-family:Spectral,serif;font-style:italic;font-size:clamp(36px,7vw,56px);font-weight:600;line-height:1.1;color:var(--text);margin:14px 0 26px;background:linear-gradient(135deg,#FFD700,#FFFFFF 50%,#FFD700);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 4px 20px rgba(230,184,0,0.2)}
+  .cert-divider{display:flex;align-items:center;gap:14px;justify-content:center;margin:26px 0;color:var(--gold);opacity:0.6}
+  .cert-divider hr{flex:1;max-width:120px;border:none;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .cert-divider span{font-size:14px}
+
+  .cert-reto{font-family:Cinzel,serif;font-size:clamp(20px,3.5vw,28px);font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--gold);line-height:1.15;margin-bottom:16px}
+
+  .cert-meta{display:flex;justify-content:space-between;align-items:flex-end;margin-top:48px;font-size:12px;flex-wrap:wrap;gap:24px}
+  .cert-meta-block{text-align:left}
+  .cert-meta-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-mut);font-weight:700;margin-bottom:6px}
+  .cert-meta-value{font-family:Spectral,serif;font-style:italic;font-size:18px;color:var(--gold);font-weight:600}
+  .cert-meta-folio{font-family:monospace;font-size:14px;color:var(--text);letter-spacing:1px;background:rgba(230,184,0,0.1);padding:6px 12px;border-radius:6px;display:inline-block}
+
+  /* Firma */
+  .cert-firma{text-align:right}
+  .cert-firma-name{font-family:Spectral,serif;font-style:italic;font-size:24px;color:var(--text);margin-bottom:2px}
+  .cert-firma-role{font-size:11px;letter-spacing:1px;color:var(--text-mut)}
+  .cert-firma-line{display:inline-block;width:180px;height:1px;background:var(--gold);margin-bottom:8px}
+
+  /* CTA CLUB (sutil) */
+  .cta-club{
+    margin-top:36px;
+    padding:34px 28px;
+    background:linear-gradient(135deg,rgba(11,20,38,0.85),rgba(11,20,38,0.6));
+    border:1px solid rgba(230,184,0,0.3);
+    border-radius:18px;
+    text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .cta-club::before{content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;background:radial-gradient(circle,rgba(230,184,0,0.15),transparent 60%);pointer-events:none}
+  .cta-club-eyebrow{display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:800;padding:4px 12px;background:rgba(230,184,0,0.12);border:1px solid rgba(230,184,0,0.35);border-radius:999px;margin-bottom:14px;position:relative;z-index:1}
+  .cta-club-title{font-family:Montserrat;font-size:clamp(20px,3vw,26px);font-weight:900;line-height:1.2;margin-bottom:10px;letter-spacing:-0.3px;position:relative;z-index:1}
+  .cta-club-sub{font-size:14px;color:var(--text-mut);max-width:460px;margin:0 auto 22px;line-height:1.55;position:relative;z-index:1}
+
+  .btn-wa{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:16px 30px;
+    background:linear-gradient(135deg,#25D366 0%,#1DA851 100%);
+    color:#fff;font-weight:900;font-size:15px;letter-spacing:0.5px;
+    text-decoration:none;border-radius:14px;
+    box-shadow:0 14px 35px rgba(37,211,102,0.4);
+    transition:all 200ms ease;position:relative;z-index:1;
+  }
+  .btn-wa:hover{transform:translateY(-2px);box-shadow:0 18px 45px rgba(37,211,102,0.55)}
+  .btn-wa svg{width:20px;height:20px;flex-shrink:0}
+
+  /* Acciones (descargar, otro) */
+  .actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+  .btn-ghost{padding:10px 18px;background:transparent;color:var(--text-mut);border:1px solid var(--border);border-radius:10px;font-size:13px;text-decoration:none;font-weight:600;cursor:pointer;transition:all 150ms ease}
+  .btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.25)}
+
+  .foot{text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin-top:24px;letter-spacing:0.5px}
+
+  /* Print */
+  @media print{
+    body{background:#fff;padding:0}
+    .success,.cta-club,.actions,.foot{display:none}
+    .cert{box-shadow:none;border:2px solid #C5A100}
+    .cert *{color:#0B1426 !important;-webkit-text-fill-color:#0B1426 !important}
+    .cert-stamp{filter:none}
+  }
+  @media (max-width:600px){
+    .cert{padding:48px 24px 40px}
+    .cert-meta{flex-direction:column;align-items:flex-start;text-align:left}
+    .cert-firma{text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="success">
+  <div class="success-icon">✓</div>
+  <div class="success-text">
+    <strong>¡Listo! Tu certificado fue generado.</strong>
+    <small>Folio: <span id="folio-mini" style="font-family:monospace;color:var(--gold)">cargando...</span></small>
+  </div>
+</div>
+
+<div class="cert" id="cert">
+  <span class="cert-corner tl"></span>
+  <span class="cert-corner tr"></span>
+  <span class="cert-corner bl"></span>
+  <span class="cert-corner br"></span>
+
+  <div class="cert-stamp">🎓</div>
+  <div class="cert-eyebrow">Certificado oficial</div>
+  <h1 class="cert-title">Certificado de Participación</h1>
+  <div class="cert-sub">GRUPO IMPOR · Daniel Bonilla</div>
+
+  <p class="cert-text">Se otorga el presente certificado a</p>
+  <div class="cert-name" id="cert-nombre">Cargando…</div>
+
+  <div class="cert-divider">
+    <hr><span>✦</span><hr>
+  </div>
+
+  <p class="cert-text">Por haber asistido y completado el</p>
+  <div class="cert-reto">Reto Importador Rentable</div>
+  <p class="cert-text">3 días de contenido en vivo sobre cómo importar productos de China a Ecuador y LATAM de forma rentable, junto a Daniel Bonilla y el equipo de GRUPO IMPOR.</p>
+
+  <div class="cert-meta">
+    <div class="cert-meta-block">
+      <div class="cert-meta-label">Emitido el</div>
+      <div class="cert-meta-value" id="cert-fecha">—</div>
+      <div style="margin-top:14px"><span class="cert-meta-folio" id="cert-folio">RIR-XXXX-XXXXXX</span></div>
+    </div>
+    <div class="cert-meta-block cert-firma">
+      <div class="cert-firma-line"></div>
+      <div class="cert-firma-name">Daniel Bonilla</div>
+      <div class="cert-firma-role">CEO · GRUPO IMPOR</div>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-ghost" onclick="window.print()">📄 Descargar PDF</button>
+  <a class="btn-ghost" href="/reto-importador-rentable">🔁 Generar otro</a>
+</div>
+
+<!-- CTA Club sutil -->
+<div class="cta-club">
+  <span class="cta-club-eyebrow">🚀 Da el siguiente paso</span>
+  <h2 class="cta-club-title">¿Listo para llevarlo a la práctica?</h2>
+  <p class="cta-club-sub">En el <strong>Club de Importadores</strong> te acompañamos a importar tu primer producto desde China — desde elegir qué importar hasta tener la mercadería en tus manos. Hablá con un asesor.</p>
+  <a class="btn-wa" href="https://wa.me/593979120058?text=Hola%20quiero%20ser%20parte%20del%20club" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    Hola, quiero ser parte del Club
+  </a>
+</div>
+
+<div class="foot">© <span id="year"></span> Daniel Bonilla · GRUPO IMPOR · Folio: <span id="folio-foot"></span></div>
+
+</div>
+
+<script>
+const folio = location.pathname.split('/').pop();
+document.getElementById('year').textContent = new Date().getFullYear();
+
+async function loadCert() {
+  try {
+    const r = await fetch('/api/reto/lead/' + encodeURIComponent(folio));
+    if (!r.ok) {
+      if (r.status === 404) {
+        document.getElementById('cert-nombre').textContent = 'Folio no encontrado';
+        return;
+      }
+      throw new Error('HTTP ' + r.status);
+    }
+    const d = await r.json();
+    document.getElementById('cert-nombre').textContent = d.nombre;
+    document.getElementById('cert-fecha').textContent = d.fecha_humana;
+    document.getElementById('cert-folio').textContent = d.folio;
+    document.getElementById('folio-mini').textContent = d.folio;
+    document.getElementById('folio-foot').textContent = d.folio;
+    document.title = '🎓 ' + d.nombre + ' · Certificado RIR';
+  } catch (e) {
+    document.getElementById('cert-nombre').textContent = 'Error al cargar';
+    console.error(e);
+  }
+}
+loadCert();
+</script>
+
+</body>
+</html>

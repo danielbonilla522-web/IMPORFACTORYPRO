@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Obtén tu Certificado · Reto Importador Rentable</title>
+<meta name="description" content="Obtén tu certificado oficial por haber asistido al Reto Importador Rentable de Daniel Bonilla · GRUPO IMPOR.">
+<meta name="robots" content="noindex,follow">
+<meta property="og:title" content="Obtén tu Certificado · Reto Importador Rentable">
+<meta property="og:image" content="https://danytraveloficial.com/img/dany_scoth_.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23E6B800'/><text x='16' y='22' font-size='18' text-anchor='middle'>🎓</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --gold:#E6B800; --gold-dim:rgba(230,184,0,0.18);
+    --cyan:#00BFFF; --navy:#0B1426; --bg:#0A0E1A; --bg2:#111729;
+    --text:#F5F7FA; --text-mut:#B4BDD3; --border:rgba(255,255,255,0.08);
+    --danger:#FF4D4F;
+  }
+  html,body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;min-height:100vh}
+  body{
+    background:
+      radial-gradient(at 20% 5%,rgba(230,184,0,0.10),transparent 50%),
+      radial-gradient(at 85% 90%,rgba(0,191,255,0.08),transparent 55%),
+      linear-gradient(180deg,#000 0%,#070A12 100%);
+    padding:24px 16px 64px;
+  }
+  .wrap{max-width:560px;margin:0 auto}
+
+  /* HERO banner */
+  .hero{position:relative;border-radius:18px;overflow:hidden;margin-bottom:32px;border:1px solid var(--border);background:linear-gradient(135deg,#1a1f3a,#0a0e1a)}
+  .hero-bg{position:absolute;inset:0;opacity:0.28;background-image:url('https://danytraveloficial.com/img/blog-thumbs/gemini-46e2fabecad0410fa6b149847a433451.png');background-size:cover;background-position:center;filter:blur(2px) brightness(0.6)}
+  .hero-content{position:relative;padding:34px 24px;text-align:center}
+  .hero-eyebrow{display:inline-block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:900;padding:5px 12px;background:rgba(230,184,0,0.12);border:1px solid rgba(230,184,0,0.4);border-radius:999px;margin-bottom:12px}
+  .hero-title{font-family:Montserrat,Inter;font-size:30px;line-height:1.05;font-weight:900;letter-spacing:-0.5px;text-transform:uppercase}
+  .hero-title .gold{color:var(--gold);display:block;margin-top:4px}
+  .hero-sub{font-size:13px;color:var(--text-mut);margin-top:10px}
+
+  h2.section{font-family:Montserrat;text-align:center;font-size:18px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:0 0 26px;color:var(--text)}
+
+  /* Form */
+  .field{margin-bottom:20px}
+  label{display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)}
+  label .req{color:var(--gold);margin-left:4px}
+  .input,select,textarea{
+    width:100%;padding:13px 14px;font-size:14px;font-family:inherit;
+    background:rgba(255,255,255,0.04);border:1px solid var(--border);
+    border-radius:12px;color:var(--text);outline:none;transition:all 160ms ease;
+  }
+  .input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.32)}
+  .input:focus,select:focus,textarea:focus{border-color:var(--gold);background:rgba(230,184,0,0.06);box-shadow:0 0 0 3px rgba(230,184,0,0.15)}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;cursor:pointer}
+  select option{background:var(--bg2);color:var(--text)}
+
+  /* Phone with country */
+  .phone-row{display:grid;grid-template-columns:88px 1fr;gap:8px}
+  .phone-row select{padding:13px 8px;text-align:center;font-size:14px}
+
+  /* Email with icon */
+  .email-wrap{position:relative}
+  .email-wrap::before{content:"✉";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:14px}
+  .email-wrap input{padding-left:38px}
+
+  /* Radios */
+  .radios{display:flex;flex-direction:column;gap:10px}
+  .radio-item{display:flex;align-items:center;gap:10px;padding:13px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 160ms ease;font-size:14px}
+  .radio-item:hover{border-color:rgba(230,184,0,0.5);background:rgba(230,184,0,0.06)}
+  .radio-item input{accent-color:var(--gold);width:18px;height:18px;cursor:pointer;flex-shrink:0}
+  .radio-item.checked{border-color:var(--gold);background:rgba(230,184,0,0.1);font-weight:600}
+
+  /* Submit button */
+  .btn-submit{
+    width:100%;padding:18px;margin-top:8px;
+    background:linear-gradient(135deg,var(--gold) 0%,#FFD700 100%);
+    color:#0B1426;border:none;border-radius:14px;
+    font-family:Montserrat;font-size:17px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;
+    cursor:pointer;transition:all 200ms ease;box-shadow:0 12px 30px rgba(230,184,0,0.35);
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  }
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(230,184,0,0.5)}
+  .btn-submit:active{transform:translateY(0)}
+  .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+  /* Error */
+  .err-msg{display:none;padding:12px;background:rgba(255,77,79,0.1);border:1px solid var(--danger);border-radius:10px;color:var(--danger);font-size:13px;margin-bottom:16px}
+
+  /* Loading spinner */
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#0B1426;border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Footer */
+  .foot{text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin-top:24px;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">🎓 Certificado oficial</span>
+    <h1 class="hero-title">Reto<br><span class="gold">Importador Rentable</span></h1>
+    <p class="hero-sub">Por Daniel Bonilla · CEO GRUPO IMPOR</p>
+  </div>
+</div>
+
+<h2 class="section">Obtén tu certificado aquí</h2>
+
+<form id="reto-form" novalidate>
+  <div id="err" class="err-msg"></div>
+
+  <div class="field">
+    <label for="nombre">Nombre y Apellido <span class="req">*</span></label>
+    <input class="input" id="nombre" name="nombre" placeholder="Nombre y Apellido" required minlength="3" autocomplete="name">
+  </div>
+
+  <div class="field">
+    <label for="telefono">Teléfono <span class="req">*</span></label>
+    <div class="phone-row">
+      <select id="pais_codigo" name="pais_codigo">
+        <option value="+593" selected>🇪🇨 +593</option>
+        <option value="+57">🇨🇴 +57</option>
+        <option value="+51">🇵🇪 +51</option>
+        <option value="+52">🇲🇽 +52</option>
+        <option value="+54">🇦🇷 +54</option>
+        <option value="+56">🇨🇱 +56</option>
+        <option value="+58">🇻🇪 +58</option>
+        <option value="+591">🇧🇴 +591</option>
+        <option value="+1">🇺🇸 +1</option>
+        <option value="+34">🇪🇸 +34</option>
+      </select>
+      <input class="input" id="telefono" name="telefono" type="tel" placeholder="Teléfono" required minlength="6" autocomplete="tel">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="email">Email <span class="req">*</span></label>
+    <div class="email-wrap">
+      <input class="input" id="email" name="email" type="email" placeholder="tu@email.com" required autocomplete="email">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="dedicacion">¿Cuéntame actualmente a qué te dedicas? <span class="req">*</span></label>
+    <select id="dedicacion" name="dedicacion" required>
+      <option value="">Selecciona una opción*</option>
+      <option value="emprendedor">Emprendedor / Dueño de negocio</option>
+      <option value="empleado">Empleado en relación de dependencia</option>
+      <option value="estudiante">Estudiante</option>
+      <option value="comerciante">Comerciante / Tienda física</option>
+      <option value="importador_principiante">Importador principiante</option>
+      <option value="importador_experimentado">Importador con experiencia</option>
+      <option value="freelancer">Freelancer / Consultor</option>
+      <option value="otro">Otro</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="producto_interes">¿Qué producto te gustaría importar?</label>
+    <input class="input" id="producto_interes" name="producto_interes" placeholder="Si no sabes aún, deja en blanco">
+  </div>
+
+  <div class="field">
+    <label for="capital_disponible">¿Qué capital tienes para invertir en tu importación? <span class="req">*</span></label>
+    <select id="capital_disponible" name="capital_disponible" required>
+      <option value="">Selecciona una opción*</option>
+      <option value="lt_500">Menos de $500</option>
+      <option value="500_1000">$500 a $1.000</option>
+      <option value="1000_3000">$1.000 a $3.000</option>
+      <option value="3000_5000">$3.000 a $5.000</option>
+      <option value="5000_10000">$5.000 a $10.000</option>
+      <option value="gt_10000">Más de $10.000</option>
+      <option value="aun_no">Aún no tengo capital</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>¿Ya conoces del Club de Importadores? <span class="req">*</span></label>
+    <div class="radios">
+      <label class="radio-item"><input type="radio" name="conoce_club" value="si_ya_conozco" required> Sí, ya lo conozco</label>
+      <label class="radio-item"><input type="radio" name="conoce_club" value="quiero_asesor"> No tengo claro, quiero un asesor</label>
+      <label class="radio-item"><input type="radio" name="conoce_club" value="quiero_ingresar"> Me gustaría ingresar</label>
+      <label class="radio-item"><input type="radio" name="conoce_club" value="no_interesa"> No me interesa</label>
+    </div>
+  </div>
+
+  <button type="submit" class="btn-submit" id="btn-submit">
+    <span id="btn-label">🎓 Quiero mi certificado</span>
+  </button>
+</form>
+
+<div class="foot">© {{ year }} Daniel Bonilla · GRUPO IMPOR</div>
+
+</div>
+
+<script>
+const form = document.getElementById('reto-form');
+const errBox = document.getElementById('err');
+const btn = document.getElementById('btn-submit');
+const btnLabel = document.getElementById('btn-label');
+
+// Visual feedback on radio selection
+document.querySelectorAll('.radio-item input[type=radio]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.radio-item').forEach(el => el.classList.remove('checked'));
+    r.closest('.radio-item').classList.add('checked');
+  });
+});
+
+function showErr(msg) {
+  errBox.textContent = msg;
+  errBox.style.display = 'block';
+  errBox.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+
+  // Validation manual
+  const nombre = form.nombre.value.trim();
+  if (nombre.length < 3) return showErr('Ingresa tu nombre completo (mínimo 3 caracteres)');
+  const telefono = form.telefono.value.replace(/\D/g,'');
+  if (telefono.length < 6) return showErr('Ingresa un teléfono válido');
+  const email = form.email.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Ingresa un email válido');
+  if (!form.dedicacion.value) return showErr('Selecciona a qué te dedicas');
+  if (!form.capital_disponible.value) return showErr('Selecciona tu capital disponible');
+  const club = form.querySelector('input[name="conoce_club"]:checked');
+  if (!club) return showErr('Marca si conoces el Club de Importadores');
+
+  // Submit
+  btn.disabled = true;
+  btnLabel.innerHTML = '<span class="spinner"></span> Generando certificado...';
+
+  const payload = {
+    nombre,
+    telefono,
+    pais_codigo: form.pais_codigo.value,
+    email,
+    dedicacion: form.dedicacion.value,
+    producto_interes: form.producto_interes.value.trim() || null,
+    capital_disponible: form.capital_disponible.value,
+    conoce_club: club.value,
+  };
+
+  try {
+    const r = await fetch('/api/reto/registro', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({detail:'Error desconocido'}));
+      throw new Error(err.detail || 'Error '+r.status);
+    }
+    const d = await r.json();
+    window.location.href = d.certificado_url || ('/certificado/' + d.folio);
+  } catch (err) {
+    btn.disabled = false;
+    btnLabel.innerHTML = '🎓 Quiero mi certificado';
+    showErr('Algo falló: ' + err.message + '. Probá de nuevo o escribime al WhatsApp.');
+  }
+});
+</script>
+
+</body>
+</html>

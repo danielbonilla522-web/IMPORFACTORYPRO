@@ -35,6 +35,7 @@ from fastapi.templating import Jinja2Templates
 from models import imporfactory_premium as _imporfactory_premium_model  # noqa: F401
 
 # Routers IMPORFACTORY
+from api import reto
 from api import imporfactory_clases
 from api import imporfactory_blog
 from api import imporfactory_blog_ai
@@ -102,6 +103,7 @@ def render_premium(request: Request, template_name: str, ctx: dict | None = None
 # ────────────────────────────────────────
 # Routers (incluye públicos /api/blog/public/* sin auth)
 # ────────────────────────────────────────
+app.include_router(reto.router)
 app.include_router(imporfactory_clases.router)
 app.include_router(imporfactory_blog.router)
 app.include_router(imporfactory_blog.public_router)
@@ -174,3 +176,19 @@ async def videos(request: Request):
 async def login_page(request: Request):
     """Redirige al login del ERP — JWT compartido."""
     return HTMLResponse('<meta http-equiv="refresh" content="0; url=https://erp.imporchina.com/?redirect=https://impor.imporchina.com/dashboard">')
+
+
+
+# ════════════════════════════════════════════════════════════
+# Reto Importador Rentable — PUBLICO (sin auth)
+# ════════════════════════════════════════════════════════════
+
+@app.get("/reto-importador-rentable", response_class=HTMLResponse)
+@app.get("/reto", response_class=HTMLResponse)
+async def reto_form(request: Request):
+    return _no_cache_html(render_premium(request, "reto/form.html", {"year": __import__("datetime").datetime.now().year}))
+
+
+@app.get("/certificado/{folio}", response_class=HTMLResponse)
+async def reto_certificado(request: Request, folio: str):
+    return _no_cache_html(render_premium(request, "reto/certificado.html"))
