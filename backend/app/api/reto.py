@@ -54,6 +54,16 @@ class RetoRegistroPayload(BaseModel):
         return v
 
 
+
+MESES_ES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+
+
+def _fecha_es(dt) -> str:
+    if not dt:
+        return ""
+    return f"{dt.day:02d} de {MESES_ES[dt.month - 1]} de {dt.year}"
+
+
 def _gen_folio() -> str:
     """RIR-YYYY-XXXXXX (formato amigable)."""
     chars = string.ascii_uppercase + string.digits
@@ -130,5 +140,5 @@ async def get_lead_by_folio(
         "email": row["email"],
         "edicion_reto": row["edicion_reto"],
         "fecha_emision": row["fecha_emision"].isoformat() if row["fecha_emision"] else None,
-        "fecha_humana": row["fecha_emision"].strftime("%d de %B de %Y") if row["fecha_emision"] else "",
+        "fecha_humana": _fecha_es(row["fecha_emision"]),
     }
