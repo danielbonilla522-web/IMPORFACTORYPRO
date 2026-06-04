@@ -36,6 +36,7 @@ from models import imporfactory_premium as _imporfactory_premium_model  # noqa: 
 
 # Routers IMPORFACTORY
 from api import reto
+from api import facturacion
 from api import imporfactory_clases
 from api import imporfactory_blog
 from api import imporfactory_blog_ai
@@ -104,6 +105,7 @@ def render_premium(request: Request, template_name: str, ctx: dict | None = None
 # Routers (incluye públicos /api/blog/public/* sin auth)
 # ────────────────────────────────────────
 app.include_router(reto.router)
+app.include_router(facturacion.router)
 app.include_router(imporfactory_clases.router)
 app.include_router(imporfactory_blog.router)
 app.include_router(imporfactory_blog.public_router)
@@ -192,3 +194,10 @@ async def reto_form(request: Request):
 @app.get("/certificado/{folio}", response_class=HTMLResponse)
 async def reto_certificado(request: Request, folio: str):
     return _no_cache_html(render_premium(request, "reto/certificado.html"))
+
+
+
+@app.get("/facturacion-masiva", response_class=HTMLResponse)
+@app.get("/facturacion", response_class=HTMLResponse)
+async def facturacion_masiva(request: Request):
+    return _no_cache_html(render_premium(request, "facturacion/landing.html"))

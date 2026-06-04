@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🧾 Facturación masiva · IMPORFACTORY Premium</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300BFFF'/><text x='16' y='22' font-size='18' text-anchor='middle'>🧾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cyan:#00BFFF; --cyan-dim:rgba(0,191,255,0.12); --cyan-bright:#33D6FF;
+    --violet:#7C5CFF; --gold:#E6B800; --success:#2BD9A0; --warn:#F5A524; --danger:#FF4D4F;
+    --navy:#0B1426; --bg:#0A0E1A; --bg2:#111729; --bg3:#182135;
+    --text:#F5F7FA; --text-mut:#B4BDD3; --text-dim:#6E7894;
+    --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.16);
+  }
+  html,body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+  body{padding:24px 16px 48px;background:radial-gradient(at 20% 0%,rgba(0,191,255,0.06),transparent 50%),radial-gradient(at 80% 100%,rgba(124,92,255,0.05),transparent 55%),var(--bg)}
+  .wrap{max-width:1400px;margin:0 auto}
+  a{color:var(--cyan);text-decoration:none}
+
+  /* Header */
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+  .head h1{font-family:Montserrat;font-size:26px;font-weight:900;letter-spacing:-0.5px}
+  .head h1 span{background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .head .sub{font-size:13px;color:var(--text-mut);margin-top:4px}
+
+  /* Empresa selector */
+  .empresa-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:24px}
+  .empresa-card{padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);cursor:pointer;transition:all 160ms ease;position:relative;overflow:hidden}
+  .empresa-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+  .empresa-card.active{border-color:var(--cyan);background:rgba(0,191,255,0.06);box-shadow:0 0 0 1px var(--cyan),0 12px 30px rgba(0,191,255,0.18)}
+  .empresa-card.disabled{opacity:0.5;cursor:not-allowed}
+  .empresa-name{font-family:Montserrat;font-size:14px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px}
+  .empresa-ruc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mut)}
+  .empresa-meta{display:flex;gap:8px;margin-top:10px;font-size:11px;flex-wrap:wrap}
+  .badge{padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+  .badge.success{background:rgba(43,217,160,0.15);color:var(--success)}
+  .badge.warn{background:rgba(245,165,36,0.15);color:var(--warn)}
+  .badge.info{background:var(--cyan-dim);color:var(--cyan)}
+  .badge.danger{background:rgba(255,77,79,0.15);color:var(--danger)}
+
+  /* Form */
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
+  .panel-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+  .panel-h h2{font-family:Montserrat;font-size:18px;font-weight:800;letter-spacing:-0.2px}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media (max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+  .field{display:flex;flex-direction:column;gap:6px}
+  label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-mut)}
+  .input,select,textarea{padding:10px 12px;font-size:13.5px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;outline:none;transition:all 140ms ease}
+  .input:focus,select:focus,textarea:focus{border-color:var(--cyan);background:rgba(0,191,255,0.04);box-shadow:0 0 0 3px var(--cyan-dim)}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--cyan) 50%),linear-gradient(135deg,var(--cyan) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;cursor:pointer}
+  select option{background:var(--bg2);color:var(--text)}
+  textarea{resize:vertical;min-height:60px}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:var(--cyan);color:var(--navy);border:none;border-radius:10px;font-weight:800;font-size:13.5px;cursor:pointer;transition:all 140ms ease;text-decoration:none;letter-spacing:0.2px}
+  .btn:hover{background:var(--cyan-bright);transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,191,255,0.25)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border-strong)}
+  .btn.ghost:hover{background:var(--bg3);box-shadow:none;transform:none}
+  .btn.violet{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff}
+  .btn.danger{background:var(--danger);color:#fff}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* Items */
+  .items-area{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .item-row{display:grid;grid-template-columns:1fr 80px 110px 90px 36px;gap:8px;align-items:center;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px}
+  .item-row input,.item-row select{padding:8px;font-size:12.5px}
+  .item-row .btn-x{background:transparent;color:var(--danger);border:none;cursor:pointer;font-size:18px;padding:6px;border-radius:6px}
+  .item-row .btn-x:hover{background:rgba(255,77,79,0.15)}
+  @media (max-width:700px){.item-row{grid-template-columns:1fr 1fr;gap:6px}}
+
+  /* Totales */
+  .totals{display:flex;justify-content:flex-end;gap:24px;padding:14px;background:var(--bg3);border-radius:10px;margin-top:12px;flex-wrap:wrap}
+  .total-block{text-align:right}
+  .total-block label{display:block;font-size:10px;color:var(--text-mut);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;font-weight:600}
+  .total-block .val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700}
+  .total-block .val.big{font-size:22px;color:var(--cyan)}
+
+  /* Tabla */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;padding:10px 8px;font-size:10px;letter-spacing:0.8px;color:var(--text-mut);text-transform:uppercase;font-weight:700;border-bottom:1px solid var(--border-strong);background:var(--bg3)}
+  td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+  tr:hover td{background:rgba(0,191,255,0.04)}
+  .check{width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)}
+
+  /* Bulk bar */
+  .bulk-bar{position:sticky;top:0;z-index:10;display:none;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:linear-gradient(135deg,var(--cyan-dim),rgba(124,92,255,0.1));border:1px solid var(--cyan);border-radius:12px;margin-bottom:14px;flex-wrap:wrap;backdrop-filter:blur(8px)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar .info{font-weight:700;color:var(--cyan)}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--bg2);border:1px solid var(--border-strong);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,0.4);font-size:13px;display:none;max-width:380px;z-index:200}
+  .toast.show{display:flex;flex-direction:column;gap:6px;animation:slideIn 200ms ease}
+  .toast.success{border-color:var(--success)}
+  .toast.error{border-color:var(--danger)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+  /* Modal */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:24px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border-strong);border-radius:16px;max-width:900px;width:100%;max-height:88vh;overflow-y:auto;padding:24px}
+
+  /* Spinner */
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.25);border-top-color:var(--navy);border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .footer{text-align:center;font-size:11px;color:var(--text-dim);margin-top:24px;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div>
+    <h1>🧾 <span>Facturación masiva</span></h1>
+    <div class="sub">Carga borradores y emite múltiples facturas Datil/SRI en un solo click</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn ghost" id="btn-refresh">↻ Refrescar</button>
+    <button class="btn violet" id="btn-new">+ Nueva factura</button>
+  </div>
+</div>
+
+<!-- Empresa selector -->
+<div class="empresa-row" id="empresa-row"></div>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulk-bar">
+  <div><span class="info" id="bulk-count">0</span> seleccionadas</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn ghost" id="btn-clear-sel">Limpiar</button>
+    <button class="btn ghost danger" id="btn-delete-sel">🗑 Eliminar</button>
+    <button class="btn" id="btn-emit-sel">⚡ Emitir seleccionadas</button>
+  </div>
+</div>
+
+<!-- Tabla borradores -->
+<div class="panel">
+  <div class="panel-h">
+    <h2>📋 Borradores</h2>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="filter-estado" style="padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px">
+        <option value="">Todos los estados</option>
+        <option value="borrador" selected>Borradores</option>
+        <option value="emitida">Emitidas</option>
+        <option value="fallo">Fallidas</option>
+      </select>
+      <span style="font-size:12px;color:var(--text-mut)" id="cnt-info"></span>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:36px"><input type="checkbox" class="check" id="check-all"></th>
+        <th>Cliente</th>
+        <th>Identificación</th>
+        <th>Email</th>
+        <th style="text-align:right">Total</th>
+        <th>Estado</th>
+        <th>N° / Auth</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Cargando...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal nueva/editar -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="panel-h" style="margin-bottom:18px">
+      <h2 id="modal-title">+ Nueva factura</h2>
+      <button class="btn ghost" id="modal-close">✕</button>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Tipo identificación</label>
+        <select id="f-tipo">
+          <option value="cedula">Cédula</option>
+          <option value="ruc">RUC</option>
+          <option value="pasaporte">Pasaporte</option>
+          <option value="consumidor_final">Consumidor Final</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Identificación *</label>
+        <input class="input" id="f-iden" maxlength="20" placeholder="1712345678">
+      </div>
+      <div class="field">
+        <label>Razón Social *</label>
+        <input class="input" id="f-razon" maxlength="220" placeholder="Nombre del cliente">
+      </div>
+      <div class="field">
+        <label>Email (Datil lo manda aquí)</label>
+        <input class="input" id="f-email" type="email" placeholder="cliente@email.com">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input class="input" id="f-tel" placeholder="0991234567">
+      </div>
+      <div class="field">
+        <label>Dirección</label>
+        <input class="input" id="f-dir" placeholder="Av. ...">
+      </div>
+    </div>
+
+    <h3 style="margin:22px 0 12px;font-size:14px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-mut)">📦 Items</h3>
+    <div class="items-area" id="items-area"></div>
+    <button class="btn ghost" id="btn-add-item" style="margin-top:10px">+ Agregar item</button>
+
+    <div class="totals">
+      <div class="total-block"><label>Subtotal</label><div class="val" id="t-sub">$0.00</div></div>
+      <div class="total-block"><label>IVA</label><div class="val" id="t-iva">$0.00</div></div>
+      <div class="total-block"><label>Total</label><div class="val big" id="t-tot">$0.00</div></div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn ghost" id="modal-cancel">Cancelar</button>
+      <button class="btn" id="btn-save">💾 Guardar borrador</button>
+      <button class="btn violet" id="btn-save-emit">⚡ Guardar y emitir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="footer">IMPORFACTORY Premium · Facturación Datil/SRI</div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const fmt = (n) => '$' + Number(n||0).toLocaleString('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc = (s) => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let empresaActiva = null;
+let empresas = [];
+let borradores = [];
+let editingId = null;
+
+function toast(msg, type='info', timeout=3500) {
+  const t = $('#toast');
+  t.className = 'toast show ' + type;
+  t.innerHTML = msg;
+  clearTimeout(t._tid);
+  t._tid = setTimeout(()=>t.className='toast', timeout);
+}
+
+async function loadEmpresas() {
+  const r = await fetch('/api/facturacion/empresas');
+  const d = await r.json();
+  empresas = d.items;
+  const cont = $('#empresa-row');
+  cont.innerHTML = empresas.map(e=>{
+    const isOk = e.habilitado;
+    const amb = e.ambiente===2?'PRODUCCIÓN':'PRUEBAS';
+    const ambClass = e.ambiente===2?'success':'warn';
+    return `<div class="empresa-card ${isOk?'':'disabled'}" data-id="${e.empresa_id}">
+      <div class="empresa-name">${esc(e.nombre)}</div>
+      <div class="empresa-ruc">${esc(e.ruc)}</div>
+      <div class="empresa-meta">
+        ${isOk ? `<span class="badge ${ambClass}">${amb}</span>` : `<span class="badge danger">SIN DATIL</span>`}
+        ${isOk ? `<span class="badge info">${esc(e.punto_emision)} · #${esc(e.siguiente_numero)}</span>` : ''}
+      </div>
+      ${!isOk?`<div style="font-size:10px;color:var(--text-mut);margin-top:8px">Falta: ${e.missing_keys.join(', ')}</div>`:''}
+    </div>`;
+  }).join('');
+  $$('#empresa-row .empresa-card').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(c.classList.contains('disabled')) {
+        toast('Esta empresa NO tiene Datil configurado. Cargá las credenciales en empresa_config.','error');
+        return;
+      }
+      $$('#empresa-row .empresa-card').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      empresaActiva = parseInt(c.dataset.id);
+      loadBorradores();
+    });
+  });
+  // Auto-seleccionar primera habilitada
+  const first = empresas.find(e=>e.habilitado);
+  if (first) {
+    const card = document.querySelector(`#empresa-row .empresa-card[data-id="${first.empresa_id}"]`);
+    if (card) card.click();
+  }
+}
+
+async function loadBorradores() {
+  if (!empresaActiva) return;
+  const est = $('#filter-estado').value;
+  const params = new URLSearchParams({empresa_id: empresaActiva, limit:200});
+  if (est) params.set('estado', est);
+  const r = await fetch('/api/facturacion/borradores?' + params);
+  const d = await r.json();
+  borradores = d.items;
+  renderRows();
+}
+
+function renderRows() {
+  const tbody = $('#rows');
+  $('#cnt-info').textContent = `${borradores.length} registros`;
+  if (borradores.length===0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Sin facturas. Click <strong style="color:var(--cyan)">+ Nueva factura</strong> arriba.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = borradores.map(b=>{
+    const estadoBadge = {
+      borrador:'<span class="badge info">Borrador</span>',
+      emitiendo:'<span class="badge warn">Emitiendo…</span>',
+      emitida:'<span class="badge success">✓ Emitida</span>',
+      fallo:`<span class="badge danger" title="${esc(b.error_msg||'')}">⚠ Fallo</span>`,
+      seleccionada:'<span class="badge info">Sel.</span>',
+    }[b.estado] || b.estado;
+    const numCol = b.factura_numero ?
+      `<div style="font-family:'JetBrains Mono';font-size:11px">${esc(b.factura_numero)}</div>
+       <div style="font-size:10px;color:var(--text-mut)">${esc((b.factura_autorizacion_sri||'').slice(0,12))}…</div>` :
+      '<span style="color:var(--text-mut);font-size:10px">—</span>';
+    const canSel = b.estado==='borrador' || b.estado==='fallo';
+    return `<tr data-id="${b.id}">
+      <td>${canSel?`<input type="checkbox" class="check row-check" data-id="${b.id}">`:''}</td>
+      <td><div style="font-weight:600">${esc(b.cliente_razon_social)}</div>
+          <div style="font-size:10px;color:var(--text-mut)">${esc(b.cliente_telefono||'')}</div></td>
+      <td><span style="font-family:'JetBrains Mono';font-size:11px">${esc(b.cliente_identificacion)}</span>
+          <div style="font-size:10px;color:var(--text-mut)">${esc(b.cliente_tipo_id)}</div></td>
+      <td style="font-size:11px;color:var(--text-mut)">${esc(b.cliente_email||'—')}</td>
+      <td style="text-align:right;font-family:'JetBrains Mono';font-weight:700">${fmt(b.total)}</td>
+      <td>${estadoBadge}</td>
+      <td>${numCol}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${canSel?`<button class="btn ghost" onclick="editar(${b.id})" title="Editar">✎</button>`:''}
+        ${canSel?`<button class="btn ghost" onclick="emitirOne(${b.id})" title="Emitir esta">⚡</button>`:''}
+        ${canSel?`<button class="btn ghost danger" onclick="eliminar(${b.id})" title="Eliminar">🗑</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  $$('.row-check').forEach(c=>c.addEventListener('change', updateBulkBar));
+  updateBulkBar();
+}
+
+function getSelected() {
+  return Array.from($$('.row-check:checked')).map(c=>parseInt(c.dataset.id));
+}
+
+function updateBulkBar() {
+  const sel = getSelected();
+  const bar = $('#bulk-bar');
+  bar.classList.toggle('show', sel.length>0);
+  $('#bulk-count').textContent = sel.length;
+}
+
+$('#check-all').addEventListener('change',(e)=>{
+  $$('.row-check').forEach(c=>c.checked = e.target.checked);
+  updateBulkBar();
+});
+
+$('#btn-clear-sel').addEventListener('click',()=>{
+  $$('.row-check').forEach(c=>c.checked=false);
+  $('#check-all').checked=false;
+  updateBulkBar();
+});
+
+$('#btn-emit-sel').addEventListener('click',async ()=>{
+  const ids = getSelected();
+  if (ids.length===0) return;
+  if (!confirm(`¿Emitir ${ids.length} facturas? Esto envía a Datil/SRI.`)) return;
+  $('#btn-emit-sel').disabled=true;
+  $('#btn-emit-sel').innerHTML='<span class="spinner"></span> Emitiendo…';
+  const r = await fetch('/api/facturacion/emitir-batch',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ids})
+  });
+  const d = await r.json();
+  $('#btn-emit-sel').disabled=false;
+  $('#btn-emit-sel').innerHTML='⚡ Emitir seleccionadas';
+  if (d.ok===d.total) {
+    toast(`✓ ${d.ok} facturas emitidas correctamente`,'success', 5000);
+  } else {
+    toast(`⚠ ${d.ok}/${d.total} emitidas. ${d.fail} fallaron — revisá los borradores marcados como Fallo.`,'error', 7000);
+  }
+  loadBorradores();
+});
+
+$('#btn-delete-sel').addEventListener('click',async ()=>{
+  const ids = getSelected();
+  if (ids.length===0) return;
+  if (!confirm(`¿Eliminar ${ids.length} borradores?`)) return;
+  for (const id of ids) {
+    await fetch(`/api/facturacion/borrador/${id}`,{method:'DELETE'});
+  }
+  toast(`✓ ${ids.length} eliminados`,'success');
+  loadBorradores();
+});
+
+$('#filter-estado').addEventListener('change', loadBorradores);
+$('#btn-refresh').addEventListener('click', loadBorradores);
+
+// Modal
+function openModal(b=null) {
+  editingId = b?.id || null;
+  $('#modal-title').textContent = b ? `✎ Editar factura #${b.id}` : '+ Nueva factura';
+  $('#f-tipo').value = b?.cliente_tipo_id || 'cedula';
+  $('#f-iden').value = b?.cliente_identificacion || '';
+  $('#f-razon').value = b?.cliente_razon_social || '';
+  $('#f-email').value = b?.cliente_email || '';
+  $('#f-tel').value = b?.cliente_telefono || '';
+  $('#f-dir').value = b?.cliente_direccion || '';
+  // Items
+  const items = b?.items?.length ? b.items : [{descripcion:'', cantidad:1, precio_unitario:0, iva_pct:15}];
+  $('#items-area').innerHTML = '';
+  items.forEach(addItem);
+  recalcTot();
+  $('#modal').classList.add('show');
+}
+
+function closeModal() { $('#modal').classList.remove('show'); editingId=null; }
+$('#modal-close').addEventListener('click', closeModal);
+$('#modal-cancel').addEventListener('click', closeModal);
+$('#btn-new').addEventListener('click',()=>{
+  if (!empresaActiva) {toast('Seleccioná una empresa primero','error');return;}
+  openModal();
+});
+
+function addItem(it={descripcion:'',cantidad:1,precio_unitario:0,iva_pct:15}) {
+  const div = document.createElement('div');
+  div.className='item-row';
+  div.innerHTML = `
+    <input class="input it-desc" placeholder="Descripción" value="${esc(it.descripcion||'')}">
+    <input class="input it-cant" type="number" min="0.01" step="0.01" value="${it.cantidad||1}">
+    <input class="input it-pu" type="number" min="0" step="0.01" placeholder="Precio U." value="${it.precio_unitario||0}">
+    <select class="it-iva">
+      <option value="0" ${it.iva_pct==0?'selected':''}>0%</option>
+      <option value="15" ${(it.iva_pct==15||it.iva_pct==undefined)?'selected':''}>15%</option>
+      <option value="12" ${it.iva_pct==12?'selected':''}>12%</option>
+      <option value="14" ${it.iva_pct==14?'selected':''}>14%</option>
+    </select>
+    <button class="btn-x" onclick="this.closest('.item-row').remove();recalcTot()">✕</button>`;
+  div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',recalcTot));
+  $('#items-area').appendChild(div);
+}
+$('#btn-add-item').addEventListener('click',()=>{addItem();recalcTot();});
+
+function collectItems() {
+  return Array.from($$('.item-row')).map(row=>({
+    descripcion: row.querySelector('.it-desc').value.trim(),
+    cantidad: parseFloat(row.querySelector('.it-cant').value)||0,
+    precio_unitario: parseFloat(row.querySelector('.it-pu').value)||0,
+    iva_pct: parseFloat(row.querySelector('.it-iva').value)||0,
+  })).filter(it=>it.descripcion);
+}
+
+function recalcTot() {
+  let sub=0, iva=0;
+  collectItems().forEach(it=>{
+    const base = it.cantidad * it.precio_unitario;
+    sub += base;
+    iva += base * it.iva_pct/100;
+  });
+  $('#t-sub').textContent = fmt(sub);
+  $('#t-iva').textContent = fmt(iva);
+  $('#t-tot').textContent = fmt(sub+iva);
+}
+
+async function saveFactura(emitirDespues=false) {
+  if (!empresaActiva) return toast('Seleccioná empresa','error');
+  const items = collectItems();
+  if (items.length===0) return toast('Agregá al menos 1 item con descripción','error');
+  if (!$('#f-razon').value.trim()) return toast('Razón social requerida','error');
+  if ($('#f-tipo').value!=='consumidor_final' && !$('#f-iden').value.trim()) return toast('Identificación requerida','error');
+
+  const payload = {
+    empresa_id: empresaActiva,
+    cliente_tipo_id: $('#f-tipo').value,
+    cliente_identificacion: $('#f-iden').value.trim() || '9999999999999',
+    cliente_razon_social: $('#f-razon').value.trim(),
+    cliente_email: $('#f-email').value.trim() || null,
+    cliente_telefono: $('#f-tel').value.trim() || null,
+    cliente_direccion: $('#f-dir').value.trim() || null,
+    items,
+  };
+
+  const url = editingId ? `/api/facturacion/borrador/${editingId}` : '/api/facturacion/borrador';
+  const method = editingId ? 'PUT' : 'POST';
+  const r = await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({detail:'Error'}));
+    return toast('Error: ' + (e.detail||r.status),'error');
+  }
+  const d = await r.json();
+  const idFinal = editingId || d.id;
+  closeModal();
+  await loadBorradores();
+  toast(editingId?'✓ Actualizado':'✓ Guardado borrador #'+idFinal,'success');
+  if (emitirDespues) {
+    await emitirOne(idFinal);
+  }
+}
+$('#btn-save').addEventListener('click',()=>saveFactura(false));
+$('#btn-save-emit').addEventListener('click',()=>saveFactura(true));
+
+window.editar = async (id) => {
+  const b = borradores.find(x=>x.id===id);
+  if (b) openModal(b);
+};
+window.eliminar = async (id) => {
+  if (!confirm('¿Eliminar borrador #'+id+'?')) return;
+  await fetch(`/api/facturacion/borrador/${id}`,{method:'DELETE'});
+  toast('✓ Eliminado','success');
+  loadBorradores();
+};
+window.emitirOne = async (id) => {
+  if (!confirm('¿Emitir factura #'+id+' a Datil/SRI?')) return;
+  toast('Emitiendo…','info');
+  const r = await fetch(`/api/facturacion/borrador/${id}/emitir`,{method:'POST'});
+  if (r.ok) {
+    const d = await r.json();
+    toast(`✓ Emitida: ${d.numero}`,'success',5000);
+  } else {
+    const e = await r.json().catch(()=>({}));
+    toast('⚠ Falló: ' + (e.detail||'error'),'error',7000);
+  }
+  loadBorradores();
+};
+
+loadEmpresas();
+</script>
+</body>
+</html>

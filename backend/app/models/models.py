@@ -17,3 +17,12 @@ UsuarioEmpresa = CurrentUser  # placeholder, no se usa en IMPORFACTORY directame
 
 # Base SQLAlchemy re-exportado desde core/database para que `from models.models import Base` funcione
 __all__ = ["CurrentUser", "Usuario", "UsuarioEmpresa", "Base"]
+
+
+
+# Stub para que  (services/datil.py legacy) no rompa.
+# Las queries reales contra empresa_config usan raw SQL via services/datil_helper.py
+class EmpresaConfig:
+    empresa_id = None
+    clave = None
+    valor = None
