@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🧾 Facturación masiva · IMPORFACTORY Premium</title>
+<title>🧾 Facturación masiva · IMPORFACTORY</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300BFFF'/><text x='16' y='22' font-size='18' text-anchor='middle'>🧾</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -22,28 +22,41 @@
   a{color:var(--cyan);text-decoration:none}
 
   /* Header */
-  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:16px;flex-wrap:wrap}
-  .head h1{font-family:Montserrat;font-size:26px;font-weight:900;letter-spacing:-0.5px}
-  .head h1 span{background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .head .sub{font-size:13px;color:var(--text-mut);margin-top:4px}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+  .head-info h1{font-family:Montserrat;font-size:26px;font-weight:900;letter-spacing:-0.5px}
+  .head-info h1 span{background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .head-info .sub{font-size:13px;color:var(--text-mut);margin-top:4px}
 
-  /* Empresa selector */
-  .empresa-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:24px}
-  .empresa-card{padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);cursor:pointer;transition:all 160ms ease;position:relative;overflow:hidden}
-  .empresa-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
-  .empresa-card.active{border-color:var(--cyan);background:rgba(0,191,255,0.06);box-shadow:0 0 0 1px var(--cyan),0 12px 30px rgba(0,191,255,0.18)}
-  .empresa-card.disabled{opacity:0.5;cursor:not-allowed}
-  .empresa-name{font-family:Montserrat;font-size:14px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px}
-  .empresa-ruc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mut)}
-  .empresa-meta{display:flex;gap:8px;margin-top:10px;font-size:11px;flex-wrap:wrap}
-  .badge{padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
-  .badge.success{background:rgba(43,217,160,0.15);color:var(--success)}
-  .badge.warn{background:rgba(245,165,36,0.15);color:var(--warn)}
+  /* Empresa info card (1 sola, simple) */
+  .empresa-strip{display:flex;align-items:center;gap:24px;padding:18px 22px;background:linear-gradient(135deg,rgba(0,191,255,0.08),rgba(124,92,255,0.04));border:1px solid var(--cyan);border-radius:14px;margin-bottom:24px;flex-wrap:wrap}
+  .empresa-strip.disabled{background:rgba(255,77,79,0.06);border-color:var(--warn)}
+  .es-icon{width:54px;height:54px;border-radius:12px;background:rgba(0,191,255,0.18);display:grid;place-items:center;font-size:26px;flex-shrink:0}
+  .empresa-strip.disabled .es-icon{background:rgba(245,165,36,0.18)}
+  .es-text strong{font-family:Montserrat;font-size:18px;font-weight:900;letter-spacing:0.3px;display:block;margin-bottom:2px}
+  .es-text small{font-family:'JetBrains Mono';font-size:11px;color:var(--text-mut)}
+  .es-meta{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .badge{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+  .badge.success{background:rgba(43,217,160,0.18);color:var(--success)}
+  .badge.warn{background:rgba(245,165,36,0.18);color:var(--warn)}
   .badge.info{background:var(--cyan-dim);color:var(--cyan)}
-  .badge.danger{background:rgba(255,77,79,0.15);color:var(--danger)}
+  .badge.danger{background:rgba(255,77,79,0.18);color:var(--danger)}
 
-  /* Form */
+  /* Setup panel (cuando NO hay Datil config) */
+  .setup-panel{display:none;padding:32px;background:linear-gradient(180deg,rgba(245,165,36,0.05),transparent);border:1px solid var(--warn);border-radius:18px;margin-bottom:24px}
+  .setup-panel.show{display:block}
+  .setup-panel h2{font-family:Montserrat;font-size:20px;font-weight:900;margin-bottom:10px;color:var(--warn)}
+  .setup-panel p{color:var(--text-mut);margin-bottom:20px;max-width:700px;line-height:1.6}
+  .setup-panel code{background:var(--bg3);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono';font-size:12px;color:var(--cyan)}
+  .setup-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+  .setup-list li{list-style:none;padding:10px 14px;background:var(--bg3);border-radius:8px;font-family:'JetBrains Mono';font-size:12px;display:flex;align-items:center;gap:10px}
+  .setup-list li::before{content:"⚠";color:var(--warn);font-size:14px;flex-shrink:0}
+  pre.sql-block{background:var(--navy);padding:18px;border-radius:10px;font-family:'JetBrains Mono';font-size:11.5px;color:var(--text);overflow-x:auto;border:1px solid var(--border);line-height:1.6}
+  pre.sql-block .key{color:var(--cyan)}
+  pre.sql-block .val{color:var(--gold)}
+
+  /* Panel facturas */
   .panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
+  .panel.disabled{opacity:0.4;pointer-events:none}
   .panel-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap}
   .panel-h h2{font-family:Montserrat;font-size:18px;font-weight:800;letter-spacing:-0.2px}
 
@@ -117,9 +130,9 @@
 <div class="wrap">
 
 <div class="head">
-  <div>
-    <h1>🧾 <span>Facturación masiva</span></h1>
-    <div class="sub">Carga borradores y emite múltiples facturas Datil/SRI en un solo click</div>
+  <div class="head-info">
+    <h1>🧾 <span>Facturación IMPORFACTORY</span></h1>
+    <div class="sub">Emisión individual o masiva de facturas Datil/SRI — empresa_id=5</div>
   </div>
   <div style="display:flex;gap:8px">
     <button class="btn ghost" id="btn-refresh">↻ Refrescar</button>
@@ -127,8 +140,42 @@
   </div>
 </div>
 
-<!-- Empresa selector -->
-<div class="empresa-row" id="empresa-row"></div>
+<!-- Empresa info strip (siempre visible, indica estado config) -->
+<div class="empresa-strip" id="empresa-strip">
+  <div class="es-icon" id="es-icon">🧾</div>
+  <div class="es-text">
+    <strong id="es-nombre">IMPORFACTORY</strong>
+    <small><span id="es-ruc">—</span> · <span id="es-razon">—</span></small>
+  </div>
+  <div class="es-meta" id="es-meta">
+    <span class="badge info">Cargando…</span>
+  </div>
+</div>
+
+<!-- Setup panel (si falta config Datil) -->
+<div class="setup-panel" id="setup-panel">
+  <h2>⚠ Datil aún no está configurado para IMPORFACTORY</h2>
+  <p>Para poder emitir facturas necesito que cargues las credenciales Datil en <code>empresa_config</code> (BD del ERP). Estas son las claves que faltan:</p>
+  <ul class="setup-list" id="missing-list"></ul>
+  <p style="margin-top:18px;margin-bottom:12px;font-weight:600;color:var(--text)">Pegá este SQL en el server con los valores reales y listo:</p>
+  <pre class="sql-block"><span style="color:var(--text-mut)">-- Reemplazá los placeholders con valores reales de Datil de IMPORFACTORY</span>
+INSERT INTO empresa_config (empresa_id, clave, valor) VALUES
+(5, <span class="key">'DATIL_API_KEY'</span>,                       <span class="val">'&lt;api_key_de_datil&gt;'</span>),
+(5, <span class="key">'DATIL_CERT_PASSWORD'</span>,                 <span class="val">'Daniel1722'</span>),
+(5, <span class="key">'DATIL_RUC'</span>,                           <span class="val">'1722377726001'</span>),
+(5, <span class="key">'DATIL_RAZON_SOCIAL'</span>,                  <span class="val">'&lt;tu razón social&gt;'</span>),
+(5, <span class="key">'DATIL_NOMBRE_COMERCIAL'</span>,              <span class="val">'IMPORFACTORY'</span>),
+(5, <span class="key">'DATIL_DIRECCION_MATRIZ'</span>,              <span class="val">'&lt;dirección matriz&gt;'</span>),
+(5, <span class="key">'DATIL_ESTABLECIMIENTO_DEFAULT'</span>,       <span class="val">'001'</span>),
+(5, <span class="key">'DATIL_PUNTO_EMISION_PRODUCCION'</span>,      <span class="val">'002'</span>),
+(5, <span class="key">'DATIL_PUNTO_EMISION_PRUEBAS'</span>,         <span class="val">'001'</span>),
+(5, <span class="key">'DATIL_SECUENCIAL_NEXT_PRODUCCION'</span>,    <span class="val">'1'</span>),
+(5, <span class="key">'DATIL_SECUENCIAL_NEXT_PRUEBAS'</span>,       <span class="val">'1'</span>),
+(5, <span class="key">'DATIL_AMBIENTE'</span>,                      <span class="val">'1'</span>)<span style="color:var(--text-mut)">  -- 1=pruebas, 2=producción</span>,
+(5, <span class="key">'DATIL_OBLIGADO_CONTABILIDAD'</span>,         <span class="val">'NO'</span>),
+(5, <span class="key">'DATIL_HABILITADO'</span>,                    <span class="val">'true'</span>);</pre>
+  <p style="margin-top:14px;font-size:12px;color:var(--text-mut)">Apenas lo cargues, click <strong>↻ Refrescar</strong> arriba y este panel desaparece.</p>
+</div>
 
 <!-- Bulk action bar -->
 <div class="bulk-bar" id="bulk-bar">
@@ -141,7 +188,7 @@
 </div>
 
 <!-- Tabla borradores -->
-<div class="panel">
+<div class="panel" id="panel-rows">
   <div class="panel-h">
     <h2>📋 Borradores</h2>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -168,7 +215,7 @@
       </tr>
     </thead>
     <tbody id="rows">
-      <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Cargando...</td></tr>
+      <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Cargando…</td></tr>
     </tbody>
   </table>
 </div>
@@ -200,7 +247,7 @@
         <input class="input" id="f-razon" maxlength="220" placeholder="Nombre del cliente">
       </div>
       <div class="field">
-        <label>Email (Datil lo manda aquí)</label>
+        <label>Email (Datil envía la factura aquí)</label>
         <input class="input" id="f-email" type="email" placeholder="cliente@email.com">
       </div>
       <div class="field">
@@ -242,8 +289,7 @@ const $$ = (s) => document.querySelectorAll(s);
 const fmt = (n) => '$' + Number(n||0).toLocaleString('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc = (s) => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let empresaActiva = null;
-let empresas = [];
+let datilHabilitado = false;
 let borradores = [];
 let editingId = null;
 
@@ -255,49 +301,42 @@ function toast(msg, type='info', timeout=3500) {
   t._tid = setTimeout(()=>t.className='toast', timeout);
 }
 
-async function loadEmpresas() {
-  const r = await fetch('/api/facturacion/empresas');
+async function loadInfo() {
+  const r = await fetch('/api/facturacion/info');
   const d = await r.json();
-  empresas = d.items;
-  const cont = $('#empresa-row');
-  cont.innerHTML = empresas.map(e=>{
-    const isOk = e.habilitado;
-    const amb = e.ambiente===2?'PRODUCCIÓN':'PRUEBAS';
-    const ambClass = e.ambiente===2?'success':'warn';
-    return `<div class="empresa-card ${isOk?'':'disabled'}" data-id="${e.empresa_id}">
-      <div class="empresa-name">${esc(e.nombre)}</div>
-      <div class="empresa-ruc">${esc(e.ruc)}</div>
-      <div class="empresa-meta">
-        ${isOk ? `<span class="badge ${ambClass}">${amb}</span>` : `<span class="badge danger">SIN DATIL</span>`}
-        ${isOk ? `<span class="badge info">${esc(e.punto_emision)} · #${esc(e.siguiente_numero)}</span>` : ''}
-      </div>
-      ${!isOk?`<div style="font-size:10px;color:var(--text-mut);margin-top:8px">Falta: ${e.missing_keys.join(', ')}</div>`:''}
-    </div>`;
-  }).join('');
-  $$('#empresa-row .empresa-card').forEach(c=>{
-    c.addEventListener('click',()=>{
-      if(c.classList.contains('disabled')) {
-        toast('Esta empresa NO tiene Datil configurado. Cargá las credenciales en empresa_config.','error');
-        return;
-      }
-      $$('#empresa-row .empresa-card').forEach(x=>x.classList.remove('active'));
-      c.classList.add('active');
-      empresaActiva = parseInt(c.dataset.id);
-      loadBorradores();
-    });
-  });
-  // Auto-seleccionar primera habilitada
-  const first = empresas.find(e=>e.habilitado);
-  if (first) {
-    const card = document.querySelector(`#empresa-row .empresa-card[data-id="${first.empresa_id}"]`);
-    if (card) card.click();
+  datilHabilitado = d.habilitado;
+  const strip = $('#empresa-strip');
+  $('#es-nombre').textContent = d.nombre;
+  $('#es-ruc').textContent = d.ruc;
+  $('#es-razon').textContent = d.razon_social || (d.habilitado ? '—' : '(sin config)');
+
+  let metaHtml = '';
+  if (d.habilitado) {
+    strip.classList.remove('disabled');
+    $('#es-icon').textContent = '🟢';
+    const ambBadge = d.ambiente===2 ? 'success' : 'warn';
+    const ambText = d.ambiente===2 ? 'PRODUCCIÓN' : 'PRUEBAS';
+    metaHtml = `
+      <span class="badge ${ambBadge}">${ambText}</span>
+      <span class="badge info">Pto ${esc(d.punto_emision)} · próx #${esc(d.siguiente_numero)}</span>
+    `;
+    $('#setup-panel').classList.remove('show');
+    $('#panel-rows').classList.remove('disabled');
+  } else {
+    strip.classList.add('disabled');
+    $('#es-icon').textContent = '⚠';
+    metaHtml = `<span class="badge warn">SIN CONFIG DATIL</span>`;
+    $('#setup-panel').classList.add('show');
+    $('#panel-rows').classList.add('disabled');
+    const ul = $('#missing-list');
+    ul.innerHTML = (d.missing_keys||[]).map(k=>`<li>${esc(k)}</li>`).join('');
   }
+  $('#es-meta').innerHTML = metaHtml;
 }
 
 async function loadBorradores() {
-  if (!empresaActiva) return;
   const est = $('#filter-estado').value;
-  const params = new URLSearchParams({empresa_id: empresaActiva, limit:200});
+  const params = new URLSearchParams({limit:200});
   if (est) params.set('estado', est);
   const r = await fetch('/api/facturacion/borradores?' + params);
   const d = await r.json();
@@ -352,8 +391,7 @@ function getSelected() {
 
 function updateBulkBar() {
   const sel = getSelected();
-  const bar = $('#bulk-bar');
-  bar.classList.toggle('show', sel.length>0);
+  $('#bulk-bar').classList.toggle('show', sel.length>0);
   $('#bulk-count').textContent = sel.length;
 }
 
@@ -369,6 +407,7 @@ $('#btn-clear-sel').addEventListener('click',()=>{
 });
 
 $('#btn-emit-sel').addEventListener('click',async ()=>{
+  if (!datilHabilitado) return toast('Datil no configurado','error');
   const ids = getSelected();
   if (ids.length===0) return;
   if (!confirm(`¿Emitir ${ids.length} facturas? Esto envía a Datil/SRI.`)) return;
@@ -384,7 +423,7 @@ $('#btn-emit-sel').addEventListener('click',async ()=>{
   if (d.ok===d.total) {
     toast(`✓ ${d.ok} facturas emitidas correctamente`,'success', 5000);
   } else {
-    toast(`⚠ ${d.ok}/${d.total} emitidas. ${d.fail} fallaron — revisá los borradores marcados como Fallo.`,'error', 7000);
+    toast(`⚠ ${d.ok}/${d.total} emitidas. ${d.fail} fallaron — revisá las marcadas como Fallo.`,'error', 7000);
   }
   loadBorradores();
 });
@@ -401,10 +440,11 @@ $('#btn-delete-sel').addEventListener('click',async ()=>{
 });
 
 $('#filter-estado').addEventListener('change', loadBorradores);
-$('#btn-refresh').addEventListener('click', loadBorradores);
+$('#btn-refresh').addEventListener('click',()=>{loadInfo();loadBorradores();});
 
 // Modal
 function openModal(b=null) {
+  if (!datilHabilitado) return toast('Configurá Datil primero','error');
   editingId = b?.id || null;
   $('#modal-title').textContent = b ? `✎ Editar factura #${b.id}` : '+ Nueva factura';
   $('#f-tipo').value = b?.cliente_tipo_id || 'cedula';
@@ -413,7 +453,6 @@ function openModal(b=null) {
   $('#f-email').value = b?.cliente_email || '';
   $('#f-tel').value = b?.cliente_telefono || '';
   $('#f-dir').value = b?.cliente_direccion || '';
-  // Items
   const items = b?.items?.length ? b.items : [{descripcion:'', cantidad:1, precio_unitario:0, iva_pct:15}];
   $('#items-area').innerHTML = '';
   items.forEach(addItem);
@@ -424,10 +463,7 @@ function openModal(b=null) {
 function closeModal() { $('#modal').classList.remove('show'); editingId=null; }
 $('#modal-close').addEventListener('click', closeModal);
 $('#modal-cancel').addEventListener('click', closeModal);
-$('#btn-new').addEventListener('click',()=>{
-  if (!empresaActiva) {toast('Seleccioná una empresa primero','error');return;}
-  openModal();
-});
+$('#btn-new').addEventListener('click',()=>openModal());
 
 function addItem(it={descripcion:'',cantidad:1,precio_unitario:0,iva_pct:15}) {
   const div = document.createElement('div');
@@ -470,14 +506,12 @@ function recalcTot() {
 }
 
 async function saveFactura(emitirDespues=false) {
-  if (!empresaActiva) return toast('Seleccioná empresa','error');
   const items = collectItems();
   if (items.length===0) return toast('Agregá al menos 1 item con descripción','error');
   if (!$('#f-razon').value.trim()) return toast('Razón social requerida','error');
   if ($('#f-tipo').value!=='consumidor_final' && !$('#f-iden').value.trim()) return toast('Identificación requerida','error');
 
   const payload = {
-    empresa_id: empresaActiva,
     cliente_tipo_id: $('#f-tipo').value,
     cliente_identificacion: $('#f-iden').value.trim() || '9999999999999',
     cliente_razon_social: $('#f-razon').value.trim(),
@@ -517,6 +551,7 @@ window.eliminar = async (id) => {
   loadBorradores();
 };
 window.emitirOne = async (id) => {
+  if (!datilHabilitado) return toast('Datil no configurado','error');
   if (!confirm('¿Emitir factura #'+id+' a Datil/SRI?')) return;
   toast('Emitiendo…','info');
   const r = await fetch(`/api/facturacion/borrador/${id}/emitir`,{method:'POST'});
@@ -530,7 +565,8 @@ window.emitirOne = async (id) => {
   loadBorradores();
 };
 
-loadEmpresas();
+loadInfo();
+loadBorradores();
 </script>
 </body>
 </html>

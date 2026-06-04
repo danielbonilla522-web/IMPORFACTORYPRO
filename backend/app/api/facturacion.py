@@ -36,11 +36,9 @@ router = APIRouter(prefix="/api/facturacion", tags=["facturacion"])
 # Helpers
 # ──────────────────────────────────────────────
 
-EMPRESAS = {
-    4: {"nombre": "IMPORSHOP", "ruc_display": "1725399677001"},
-    5: {"nombre": "IMPORFACTORY", "ruc_display": "1722377726001"},
-    6: {"nombre": "IMPORCOMEX", "ruc_display": "0993456790001"},
-}
+# IMPORFACTORY exclusivamente — cada empresa tiene su propio sistema separado
+EMPRESA_ID = 5
+EMPRESA_INFO = {"nombre": "IMPORFACTORY", "ruc_display": "1722377726001"}
 
 
 def _calc_totales(items_json: list[dict], iva_default_pct: float = 15.0) -> tuple[float, float, float]:
@@ -71,7 +69,7 @@ class ItemPayload(BaseModel):
 
 
 class BorradorCreate(BaseModel):
-    empresa_id: int = Field(..., ge=4, le=6)
+    empresa_id: int = Field(default=5, description="Fijo IMPORFACTORY=5")
     cliente_tipo_id: str = Field(default="cedula")
     cliente_identificacion: str = Field(..., min_length=1, max_length=20)
     cliente_razon_social: str = Field(..., min_length=2, max_length=220)
@@ -107,30 +105,26 @@ class EmitirBatchPayload(BaseModel):
 # Endpoints
 # ──────────────────────────────────────────────
 
-@router.get("/empresas")
-async def listar_empresas(
-    db_erp: AsyncSession = Depends(get_db_erp),
-):
-    """Lista empresas con su estado de configuración Datil."""
-    out = []
-    for eid, info in EMPRESAS.items():
-        cfg = await dh.get_all_datil_config(db_erp, eid)
-        habilitado = bool(cfg.get("DATIL_API_KEY"))
-        out.append({
-            "empresa_id": eid,
-            "nombre": info["nombre"],
-            "ruc": cfg.get("DATIL_RUC", info["ruc_display"]),
-            "razon_social": cfg.get("DATIL_RAZON_SOCIAL", ""),
-            "ambiente": int(cfg.get("DATIL_AMBIENTE", "1")),
-            "punto_emision": cfg.get("DATIL_PUNTO_EMISION_PRODUCCION") if cfg.get("DATIL_AMBIENTE") == "2" else cfg.get("DATIL_PUNTO_EMISION_PRUEBAS", "001"),
-            "siguiente_numero": cfg.get("DATIL_SECUENCIAL_NEXT_PRODUCCION" if cfg.get("DATIL_AMBIENTE") == "2" else "DATIL_SECUENCIAL_NEXT_PRUEBAS", "1"),
-            "habilitado": habilitado,
-            "missing_keys": [] if habilitado else [
-                k for k in ["DATIL_API_KEY", "DATIL_CERT_PASSWORD", "DATIL_RUC", "DATIL_RAZON_SOCIAL",
-                            "DATIL_ESTABLECIMIENTO_DEFAULT"] if not cfg.get(k)
-            ],
-        })
-    return {"items": out}
+@router.get("/info")
+async def get_info(db_erp: AsyncSession = Depends(get_db_erp)):
+    """Estado config Datil de IMPORFACTORY (eid=5)."""
+    cfg = await dh.get_all_datil_config(db_erp, EMPRESA_ID)
+    habilitado = bool(cfg.get("DATIL_API_KEY"))
+    ambiente = int(cfg.get("DATIL_AMBIENTE", "1"))
+    return {
+        "empresa_id": EMPRESA_ID,
+        "nombre": EMPRESA_INFO["nombre"],
+        "ruc": cfg.get("DATIL_RUC", EMPRESA_INFO["ruc_display"]),
+        "razon_social": cfg.get("DATIL_RAZON_SOCIAL", ""),
+        "ambiente": ambiente,
+        "punto_emision": cfg.get("DATIL_PUNTO_EMISION_PRODUCCION") if ambiente == 2 else cfg.get("DATIL_PUNTO_EMISION_PRUEBAS", "001"),
+        "siguiente_numero": cfg.get("DATIL_SECUENCIAL_NEXT_PRODUCCION" if ambiente == 2 else "DATIL_SECUENCIAL_NEXT_PRUEBAS", "1"),
+        "habilitado": habilitado,
+        "missing_keys": [] if habilitado else [
+            k for k in ["DATIL_API_KEY", "DATIL_CERT_PASSWORD", "DATIL_RUC", "DATIL_RAZON_SOCIAL",
+                        "DATIL_ESTABLECIMIENTO_DEFAULT"] if not cfg.get(k)
+        ],
+    }
 
 
 @router.post("/borrador")
@@ -139,8 +133,7 @@ async def crear_borrador(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    if payload.empresa_id not in EMPRESAS:
-        raise HTTPException(400, "empresa_id invalido (4=IMPORSHOP, 5=IMPORFACTORY, 6=IMPORCOMEX)")
+    payload.empresa_id = EMPRESA_ID  # forzar IMPORFACTORY
 
     items_dicts = [it.model_dump() for it in payload.items]
     subtotal, iva, total = _calc_totales(items_dicts)
@@ -170,16 +163,12 @@ async def crear_borrador(
 
 @router.get("/borradores")
 async def listar_borradores(
-    empresa_id: Optional[int] = None,
     estado: Optional[str] = None,
     limit: int = 200,
     db: AsyncSession = Depends(get_db),
 ):
-    where = ["1=1"]
-    params = {"limit": limit}
-    if empresa_id:
-        where.append("empresa_id = :eid")
-        params["eid"] = empresa_id
+    where = ["empresa_id = :eid"]
+    params = {"limit": limit, "eid": EMPRESA_ID}
     if estado:
         where.append("estado = :est")
         params["est"] = estado
