@@ -1,0 +1,83 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Agendamiento{% endblock %}
+{% block topbar_title %}Academia › Agendamiento{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Agendamiento</h1>
+        <p class="imf-page-subtitle">Citas y sesiones 1:1 agendadas · estado · enlaces Zoom</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <select id="f-estado" style="padding:8px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+            <option value="">Todos los estados</option>
+            <option value="AGENDADA">Agendadas</option>
+            <option value="CONFIRMADA">Confirmadas</option>
+            <option value="COMPLETADA">Completadas</option>
+            <option value="CANCELADA">Canceladas</option>
+        </select>
+        <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom:24px" id="stats-cards"></div>
+
+<div class="imf-card">
+    <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px">Citas</h2>
+    <div style="overflow-x:auto">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Persona</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Contacto</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Fecha / hora</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Estado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Zoom</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr><td colspan="5" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<script>
+const EST_BADGE = { AGENDADA:'imf-badge imf-badge--info', CONFIRMADA:'imf-badge imf-badge--warn', COMPLETADA:'imf-badge imf-badge--success', CANCELADA:'imf-badge imf-badge--danger' };
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fdt(s){if(!s)return '—';const t=String(s).replace('T',' ');return t.substring(0,16);}
+
+async function cargar() {
+    const est = document.getElementById('f-estado').value;
+    const params = new URLSearchParams({limit:200});
+    if (est) params.set('estado', est);
+    const r = await fetch('/api/imporfactory/admin/5/agendamientos?'+params, {credentials:'include'});
+    const tbody = document.getElementById('tbody');
+    if (!r.ok) { tbody.innerHTML = `<tr><td colspan="5" style="padding:48px;text-align:center;color:var(--imf-danger)">Error ${r.status}</td></tr>`; return; }
+    const d = await r.json();
+    // stats
+    const statMap = {}; (d.stats||[]).forEach(s=>statMap[s.estado]=s.n);
+    const totalCitas = (d.stats||[]).reduce((a,s)=>a+Number(s.n),0);
+    document.getElementById('stats-cards').innerHTML = [
+        {l:'Total citas', v:totalCitas},
+        {l:'Agendadas', v:statMap['AGENDADA']||0},
+        {l:'Completadas', v:statMap['COMPLETADA']||0},
+        {l:'Canceladas', v:statMap['CANCELADA']||0},
+    ].map(c=>`<div class="imf-kpi"><div class="imf-kpi__label">${c.l}</div><div class="imf-kpi__value">${c.v}</div></div>`).join('');
+    const items = d.items || [];
+    if (items.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="padding:48px;text-align:center;color:var(--imf-text-muted)">${d.warning?'⚠️ '+escapeHtml(d.warning):'Sin citas'}</td></tr>`; return; }
+    tbody.innerHTML = items.map(a => `
+        <tr style="border-bottom:1px solid var(--imf-divider)">
+            <td style="padding:10px 12px;font-weight:600">${escapeHtml(a.nombre||'—')}</td>
+            <td style="padding:10px 12px"><div style="font-size:12px">${escapeHtml(a.email||'')}</div><div style="font-size:12px;color:var(--imf-text-muted);font-family:var(--ff-mono)">${escapeHtml(a.telefono||'')}</div></td>
+            <td style="padding:10px 12px;font-family:var(--ff-mono);font-size:12px">${fdt(a.fecha_hora_inicio)}</td>
+            <td style="padding:10px 12px"><span class="${EST_BADGE[a.estado]||'imf-badge'}">${escapeHtml(a.estado||'—')}</span></td>
+            <td style="padding:10px 12px;text-align:right">${a.zoom_join_url?`<a href="${escapeHtml(a.zoom_join_url)}" target="_blank" class="imf-btn imf-btn--ghost">📹 Abrir</a>`:'<span style="color:var(--imf-text-muted)">—</span>'}</td>
+        </tr>`).join('');
+}
+document.getElementById('f-estado').addEventListener('change', cargar);
+document.getElementById('btn-refresh').addEventListener('click', cargar);
+cargar();
+</script>
+{% endblock %}

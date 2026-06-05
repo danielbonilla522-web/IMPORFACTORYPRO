@@ -1,0 +1,62 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Configuración{% endblock %}
+{% block topbar_title %}Sistema › Configuración{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Configuración</h1>
+        <p class="imf-page-subtitle">Estado de integraciones y servicios conectados</p>
+    </div>
+    <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+</div>
+
+<div class="imf-card" style="margin-bottom:24px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+            <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 4px">Salud de integraciones</h2>
+            <p style="font-size:13px;color:var(--imf-text-secondary);margin:0" id="health-summary">Cargando...</p>
+        </div>
+        <div id="health-ring" style="font-size:42px;font-weight:800;font-family:var(--ff-mono);color:var(--imf-cyan)">—</div>
+    </div>
+</div>
+
+<div class="imf-grid-2" id="integraciones-grid">
+    <div class="imf-card" style="grid-column:1/-1;text-align:center;padding:48px;color:var(--imf-text-muted)">Cargando...</div>
+</div>
+
+<div class="imf-card" style="margin-top:24px">
+    <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 12px">Información del sistema</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:13px">
+        <div><div style="color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px">Dominio</div><div style="font-family:var(--ff-mono);margin-top:4px">impor.imporchina.com</div></div>
+        <div><div style="color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px">Empresa</div><div style="margin-top:4px">IMPORFACTORY (id=5)</div></div>
+        <div><div style="color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px">BD propia</div><div style="font-family:var(--ff-mono);margin-top:4px" id="info-db">imporfactory_premium</div></div>
+        <div><div style="color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px">Estado servicio</div><div style="margin-top:4px" id="info-svc"><span class="imf-badge imf-badge--success">Operativo</span></div></div>
+    </div>
+</div>
+
+<script>
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function cargar() {
+    const r = await fetch('/api/imporfactory/admin/5/config-status', {credentials:'include'});
+    const grid = document.getElementById('integraciones-grid');
+    if (!r.ok) { grid.innerHTML = `<div class="imf-card" style="grid-column:1/-1;text-align:center;padding:48px;color:var(--imf-danger)">Error ${r.status}</div>`; return; }
+    const d = await r.json();
+    document.getElementById('health-ring').textContent = `${d.total_ok}/${d.total}`;
+    document.getElementById('health-summary').textContent = `${d.total_ok} de ${d.total} integraciones configuradas y listas.`;
+    grid.innerHTML = (d.integraciones||[]).map(i => `
+        <div class="imf-card" style="display:flex;align-items:center;gap:16px;${i.ok?'':'opacity:0.85'}">
+            <div style="width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:${i.ok?'var(--imf-cyan-dim)':'rgba(255,255,255,0.04)'};flex-shrink:0">${i.icon}</div>
+            <div style="flex:1;min-width:0">
+                <div style="font-weight:700;font-size:15px">${escapeHtml(i.nombre)}</div>
+                <div style="font-size:12px;color:var(--imf-text-muted)">${escapeHtml(i.desc)}</div>
+            </div>
+            ${i.ok?'<span class="imf-badge imf-badge--success">✓ Conectado</span>':'<span class="imf-badge imf-badge--danger">Sin configurar</span>'}
+        </div>`).join('');
+}
+document.getElementById('btn-refresh').addEventListener('click', cargar);
+cargar();
+</script>
+{% endblock %}

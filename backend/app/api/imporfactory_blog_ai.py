@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_db, get_db_erp
 from core.security import get_current_user
 from models.models import Usuario
 
@@ -260,19 +260,26 @@ async def historial_ai(
 @router.get("/{empresa_id}/ai/health")
 async def ai_health(
     empresa_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
-    """Verifica si las API keys están configuradas."""
+    """Verifica si las API keys están configuradas (env O empresa_config ERP)."""
     _ensure_empresa_5(empresa_id)
-    keys = (await db.execute(text("""
-        SELECT clave, LENGTH(valor) AS lvalor FROM empresa_config
-        WHERE empresa_id = 5 AND clave IN ('ANTHROPIC_API_KEY', 'OPENAI_API_KEY')
-    """))).mappings().all()
-    available = {k["clave"]: bool(k["lvalor"] and k["lvalor"] > 10) for k in keys}
+    import os
+    # Prioridad 1: variables de entorno (.env del proceso)
+    anthropic_ok = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    openai_ok = bool(os.environ.get("OPENAI_API_KEY"))
+    # Prioridad 2: empresa_config (BD ERP grupo_impor)
+    if not (anthropic_ok and openai_ok):
+        keys = (await db.execute(text("""
+            SELECT clave, LENGTH(valor) AS lvalor FROM empresa_config
+            WHERE empresa_id = 5 AND clave IN ('ANTHROPIC_API_KEY', 'OPENAI_API_KEY')
+        """))).mappings().all()
+        available = {k["clave"]: bool(k["lvalor"] and k["lvalor"] > 10) for k in keys}
+        anthropic_ok = anthropic_ok or available.get("ANTHROPIC_API_KEY", False)
+        openai_ok = openai_ok or available.get("OPENAI_API_KEY", False)
     return {
-        "anthropic_configured": available.get("ANTHROPIC_API_KEY", False),
-        "openai_configured": available.get("OPENAI_API_KEY", False),
-        "ready_for_ai": all([available.get("ANTHROPIC_API_KEY", False),
-                              available.get("OPENAI_API_KEY", False)]),
+        "anthropic_configured": anthropic_ok,
+        "openai_configured": openai_ok,
+        "ready_for_ai": anthropic_ok and openai_ok,
     }

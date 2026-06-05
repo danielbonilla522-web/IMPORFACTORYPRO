@@ -1,0 +1,110 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Alumnos{% endblock %}
+{% block topbar_title %}Academia › Alumnos{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Alumnos</h1>
+        <p class="imf-page-subtitle">Base de alumnos IMPORFACTORY · membresías activas · pagos</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom:24px" id="stats-cards"></div>
+
+<div class="imf-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Listado</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--imf-text-secondary);cursor:pointer">
+                <input type="checkbox" id="f-activos"> Solo activos
+            </label>
+            <input type="search" id="f-q" placeholder="Buscar nombre, email, WhatsApp..." style="padding:8px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px;min-width:240px">
+        </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Alumno</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Contacto</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Ubicación</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Membresías</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Pagado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Estado</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+        <span id="pag-info" style="font-size:12px;color:var(--imf-text-muted)"></span>
+        <div style="display:flex;gap:8px">
+            <button class="imf-btn imf-btn--ghost" id="btn-prev">← Anterior</button>
+            <button class="imf-btn imf-btn--ghost" id="btn-next">Siguiente →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let offset = 0;
+const LIMIT = 50;
+let lastTotal = 0;
+
+const MEM_BADGE = { importacion:'imf-badge imf-badge--info', ecommerce:'imf-badge imf-badge--success', infoaduana:'imf-badge imf-badge--warn', kit:'imf-badge' };
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function money(v){return v!=null?'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';}
+function fdate(s){return s?String(s).substring(0,10):'—';}
+
+async function cargar() {
+    const q = document.getElementById('f-q').value.trim();
+    const activos = document.getElementById('f-activos').checked;
+    const params = new URLSearchParams({limit:LIMIT, offset});
+    if (q) params.set('q', q);
+    if (activos) params.set('solo_activos', 'true');
+    const r = await fetch('/api/imporfactory/admin/5/alumnos?'+params, {credentials:'include'});
+    if (!r.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--imf-danger)">Error ${r.status}</td></tr>`; return; }
+    const d = await r.json();
+    lastTotal = d.total;
+    // stats
+    document.getElementById('stats-cards').innerHTML = [
+        {l:'Total alumnos', v:d.total},
+        {l:'Activos', v:d.activos},
+        {l:'En esta vista', v:(d.items||[]).length},
+        {l:'Inactivos', v:Math.max(d.total-d.activos,0)},
+    ].map(c=>`<div class="imf-kpi"><div class="imf-kpi__label">${c.l}</div><div class="imf-kpi__value">${c.v}</div></div>`).join('');
+    // tabla
+    const items = d.items || [];
+    if (items.length === 0) { document.getElementById('tbody').innerHTML = '<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Sin resultados</td></tr>'; }
+    else document.getElementById('tbody').innerHTML = items.map(a => `
+        <tr style="border-bottom:1px solid var(--imf-divider)">
+            <td style="padding:10px 12px"><div style="font-weight:600">${escapeHtml(a.nombre||'—')}</div><div style="font-size:11px;color:var(--imf-text-muted)">#${a.id} · ${fdate(a.fecha_registro)}</div></td>
+            <td style="padding:10px 12px"><div style="font-size:12px">${escapeHtml(a.email||'—')}</div><div style="font-size:12px;color:var(--imf-text-muted);font-family:var(--ff-mono)">${escapeHtml(a.whatsapp||'')}</div></td>
+            <td style="padding:10px 12px;font-size:12px;color:var(--imf-text-secondary)">${escapeHtml([a.ciudad,a.pais].filter(Boolean).join(', ')||'—')}</td>
+            <td style="padding:10px 12px">${(a.membresias||[]).filter(Boolean).map(m=>`<span class="${MEM_BADGE[m]||'imf-badge'}" style="margin-right:4px">${escapeHtml(m)}</span>`).join('')||'<span style="color:var(--imf-text-muted);font-size:12px">—</span>'}</td>
+            <td style="padding:10px 12px;text-align:right;font-family:var(--ff-mono);font-weight:600">${money(a.monto_pagado_total)}</td>
+            <td style="padding:10px 12px">${a.activo?'<span class="imf-badge imf-badge--success">Activo</span>':'<span class="imf-badge">Inactivo</span>'}</td>
+        </tr>`).join('');
+    // paginación
+    document.getElementById('pag-info').textContent = `${offset+1}–${offset+items.length} de ${d.total}`;
+    document.getElementById('btn-prev').disabled = offset === 0;
+    document.getElementById('btn-next').disabled = offset + items.length >= d.total;
+}
+
+let qTimer;
+document.getElementById('f-q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(()=>{offset=0;cargar();}, 350); });
+document.getElementById('f-activos').addEventListener('change', () => { offset=0; cargar(); });
+document.getElementById('btn-refresh').addEventListener('click', cargar);
+document.getElementById('btn-prev').addEventListener('click', () => { offset=Math.max(0,offset-LIMIT); cargar(); });
+document.getElementById('btn-next').addEventListener('click', () => { offset+=LIMIT; cargar(); });
+
+cargar();
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Solicitudes de formularios{% endblock %}
+{% block topbar_title %}Alumnos › Gestor de formularios{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Solicitudes de formularios</h1>
+        <p class="imf-page-subtitle">Solicitudes de factura enviadas por alumnos · revisar y emitir</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <a href="/formularios" target="_blank" class="imf-btn imf-btn--ghost">↗ Ver formularios públicos</a>
+        <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+    </div>
+</div>
+
+<div class="imf-grid-4" style="margin-bottom:24px" id="stats-cards"></div>
+
+<div class="imf-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Solicitudes de factura</h2>
+        <select id="f-estado" style="padding:8px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:13px">
+            <option value="">Todas</option>
+            <option value="borrador">Pendientes (borrador)</option>
+            <option value="emitida">Emitidas</option>
+            <option value="error">Con error</option>
+        </select>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Cliente</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Identificación</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Concepto</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Total</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Origen</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Estado</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Fecha</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr><td colspan="7" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<script>
+const EST_BADGE = { borrador:'imf-badge imf-badge--warn', emitida:'imf-badge imf-badge--success', error:'imf-badge imf-badge--danger' };
+const FUENTE_LABEL = { form_alumno:'🧾 Form alumno', form:'📝 Manual', csv_bulk:'📑 CSV', api:'🔌 API' };
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function money(v){return v!=null?'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';}
+function fdate(s){return s?String(s).substring(0,16).replace('T',' '):'—';}
+function concepto(items){ if(!items||!items.length)return '—'; return items.map(i=>i.descripcion||i.desc||'').filter(Boolean).join(', ').substring(0,60); }
+
+async function cargar() {
+    const est = document.getElementById('f-estado').value;
+    const params = new URLSearchParams({limit:200});
+    if (est) params.set('estado', est);
+    const r = await fetch('/api/facturacion/borradores?'+params, {credentials:'include'});
+    const tbody = document.getElementById('tbody');
+    if (!r.ok) { tbody.innerHTML = `<tr><td colspan="7" style="padding:48px;text-align:center;color:var(--imf-danger)">Error ${r.status}</td></tr>`; return; }
+    const d = await r.json();
+    const items = d.items || [];
+    // stats (sobre el set traido)
+    const cnt = {borrador:0, emitida:0, error:0};
+    let totalUSD = 0;
+    items.forEach(i=>{ cnt[i.estado]=(cnt[i.estado]||0)+1; if(i.estado==='borrador') totalUSD+=Number(i.total||0); });
+    document.getElementById('stats-cards').innerHTML = [
+        {l:'Total solicitudes', v:items.length},
+        {l:'Pendientes', v:cnt.borrador||0},
+        {l:'Emitidas', v:cnt.emitida||0},
+        {l:'$ por facturar', v:money(totalUSD)},
+    ].map(c=>`<div class="imf-kpi"><div class="imf-kpi__label">${c.l}</div><div class="imf-kpi__value">${c.v}</div></div>`).join('');
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="padding:48px;text-align:center;color:var(--imf-text-muted)">Sin solicitudes todavía</td></tr>'; return; }
+    tbody.innerHTML = items.map(it => `
+        <tr style="border-bottom:1px solid var(--imf-divider)">
+            <td style="padding:10px 12px"><div style="font-weight:600">${escapeHtml(it.cliente_razon_social||'—')}</div><div style="font-size:11px;color:var(--imf-text-muted)">${escapeHtml(it.cliente_email||'')}</div></td>
+            <td style="padding:10px 12px;font-family:var(--ff-mono);font-size:12px">${escapeHtml(it.cliente_identificacion||'—')}</td>
+            <td style="padding:10px 12px;font-size:12px;color:var(--imf-text-secondary)">${escapeHtml(concepto(it.items))}</td>
+            <td style="padding:10px 12px;text-align:right;font-family:var(--ff-mono);font-weight:600">${money(it.total)}</td>
+            <td style="padding:10px 12px;font-size:11px">${escapeHtml(FUENTE_LABEL[it.fuente]||it.fuente||'—')}</td>
+            <td style="padding:10px 12px"><span class="${EST_BADGE[it.estado]||'imf-badge'}">${escapeHtml(it.estado||'—')}</span></td>
+            <td style="padding:10px 12px;font-family:var(--ff-mono);font-size:11px;color:var(--imf-text-muted)">${fdate(it.created_at)}</td>
+        </tr>`).join('');
+}
+document.getElementById('f-estado').addEventListener('change', cargar);
+document.getElementById('btn-refresh').addEventListener('click', cargar);
+cargar();
+</script>
+{% endblock %}

@@ -104,8 +104,11 @@ async def schedule_reminders_for_clase(db: AsyncSession, clase_id: int) -> int:
     return inserted
 
 
-async def inscribir_masivo(db: AsyncSession, clase_id: int, filtro_membresia: list[str]) -> int:
+async def inscribir_masivo(db: AsyncSession, db_erp: AsyncSession, clase_id: int, filtro_membresia: list[str]) -> int:
     """Inscribe todos los alumnos con alguna membresía activa de los tipos dados.
+
+    DBs separadas: alumno_membresias vive en el ERP (db_erp), clase_inscripciones
+    en la BD propia (db). Por eso se hace en dos pasos (no INSERT...SELECT cross-DB).
 
     Returns: número de inscripciones nuevas.
     """
@@ -114,45 +117,68 @@ async def inscribir_masivo(db: AsyncSession, clase_id: int, filtro_membresia: li
 
     placeholders = ",".join([f":t{i}" for i in range(len(filtro_membresia))])
     params = {f"t{i}": tipo for i, tipo in enumerate(filtro_membresia)}
-    params["cid"] = clase_id
 
-    # Insertar inscripciones (ignora duplicados por UNIQUE)
-    res = await db.execute(text(f"""
-        INSERT IGNORE INTO clase_inscripciones (clase_id, alumno_id, inscripcion_modo)
-        SELECT :cid, DISTINCT am.alumno_id, 'masiva'
+    # 1) Alumnos elegibles desde el ERP (grupo_impor)
+    alumno_rows = (await db_erp.execute(text(f"""
+        SELECT DISTINCT am.alumno_id
         FROM alumno_membresias am
         WHERE am.activa = 1 AND am.tipo IN ({placeholders})
-    """), params)
-    await db.commit()
-    inserted = res.rowcount
+    """), params)).mappings().all()
 
-    # Re-programar recordatorios
+    # 2) Insertar inscripciones en la BD propia (ignora duplicados por UNIQUE)
+    inserted = 0
+    for r in alumno_rows:
+        res = await db.execute(text("""
+            INSERT IGNORE INTO clase_inscripciones (clase_id, alumno_id, inscripcion_modo)
+            VALUES (:cid, :aid, 'masiva')
+        """), {"cid": clase_id, "aid": r["alumno_id"]})
+        inserted += res.rowcount
+    await db.commit()
+
+    # 3) Re-programar recordatorios (todo BD propia)
     await schedule_reminders_for_clase(db, clase_id)
     return inserted
 
 
-async def enqueue_pending_reminders(db: AsyncSession, lookahead_min: int = 1) -> int:
+async def enqueue_pending_reminders(db: AsyncSession, db_erp: AsyncSession, lookahead_min: int = 1) -> int:
     """Drena clase_recordatorios.estado=pendiente AND programado_para<=NOW()+lookahead.
+
+    DBs separadas: clase_recordatorios/clases_vivas en BD propia (db); alumnos y
+    whatsapp_queue en el ERP (db_erp). Se resuelve en pasos sin JOIN cross-DB.
 
     Inserta en whatsapp_queue con trigger_origen='clase_recordatorio'.
     Returns: número de mensajes encolados.
     """
+    # 1) Recordatorios pendientes + datos de clase (BD propia, sin JOIN alumnos)
     rows = (await db.execute(text("""
         SELECT cr.id AS recordatorio_id, cr.clase_id, cr.alumno_id, cr.tipo, cr.programado_para,
-               cv.titulo, cv.instructor, cv.fecha_inicio, cv.zoom_join_url, cv.grabacion_url,
-               a.nombre, a.whatsapp, a.email
+               cv.titulo, cv.instructor, cv.fecha_inicio, cv.zoom_join_url, cv.grabacion_url
         FROM clase_recordatorios cr
         JOIN clases_vivas cv ON cv.id = cr.clase_id
-        JOIN alumnos a ON a.id = cr.alumno_id
         WHERE cr.estado = 'pendiente'
           AND cr.programado_para <= DATE_ADD(NOW(), INTERVAL :look MINUTE)
           AND cv.estado IN ('programada','en_vivo','finalizada')
         LIMIT 500
     """), {"look": lookahead_min})).mappings().all()
 
+    if not rows:
+        return 0
+
+    # 2) Datos de alumnos desde el ERP (batch)
+    alumno_ids = list({r["alumno_id"] for r in rows})
+    alumnos_map = {}
+    if alumno_ids:
+        ph = ",".join(f":a{i}" for i in range(len(alumno_ids)))
+        ap = {f"a{i}": aid for i, aid in enumerate(alumno_ids)}
+        arows = (await db_erp.execute(text(f"""
+            SELECT id, nombre, whatsapp, email FROM alumnos WHERE id IN ({ph})
+        """), ap)).mappings().all()
+        alumnos_map = {a["id"]: a for a in arows}
+
     encolados = 0
     for r in rows:
-        telefono_norm = normalize_phone(r["whatsapp"])
+        alumno = alumnos_map.get(r["alumno_id"]) or {}
+        telefono_norm = normalize_phone(alumno.get("whatsapp"))
         template = TEMPLATES_RECORDATORIO.get(r["tipo"], "")
         if not telefono_norm or not template:
             await db.execute(text("""
@@ -162,7 +188,7 @@ async def enqueue_pending_reminders(db: AsyncSession, lookahead_min: int = 1) ->
             continue
 
         mensaje = template.format(
-            nombre=(r["nombre"] or "alumno").split(" ")[0],
+            nombre=(alumno.get("nombre") or "alumno").split(" ")[0],
             clase=r["titulo"],
             instructor=r["instructor"] or "Daniel",
             zoom_url=r["zoom_join_url"] or "(link pendiente)",
@@ -172,7 +198,7 @@ async def enqueue_pending_reminders(db: AsyncSession, lookahead_min: int = 1) ->
 
         jid = telefono_norm + "@s.whatsapp.net"
         try:
-            insert_res = await db.execute(text("""
+            insert_res = await db_erp.execute(text("""
                 INSERT INTO whatsapp_queue
                     (empresa_id, alumno_id, telefono, jid, mensaje, wacli_store,
                      scheduled_at, trigger_origen, contexto_json)
@@ -183,6 +209,7 @@ async def enqueue_pending_reminders(db: AsyncSession, lookahead_min: int = 1) ->
                 "aid": r["alumno_id"], "tel": telefono_norm, "jid": jid, "msg": mensaje,
                 "ctx": json.dumps({"clase_id": r["clase_id"], "tipo": r["tipo"], "recordatorio_id": r["recordatorio_id"]}),
             })
+            await db_erp.commit()
             queue_id = insert_res.lastrowid
 
             await db.execute(text("""
@@ -200,7 +227,7 @@ async def enqueue_pending_reminders(db: AsyncSession, lookahead_min: int = 1) ->
     return encolados
 
 
-async def crear_clase(db: AsyncSession, payload: dict, created_by: int = 1) -> int:
+async def crear_clase(db: AsyncSession, db_erp: AsyncSession, payload: dict, created_by: int = 1) -> int:
     """Crea una clase nueva y retorna su id."""
     res = await db.execute(text("""
         INSERT INTO clases_vivas
@@ -231,7 +258,7 @@ async def crear_clase(db: AsyncSession, payload: dict, created_by: int = 1) -> i
 
     # Si vienen membresías de audiencia, inscribir masivo inmediatamente
     if payload.get("dirigida_a"):
-        await inscribir_masivo(db, clase_id, payload["dirigida_a"])
+        await inscribir_masivo(db, db_erp, clase_id, payload["dirigida_a"])
 
     return clase_id
 
@@ -257,23 +284,45 @@ async def listar_clases(db: AsyncSession, estado: Optional[str] = None, limit: i
     return [dict(r) for r in rows]
 
 
-async def get_clase_detalle(db: AsyncSession, clase_id: int) -> Optional[dict]:
-    """Detalle completo de una clase: datos + inscritos + recordatorios."""
+async def get_clase_detalle(db: AsyncSession, db_erp: AsyncSession, clase_id: int) -> Optional[dict]:
+    """Detalle completo de una clase: datos + inscritos + recordatorios.
+
+    DBs separadas: clase_inscripciones en BD propia, datos de alumnos en el ERP.
+    """
     clase = (await db.execute(text("""
         SELECT * FROM clases_vivas WHERE id = :id
     """), {"id": clase_id})).mappings().first()
     if not clase:
         return None
 
-    inscritos = (await db.execute(text("""
+    inscritos_raw = (await db.execute(text("""
         SELECT ci.alumno_id, ci.fecha_inscripcion, ci.asistio, ci.minutos_asistidos,
-               ci.inscripcion_modo, a.nombre, a.email, a.whatsapp
+               ci.inscripcion_modo
         FROM clase_inscripciones ci
-        JOIN alumnos a ON a.id = ci.alumno_id
         WHERE ci.clase_id = :id
         ORDER BY ci.fecha_inscripcion DESC
         LIMIT 500
     """), {"id": clase_id})).mappings().all()
+
+    # Enriquecer con datos de alumnos desde el ERP (batch)
+    alumno_ids = list({r["alumno_id"] for r in inscritos_raw})
+    alumnos_map = {}
+    if alumno_ids:
+        ph = ",".join(f":a{i}" for i in range(len(alumno_ids)))
+        ap = {f"a{i}": aid for i, aid in enumerate(alumno_ids)}
+        arows = (await db_erp.execute(text(f"""
+            SELECT id, nombre, email, whatsapp FROM alumnos WHERE id IN ({ph})
+        """), ap)).mappings().all()
+        alumnos_map = {a["id"]: a for a in arows}
+
+    inscritos = []
+    for r in inscritos_raw:
+        a = alumnos_map.get(r["alumno_id"]) or {}
+        d = dict(r)
+        d["nombre"] = a.get("nombre")
+        d["email"] = a.get("email")
+        d["whatsapp"] = a.get("whatsapp")
+        inscritos.append(d)
 
     recordatorios_stats = (await db.execute(text("""
         SELECT tipo, estado, COUNT(*) AS n
@@ -284,6 +333,6 @@ async def get_clase_detalle(db: AsyncSession, clase_id: int) -> Optional[dict]:
 
     return {
         "clase": dict(clase),
-        "inscritos": [dict(r) for r in inscritos],
+        "inscritos": inscritos,
         "recordatorios_stats": [dict(r) for r in recordatorios_stats],
     }

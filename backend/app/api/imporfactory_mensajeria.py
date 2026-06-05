@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_db, get_db_erp
 from core.security import get_current_user
 from models.models import Usuario
 
@@ -44,7 +44,7 @@ async def listar_cola(
     estado: Optional[str] = None,
     trigger_origen: Optional[str] = None,
     limit: int = 100,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
@@ -71,7 +71,7 @@ async def listar_cola(
 @router.get("/{empresa_id}/cola/stats")
 async def cola_stats(
     empresa_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
@@ -101,7 +101,7 @@ async def cola_stats(
 async def reintentar(
     empresa_id: int,
     queue_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
@@ -120,7 +120,7 @@ async def reintentar(
 async def cancelar(
     empresa_id: int,
     queue_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
@@ -136,7 +136,7 @@ async def cancelar(
 async def broadcast(
     empresa_id: int,
     payload: BroadcastPayload,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     """Encola mensaje masivo a segmento de alumnos con rate-limit.

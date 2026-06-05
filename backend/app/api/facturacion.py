@@ -175,7 +175,7 @@ async def listar_borradores(
     sql = f"""
         SELECT id, empresa_id, cliente_tipo_id, cliente_identificacion,
                cliente_razon_social, cliente_email, cliente_telefono, items_json,
-               subtotal, iva_valor, total, estado, factura_numero,
+               subtotal, iva_valor, total, estado, fuente, factura_numero,
                factura_autorizacion_sri, factura_pdf_url, factura_xml_url,
                error_msg, created_at, emitida_at
         FROM facturas_borrador

@@ -15,13 +15,14 @@ sys.path.insert(0, str(ROOT / "app"))
 from dotenv import load_dotenv
 load_dotenv(str(ROOT / ".env"))
 
-from core.database import AsyncSessionLocal
+from core.database import AsyncSessionLocal, ErpAsyncSessionLocal
 from services.imporfactory_clases_service import enqueue_pending_reminders
 
 
 async def main():
-    async with AsyncSessionLocal() as db:
-        n = await enqueue_pending_reminders(db, lookahead_min=1)
+    # recordatorios/clases en BD propia; alumnos + whatsapp_queue en el ERP
+    async with AsyncSessionLocal() as db, ErpAsyncSessionLocal() as db_erp:
+        n = await enqueue_pending_reminders(db, db_erp, lookahead_min=1)
         print(f"[clases-recordatorios] OK encolados={n}")
 
 

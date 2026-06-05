@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_db, get_db_erp
 from core.security import get_current_user
 from models.models import Usuario
 
@@ -72,10 +72,11 @@ async def crear(
     empresa_id: int,
     payload: CrearClasePayload,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
-    clase_id = await crear_clase(db, payload.dict(), created_by=user.id)
+    clase_id = await crear_clase(db, db_erp, payload.dict(), created_by=user.id)
     return {"ok": True, "clase_id": clase_id}
 
 
@@ -84,10 +85,11 @@ async def detalle(
     empresa_id: int,
     clase_id: int,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
-    d = await get_clase_detalle(db, clase_id)
+    d = await get_clase_detalle(db, db_erp, clase_id)
     if not d:
         raise HTTPException(404, "Clase no encontrada")
     return d
@@ -131,10 +133,11 @@ async def inscribir_masivo_endpoint(
     clase_id: int,
     payload: InscribirMasivoPayload,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
-    n = await inscribir_masivo(db, clase_id, payload.filtro_membresia)
+    n = await inscribir_masivo(db, db_erp, clase_id, payload.filtro_membresia)
     return {"ok": True, "inscritos_nuevos": n}
 
 
@@ -154,11 +157,12 @@ async def reprogramar_recordatorios(
 async def encolar_pendientes(
     empresa_id: int,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     """Fuerza drenado del cron: encola TODOS los recordatorios pendientes que ya cumplieron tiempo."""
     _ensure_empresa_5(empresa_id)
-    n = await enqueue_pending_reminders(db, lookahead_min=1)
+    n = await enqueue_pending_reminders(db, db_erp, lookahead_min=1)
     return {"ok": True, "encolados": n}
 
 

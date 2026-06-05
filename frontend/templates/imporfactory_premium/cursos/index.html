@@ -1,0 +1,50 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Cursos{% endblock %}
+{% block topbar_title %}Academia › Cursos{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Cursos</h1>
+        <p class="imf-page-subtitle">Catálogo de cursos IMPORFACTORY · módulos · lecciones</p>
+    </div>
+    <button class="imf-btn imf-btn--secondary" id="btn-refresh">↻ Refrescar</button>
+</div>
+
+<div class="imf-grid-3" id="cursos-grid">
+    <div class="imf-card" style="grid-column:1/-1;text-align:center;padding:48px;color:var(--imf-text-muted)">Cargando...</div>
+</div>
+
+<script>
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function cargar() {
+    const r = await fetch('/api/imporfactory/admin/5/cursos', {credentials:'include'});
+    const grid = document.getElementById('cursos-grid');
+    if (!r.ok) { grid.innerHTML = `<div class="imf-card" style="grid-column:1/-1;text-align:center;padding:48px;color:var(--imf-danger)">Error ${r.status}</div>`; return; }
+    const d = await r.json();
+    const items = d.items || [];
+    if (items.length === 0) { grid.innerHTML = '<div class="imf-card" style="grid-column:1/-1;text-align:center;padding:48px;color:var(--imf-text-muted)">No hay cursos cargados</div>'; return; }
+    grid.innerHTML = items.map(c => `
+        <div class="imf-card" style="display:flex;flex-direction:column;gap:12px;overflow:hidden">
+            <div style="height:140px;margin:-24px -24px 0;background:${c.imagen_url?`url('${escapeHtml(c.imagen_url)}') center/cover`:'linear-gradient(135deg,var(--imf-cyan-dim),rgba(124,92,255,0.15))'};display:flex;align-items:flex-end;padding:12px">
+                ${c.activo?'<span class="imf-badge imf-badge--success">Activo</span>':'<span class="imf-badge">Inactivo</span>'}
+            </div>
+            <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--imf-text-muted);font-weight:700">${escapeHtml(c.paquete||'Curso')}</div>
+                <h3 style="font-family:var(--ff-serif);font-size:19px;font-weight:800;margin:4px 0 0;line-height:1.2">${escapeHtml(c.titulo||'—')}</h3>
+            </div>
+            <p style="font-size:13px;color:var(--imf-text-secondary);line-height:1.5;margin:0;flex:1">${escapeHtml((c.descripcion||'').substring(0,120))}${(c.descripcion||'').length>120?'...':''}</p>
+            <div style="display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--imf-divider);font-size:12px;color:var(--imf-text-secondary)">
+                <span>📚 <strong>${c.total_modulos||0}</strong> módulos</span>
+                <span>🎬 <strong>${c.total_lecciones||0}</strong> lecciones</span>
+                ${c.duracion_total_min?`<span>⏱️ <strong>${Math.round(c.duracion_total_min/60)}</strong>h</span>`:''}
+            </div>
+            <div style="font-size:11px;color:var(--imf-text-muted)">Instructor: ${escapeHtml(c.instructor||'Daniel Bonilla')}</div>
+        </div>`).join('');
+}
+document.getElementById('btn-refresh').addEventListener('click', cargar);
+cargar();
+</script>
+{% endblock %}

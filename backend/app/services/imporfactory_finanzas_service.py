@@ -37,6 +37,11 @@ async def compute_snapshot(db: AsyncSession, empresa_id: int = 5) -> dict:
     """Calcula todos los KPIs para una fecha (hoy) y retorna dict listo para insertar.
 
     Robusto a tablas vacías: campos NULL si no hay datos.
+
+    IMPORTANTE: `db` debe ser una sesión a la BD ERP (grupo_impor) porque la
+    mayoría de queries (alumnos, alumno_membresias, flujo_caja) viven ahí.
+    El único dato de la BD PROPIA (blog_generaciones_ai → costo_ai) se lee con
+    una sesión propia interna (AsyncSessionLocal).
     """
     hoy = date.today()
     inicio_mes = hoy.replace(day=1)
@@ -155,11 +160,17 @@ async def compute_snapshot(db: AsyncSession, empresa_id: int = 5) -> dict:
     except Exception:
         cxc = Decimal("0.00")
 
-    # ── 9. Costo AI 30d
-    costo_ai = (await db.execute(text("""
-        SELECT COALESCE(SUM(costo_usd), 0) FROM blog_generaciones_ai
-        WHERE generado_en >= :hace_30d
-    """), {"hace_30d": hace_30d})).scalar() or 0
+    # ── 9. Costo AI 30d (tabla PROPIA blog_generaciones_ai → sesión propia separada)
+    costo_ai = 0
+    try:
+        from core.database import AsyncSessionLocal as _OwnSession
+        async with _OwnSession() as _own:
+            costo_ai = (await _own.execute(text("""
+                SELECT COALESCE(SUM(costo_usd), 0) FROM blog_generaciones_ai
+                WHERE generado_en >= :hace_30d
+            """), {"hace_30d": hace_30d})).scalar() or 0
+    except Exception:
+        costo_ai = 0
 
     return {
         "empresa_id": empresa_id,

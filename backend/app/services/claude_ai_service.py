@@ -74,13 +74,18 @@ async def _get_api_key(db: AsyncSession, empresa_id: int = 5) -> Optional[str]:
     env_key = os.environ.get("ANTHROPIC_API_KEY")
     if env_key:
         return env_key
-    # Prioridad 2: empresa_config por empresa
-    row = (await db.execute(text("""
-        SELECT valor FROM empresa_config
-        WHERE empresa_id = :emp AND clave = 'ANTHROPIC_API_KEY'
-        LIMIT 1
-    """), {"emp": empresa_id})).first()
-    return row[0] if row else None
+    # Prioridad 2: empresa_config (tabla ERP grupo_impor → sesión ERP propia)
+    try:
+        from core.database import ErpAsyncSessionLocal
+        async with ErpAsyncSessionLocal() as erp:
+            row = (await erp.execute(text("""
+                SELECT valor FROM empresa_config
+                WHERE empresa_id = :emp AND clave = 'ANTHROPIC_API_KEY'
+                LIMIT 1
+            """), {"emp": empresa_id})).first()
+        return row[0] if row else None
+    except Exception:
+        return None
 
 
 def _calc_cost(model: str, tokens_in: int, tokens_out: int, cached_in: int = 0) -> float:

@@ -22,13 +22,14 @@ sys.path.insert(0, str(ROOT / "app"))
 from dotenv import load_dotenv
 load_dotenv(str(ROOT / ".env"))
 
-from core.database import AsyncSessionLocal
+from core.database import AsyncSessionLocal, ErpAsyncSessionLocal
 from services.imporfactory_finanzas_service import compute_snapshot, upsert_snapshot
 
 
 async def main():
-    async with AsyncSessionLocal() as db:
-        snap = await compute_snapshot(db, empresa_id=5)
+    # compute_snapshot lee del ERP (alumnos/membresias/flujo_caja); upsert escribe en BD propia
+    async with AsyncSessionLocal() as db, ErpAsyncSessionLocal() as db_erp:
+        snap = await compute_snapshot(db_erp, empresa_id=5)
         snap_id = await upsert_snapshot(db, snap)
         print(f"[finanzas-snapshot] OK fecha={snap['fecha']} id={snap_id} "
               f"mrr={snap['mrr']:.2f} alumnos_activos={snap['alumnos_activos']} "

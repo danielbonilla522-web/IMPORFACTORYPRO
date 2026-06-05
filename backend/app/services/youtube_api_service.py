@@ -27,20 +27,26 @@ REDIRECT_URI = "https://impor.imporchina.com/api/imporfactory/youtube/5/oauth/ca
 
 
 async def _get_config(db: AsyncSession, empresa_id: int = 5) -> dict:
-    rows = (await db.execute(text("""
-        SELECT clave, valor FROM empresa_config
-        WHERE empresa_id = :emp AND clave LIKE 'YOUTUBE_%'
-    """), {"emp": empresa_id})).mappings().all()
+    # empresa_config vive en la BD ERP (grupo_impor) → sesión ERP propia
+    from core.database import ErpAsyncSessionLocal
+    async with ErpAsyncSessionLocal() as erp:
+        rows = (await erp.execute(text("""
+            SELECT clave, valor FROM empresa_config
+            WHERE empresa_id = :emp AND clave LIKE 'YOUTUBE_%'
+        """), {"emp": empresa_id})).mappings().all()
     return {r["clave"]: r["valor"] for r in rows}
 
 
 async def _save_config(db: AsyncSession, empresa_id: int, clave: str, valor: str):
-    await db.execute(text("""
-        INSERT INTO empresa_config (empresa_id, clave, valor)
-        VALUES (:emp, :clave, :valor)
-        ON DUPLICATE KEY UPDATE valor = VALUES(valor), updated_at = NOW()
-    """), {"emp": empresa_id, "clave": clave, "valor": valor})
-    await db.commit()
+    # empresa_config vive en la BD ERP (grupo_impor) → sesión ERP propia
+    from core.database import ErpAsyncSessionLocal
+    async with ErpAsyncSessionLocal() as erp:
+        await erp.execute(text("""
+            INSERT INTO empresa_config (empresa_id, clave, valor)
+            VALUES (:emp, :clave, :valor)
+            ON DUPLICATE KEY UPDATE valor = VALUES(valor), updated_at = NOW()
+        """), {"emp": empresa_id, "clave": clave, "valor": valor})
+        await erp.commit()
 
 
 def _build_oauth_flow(client_id: str, client_secret: str):

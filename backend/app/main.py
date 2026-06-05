@@ -44,6 +44,7 @@ from api import imporfactory_blog_gemini
 from api import imporfactory_youtube
 from api import imporfactory_finanzas
 from api import imporfactory_mensajeria
+from api import imporfactory_admin
 
 
 # ────────────────────────────────────────
@@ -114,6 +115,7 @@ app.include_router(imporfactory_blog_gemini.router)
 app.include_router(imporfactory_youtube.router)
 app.include_router(imporfactory_finanzas.router)
 app.include_router(imporfactory_mensajeria.router)
+app.include_router(imporfactory_admin.router)
 
 
 # ────────────────────────────────────────
@@ -172,6 +174,31 @@ async def mensajeria(request: Request):
 @app.get("/videos", response_class=HTMLResponse)
 async def videos(request: Request):
     return _no_cache_html(render_premium(request, "videos/index.html", {"active_item": "videos"}))
+
+
+@app.get("/alumnos", response_class=HTMLResponse)
+async def alumnos_page(request: Request):
+    return _no_cache_html(render_premium(request, "alumnos/index.html", {"active_item": "alumnos"}))
+
+
+@app.get("/cursos", response_class=HTMLResponse)
+async def cursos_page(request: Request):
+    return _no_cache_html(render_premium(request, "cursos/index.html", {"active_item": "cursos"}))
+
+
+@app.get("/agendamiento", response_class=HTMLResponse)
+async def agendamiento_page(request: Request):
+    return _no_cache_html(render_premium(request, "agendamiento/index.html", {"active_item": "agendamiento"}))
+
+
+@app.get("/configuracion", response_class=HTMLResponse)
+async def configuracion_page(request: Request):
+    return _no_cache_html(render_premium(request, "configuracion/index.html", {"active_item": "configuracion"}))
+
+
+@app.get("/admin/formularios", response_class=HTMLResponse)
+async def admin_formularios_page(request: Request):
+    return _no_cache_html(render_premium(request, "admin/formularios.html", {"active_item": "admin_formularios"}))
 
 
 @app.get("/login", response_class=HTMLResponse)

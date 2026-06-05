@@ -34,12 +34,22 @@ COST_PER_IMAGE = {
 
 
 async def _get_api_key(db: AsyncSession, empresa_id: int = 5) -> Optional[str]:
-    row = (await db.execute(text("""
-        SELECT valor FROM empresa_config
-        WHERE empresa_id = :emp AND clave = 'OPENAI_API_KEY'
-        LIMIT 1
-    """), {"emp": empresa_id})).first()
-    return row[0] if row else None
+    import os
+    env_key = os.environ.get("OPENAI_API_KEY")
+    if env_key:
+        return env_key
+    # empresa_config (tabla ERP grupo_impor → sesión ERP propia)
+    try:
+        from core.database import ErpAsyncSessionLocal
+        async with ErpAsyncSessionLocal() as erp:
+            row = (await erp.execute(text("""
+                SELECT valor FROM empresa_config
+                WHERE empresa_id = :emp AND clave = 'OPENAI_API_KEY'
+                LIMIT 1
+            """), {"emp": empresa_id})).first()
+        return row[0] if row else None
+    except Exception:
+        return None
 
 
 async def generate_thumbnail(

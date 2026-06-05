@@ -18,7 +18,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_db, get_db_erp
 from core.security import get_current_user
 from models.models import Usuario
 
@@ -44,9 +44,14 @@ async def dashboard(
     empresa_id: int,
     forzar: bool = False,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
-    """Devuelve KPIs ejecutivos. Si no hay snapshot del día (o forzar=True), recalcula."""
+    """Devuelve KPIs ejecutivos. Si no hay snapshot del día (o forzar=True), recalcula.
+
+    db     → BD propia (finanzas_snapshots: get_latest/upsert)
+    db_erp → BD ERP (compute_snapshot lee alumnos/membresias/flujo_caja)
+    """
     _ensure_empresa_5(empresa_id)
 
     snap = await get_latest_snapshot(db, empresa_id)
@@ -57,7 +62,7 @@ async def dashboard(
     )
 
     if needs_refresh:
-        fresh = await compute_snapshot(db, empresa_id)
+        fresh = await compute_snapshot(db_erp, empresa_id)
         await upsert_snapshot(db, fresh)
         snap = await get_latest_snapshot(db, empresa_id)
 
@@ -106,11 +111,12 @@ async def mrr_historico(
 async def snapshot_now(
     empresa_id: int,
     db: AsyncSession = Depends(get_db),
+    db_erp: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     """Fuerza recálculo de KPIs (uso admin / debug)."""
     _ensure_empresa_5(empresa_id)
-    snap = await compute_snapshot(db, empresa_id)
+    snap = await compute_snapshot(db_erp, empresa_id)
     snap_id = await upsert_snapshot(db, snap)
     return {"ok": True, "snapshot_id": snap_id, "fecha": snap["fecha"].isoformat()}
 
@@ -118,7 +124,7 @@ async def snapshot_now(
 @router.get("/{empresa_id}/cuentas-por-cobrar")
 async def cuentas_por_cobrar(
     empresa_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     """Lista alumnos con pagos pendientes (cuotas_monto_pendiente > 0)."""
@@ -144,7 +150,7 @@ async def cuentas_por_cobrar(
 @router.get("/{empresa_id}/membresias-resumen")
 async def membresias_resumen(
     empresa_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     """Distribución actual de membresías por tipo."""

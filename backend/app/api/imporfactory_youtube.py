@@ -13,7 +13,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_db, get_db_erp
 from core.security import get_current_user
 from models.models import Usuario
 
@@ -60,7 +60,7 @@ async def oauth_callback(
 @router.get("/{empresa_id}/health")
 async def yt_health(
     empresa_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_erp),
     user: Usuario = Depends(get_current_user),
 ):
     _ensure_empresa_5(empresa_id)
