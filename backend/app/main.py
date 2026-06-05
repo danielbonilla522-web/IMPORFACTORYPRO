@@ -205,9 +205,9 @@ async def facturacion_masiva(request: Request):
 
 @app.get("/formularios", response_class=HTMLResponse)
 async def formularios_hub(request: Request):
-    return _no_cache_html(render_premium(request, "formularios/hub.html", {"active_item": "formularios"}))
+    return _no_cache_html(render_premium(request, "formularios/hub_publico.html", {"active_item": "formularios"}))
 
 
 @app.get("/formularios/factura", response_class=HTMLResponse)
 async def formularios_factura(request: Request):
-    return _no_cache_html(render_premium(request, "formularios/factura_alumno.html", {"active_item": "formularios"}))
+    return _no_cache_html(render_premium(request, "formularios/factura_publico.html", {"active_item": "formularios"}))

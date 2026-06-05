@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Formularios · IMPORFACTORY</title>
+<meta name="description" content="Trámites rápidos para alumnos IMPORFACTORY: factura, certificado, inscripciones">
+<meta name="robots" content="noindex,follow">
+<meta property="og:title" content="Formularios · IMPORFACTORY">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white'>📋</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#0b1020; --bg-1:#111a36; --card:#131c39; --card-border:rgba(56,117,250,0.18);
+  --primary:#2563eb; --primary-hover:#1d4ed8; --accent:#06b6d4;
+  --text:#f1f5f9; --text-dim:#94a3b8; --text-soft:#64748b;
+  --border:rgba(255,255,255,.08);
+}
+html,body{height:100%;font-family:-apple-system,'Inter','Segoe UI',Roboto,system-ui,sans-serif}
+body{
+  background:radial-gradient(circle at 25% 0%,#1d3a8a 0%,transparent 45%),
+             radial-gradient(circle at 95% 90%,#06b6d4 0%,transparent 35%),
+             var(--bg-0);
+  color:var(--text);min-height:100vh;padding:24px 16px 64px;line-height:1.5;font-size:14px;
+}
+.wrap{max-width:1080px;margin:0 auto}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding:0 4px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--text)}
+.nav-logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff}
+.nav-logo small{display:block;font-size:9px;color:var(--text-dim);letter-spacing:1.5px;font-weight:600;text-transform:uppercase;margin-top:2px}
+.nav-help{font-size:13px;color:var(--text-dim);font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;transition:all 0.15s}
+.nav-help:hover{color:var(--text);border-color:var(--primary)}
+
+/* HERO */
+.hero{text-align:center;padding:24px 16px 36px}
+.hero-eyebrow{display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:800;padding:5px 14px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);border-radius:999px;margin-bottom:14px}
+.hero-title{font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin-bottom:12px}
+.hero-title .accent{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:15px;color:var(--text-dim);line-height:1.6;max-width:560px;margin:0 auto}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:36px}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--card-border);border-radius:18px;overflow:hidden;transition:all 280ms cubic-bezier(.2,.8,.2,1);min-height:240px;position:relative}
+.card:hover{transform:translateY(-6px);border-color:var(--primary);box-shadow:0 20px 50px rgba(37,99,235,0.25)}
+.card-glow{position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,var(--card-color,rgba(37,99,235,0.18)),transparent 60%);pointer-events:none;transition:all 400ms ease;opacity:0.6}
+.card:hover .card-glow{opacity:1;transform:scale(1.1)}
+.card-body{position:relative;padding:28px 24px;flex:1;display:flex;flex-direction:column;gap:12px}
+.card-icon{width:60px;height:60px;border-radius:14px;display:grid;place-items:center;font-size:30px;background:var(--card-icon-bg,rgba(37,99,235,0.18));box-shadow:0 8px 24px var(--card-shadow,rgba(37,99,235,0.25))}
+.card-kicker{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);font-weight:700}
+.card-title{font-size:22px;font-weight:800;line-height:1.2;letter-spacing:-0.02em;color:var(--text);margin:0}
+.card-desc{font-size:13px;color:var(--text-dim);line-height:1.55;margin:0}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:rgba(0,0,0,0.2);border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);font-weight:600}
+.card-arrow{font-weight:900;color:var(--card-color,var(--primary));font-size:13px;letter-spacing:0.5px;text-transform:uppercase}
+.card.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none}
+
+/* HELP BLOCK */
+.help{padding:24px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.help-icon{width:48px;height:48px;border-radius:50%;background:rgba(37,211,102,0.15);color:#25D366;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.help-text{flex:1;min-width:200px}
+.help-text strong{display:block;font-size:15px;font-weight:700;margin-bottom:4px}
+.help-text small{font-size:13px;color:var(--text-dim);line-height:1.55}
+.btn-wa{padding:12px 22px;background:#25D366;color:#fff;border-radius:10px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:all 0.15s;white-space:nowrap}
+.btn-wa:hover{background:#1eb858;transform:translateY(-1px);color:#fff}
+
+.foot{text-align:center;font-size:11px;color:var(--text-soft);margin-top:32px;letter-spacing:0.3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a href="/formularios" class="nav-logo">
+      <div class="nav-logo-icon">IF</div>
+      <div>IMPORFACTORY<small>Trámites alumnos</small></div>
+    </a>
+    <a href="https://wa.me/593979120058?text=Hola%20necesito%20ayuda" target="_blank" rel="noopener" class="nav-help">💬 Ayuda</a>
+  </nav>
+
+  <div class="hero">
+    <span class="hero-eyebrow">📋 Centro de trámites</span>
+    <h1 class="hero-title">Tus trámites en <span class="accent">2 minutos</span></h1>
+    <p class="hero-sub">Pedí tu factura, obtené tu certificado o inscribite a un evento. Todo en un solo lugar, sin papeleo.</p>
+  </div>
+
+  <div class="grid">
+
+    <a href="/formularios/factura" class="card" style="--card-color:#2563eb;--card-icon-bg:rgba(37,99,235,0.18);--card-shadow:rgba(37,99,235,0.3)">
+      <div class="card-glow"></div>
+      <div class="card-body">
+        <div class="card-icon">🧾</div>
+        <div class="card-kicker">Trámite financiero</div>
+        <h3 class="card-title">Solicitar mi factura</h3>
+        <p class="card-desc">¿Pagaste el Club, un curso o asesoría? Pedí tu factura electrónica autorizada SRI. Te llega al email en 24h.</p>
+      </div>
+      <div class="card-footer">
+        <span>2 min · datos básicos</span>
+        <span class="card-arrow">PEDIR FACTURA →</span>
+      </div>
+    </a>
+
+    <a href="/reto-importador-rentable" class="card" style="--card-color:#06b6d4;--card-icon-bg:rgba(6,182,212,0.18);--card-shadow:rgba(6,182,212,0.3)">
+      <div class="card-glow"></div>
+      <div class="card-body">
+        <div class="card-icon">🎓</div>
+        <div class="card-kicker">Certificado oficial</div>
+        <h3 class="card-title">Reto Importador Rentable</h3>
+        <p class="card-desc">¿Asististe al Reto Importador Rentable de Daniel Bonilla? Obtené tu certificado al instante con tu nombre.</p>
+      </div>
+      <div class="card-footer">
+        <span>1 min · al instante</span>
+        <span class="card-arrow">OBTENER →</span>
+      </div>
+    </a>
+
+    <div class="card disabled" style="--card-color:#f59e0b;--card-icon-bg:rgba(245,158,11,0.15);--card-shadow:rgba(245,158,11,0.25)">
+      <div class="card-glow"></div>
+      <div class="card-body">
+        <div class="card-icon">✨</div>
+        <div class="card-kicker">Pronto</div>
+        <h3 class="card-title">Más formularios</h3>
+        <p class="card-desc">Encuestas de satisfacción, inscripción a masterclasses, agendamiento de mentorías…</p>
+      </div>
+      <div class="card-footer">
+        <span>En desarrollo</span>
+        <span class="card-arrow" style="opacity:0.6">PRONTO</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="custom-forms-section" style="display:none;margin-bottom:36px">
+    <h2 style="font-size:20px;font-weight:800;margin:0 0 16px;letter-spacing:-0.01em">Otros formularios disponibles</h2>
+    <div class="grid" id="custom-forms-grid"></div>
+  </div>
+
+  <div class="help">
+    <div class="help-icon">💬</div>
+    <div class="help-text">
+      <strong>¿Necesitás algo distinto?</strong>
+      <small>Escribinos directo por WhatsApp y te ayudamos.</small>
+    </div>
+    <a href="https://wa.me/593979120058?text=Hola%20necesito%20ayuda%20con%20un%20tr%C3%A1mite" target="_blank" rel="noopener" class="btn-wa">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/></svg>
+      WhatsApp +593 97 912 0058
+    </a>
+  </div>
+
+  <div class="foot">© <span id="year"></span> Daniel Bonilla · GRUPO IMPOR · IMPORFACTORY</div>
+
+</div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+(async function() {
+  try {
+    const r = await fetch('/api/form/list');
+    if (!r.ok) return;
+    const d = await r.json();
+    const items = (d.items || []).filter(f => f.estado === 'ACTIVO');
+    if (items.length === 0) return;
+    const cont = document.getElementById('custom-forms-grid');
+    cont.innerHTML = items.map(f => `
+      <a href="/formularios/${f.slug}" class="card" style="--card-color:#22c55e;--card-icon-bg:rgba(34,197,94,0.15);--card-shadow:rgba(34,197,94,0.25)">
+        <div class="card-glow"></div>
+        <div class="card-body">
+          <div class="card-icon">📝</div>
+          <div class="card-kicker">${f.tipo === 'EVENTO' ? 'Inscripción' : f.tipo === 'ENCUESTA' ? 'Encuesta' : 'Formulario'}</div>
+          <h3 class="card-title">${f.titulo}</h3>
+          <p class="card-desc">${(f.descripcion || '').substring(0, 140)}</p>
+        </div>
+        <div class="card-footer">
+          <span>${f.respuestas_count || 0} respuestas</span>
+          <span class="card-arrow">INGRESAR →</span>
+        </div>
+      </a>
+    `).join('');
+    document.getElementById('custom-forms-section').style.display = 'block';
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

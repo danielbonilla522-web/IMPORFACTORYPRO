@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Solicitar Factura · IMPORFACTORY</title>
+<meta name="description" content="Solicitá tu factura electrónica autorizada SRI de IMPORFACTORY">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:title" content="Solicitar Factura · IMPORFACTORY">
+<meta property="og:description" content="Recibí tu factura electrónica al email en menos de 24h">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white'>🧾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#0b1020; --bg-1:#111a36; --card:#131c39; --card-border:rgba(56,117,250,0.18);
+  --primary:#2563eb; --primary-hover:#1d4ed8; --accent:#06b6d4;
+  --text:#f1f5f9; --text-dim:#94a3b8; --text-soft:#64748b;
+  --danger:#ef4444; --danger-bg:rgba(239,68,68,.10); --danger-border:rgba(239,68,68,.30);
+  --success:#22c55e; --success-bg:rgba(34,197,94,.10); --success-border:rgba(34,197,94,.30);
+  --warn:#f59e0b;
+  --border:rgba(255,255,255,.08);
+}
+html,body{height:100%;font-family:-apple-system,'Inter','Segoe UI',Roboto,system-ui,sans-serif}
+body{
+  background:radial-gradient(circle at 25% 0%,#1d3a8a 0%,transparent 45%),
+             radial-gradient(circle at 95% 90%,#06b6d4 0%,transparent 35%),
+             var(--bg-0);
+  color:var(--text);min-height:100vh;padding:24px 16px 48px;line-height:1.5;font-size:14px;
+}
+.wrap{max-width:720px;margin:0 auto}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:var(--accent)}
+
+/* NAV minimal */
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding:0 4px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--text);text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:14px}
+.nav-logo small{display:block;font-size:9px;color:var(--text-dim);letter-spacing:1.5px;font-weight:600;text-transform:uppercase;margin-top:2px}
+.nav-back{font-size:13px;color:var(--text-dim);font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s}
+.nav-back:hover{color:var(--text)}
+
+/* HERO */
+.hero{padding:36px 32px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;margin-bottom:20px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(56,117,250,0.18),transparent 60%);pointer-events:none}
+.hero-icon{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-size:30px;margin-bottom:18px;position:relative;box-shadow:0 12px 30px rgba(37,99,235,0.35)}
+.hero-title{font-size:30px;font-weight:800;letter-spacing:-0.025em;line-height:1.1;margin-bottom:10px;position:relative}
+.hero-sub{font-size:14px;color:var(--text-dim);line-height:1.6;max-width:520px;position:relative}
+
+/* SECTION CARDS */
+.section{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:26px;margin-bottom:18px}
+.section-h{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.section-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex-shrink:0;box-shadow:0 6px 16px rgba(37,99,235,0.3)}
+.section-title{font-size:17px;font-weight:700;letter-spacing:-0.01em}
+.section-title small{display:block;font-size:11px;font-weight:500;color:var(--text-dim);margin-top:2px;letter-spacing:0}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:600px){.grid{grid-template-columns:1fr}}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.2px}
+.field label .req{color:var(--primary);margin-left:2px}
+.input,.select,.area{width:100%;padding:12px 14px;font-size:14px;background:var(--bg-1);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;outline:none;transition:all 150ms ease}
+.input::placeholder,.area::placeholder{color:var(--text-soft)}
+.input:focus,.select:focus,.area:focus{border-color:var(--primary);background:#0f1730;box-shadow:0 0 0 3px rgba(37,99,235,0.18)}
+.select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--primary) 50%),linear-gradient(135deg,var(--primary) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;cursor:pointer}
+.select option{background:var(--card);color:var(--text)}
+.area{min-height:80px;resize:vertical;font-family:inherit}
+.hint{font-size:11px;color:var(--text-soft);margin-top:1px}
+
+/* TIPO ID CHIPS */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:600;color:var(--text-dim);cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--primary);color:var(--text)}
+.chip input{display:none}
+.chip:has(input:checked){background:rgba(37,99,235,0.15);border-color:var(--primary);color:var(--text)}
+
+/* RADIO CARDS */
+.radio-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){.radio-cards{grid-template-columns:1fr}}
+.radio-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 150ms ease;font-size:14px;font-weight:600}
+.radio-card:hover{border-color:var(--primary)}
+.radio-card:has(input:checked){background:rgba(37,99,235,0.1);border-color:var(--primary)}
+.radio-card input{accent-color:var(--primary);width:18px;height:18px;cursor:pointer;flex-shrink:0}
+.radio-card-emoji{font-size:22px;line-height:1;flex-shrink:0}
+
+/* MONTO */
+.monto-wrap{position:relative}
+.monto-wrap::before{content:"$";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-weight:700;font-size:16px;z-index:1}
+.monto-wrap input{padding-left:30px;font-weight:700;font-size:18px}
+
+/* SUBMIT */
+.submit{width:100%;padding:18px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;transition:all 200ms ease;box-shadow:0 12px 28px rgba(37,99,235,0.35);margin-top:8px;display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.submit:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(37,99,235,0.5)}
+.submit:active{transform:translateY(0)}
+.submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+.err{display:none;padding:14px 16px;background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:10px;color:var(--danger);font-size:13.5px;margin-bottom:16px;font-weight:500}
+
+/* SUCCESS */
+.success{display:none;text-align:center;padding:48px 32px;background:var(--card);border:1px solid var(--success-border);border-radius:18px;margin:20px 0}
+.success.show{display:block}
+.success-icon{width:80px;height:80px;border-radius:50%;background:var(--success-bg);display:inline-grid;place-items:center;font-size:38px;margin-bottom:18px;box-shadow:0 12px 32px rgba(34,197,94,0.3)}
+.success-title{font-size:26px;font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;color:var(--success)}
+.success-sub{color:var(--text-dim);line-height:1.6;max-width:480px;margin:0 auto 24px;font-size:14px}
+.success-sub strong{color:var(--text)}
+.success-id{font-family:monospace;background:var(--bg-1);padding:10px 18px;border-radius:10px;display:inline-block;color:var(--primary);font-weight:700;letter-spacing:0.5px;border:1px solid var(--border)}
+.success-actions{display:flex;gap:10px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+
+.btn-ghost{padding:11px 20px;background:var(--bg-1);color:var(--text);border:1px solid var(--border);border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{background:var(--card-border);color:var(--text)}
+.btn-primary{padding:11px 20px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--primary-hover);color:#fff}
+.btn-wa{padding:11px 20px;background:#25D366;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:8px}
+.btn-wa:hover{background:#1eb858;color:#fff}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.foot{text-align:center;font-size:11px;color:var(--text-soft);margin-top:24px;letter-spacing:0.3px;line-height:1.6}
+.foot a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a href="/formularios" class="nav-logo">
+      <div class="nav-logo-icon">IF</div>
+      <div>
+        IMPORFACTORY
+        <small>Facturación electrónica</small>
+      </div>
+    </a>
+    <a href="/formularios" class="nav-back">← Volver</a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-icon">🧾</div>
+    <h1 class="hero-title">Solicitar mi factura</h1>
+    <p class="hero-sub">Llená los datos y nuestro equipo te emite la factura electrónica autorizada SRI. La recibís al email en menos de <strong style="color:var(--text)">24 horas hábiles</strong>.</p>
+  </div>
+
+  <form id="form" novalidate>
+    <div class="err" id="err"></div>
+
+    <div class="section">
+      <div class="section-h">
+        <div class="section-num">1</div>
+        <div>
+          <div class="section-title">Tus datos</div>
+          <small style="display:block;font-size:11px;color:var(--text-dim);margin-top:2px">Para que el SRI emita correctamente</small>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>¿Cómo facturás?</label>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="tipo" value="cedula" checked>🆔 Cédula</label>
+          <label class="chip"><input type="radio" name="tipo" value="ruc">🏢 RUC</label>
+          <label class="chip"><input type="radio" name="tipo" value="pasaporte">🌍 Pasaporte</label>
+          <label class="chip"><input type="radio" name="tipo" value="consumidor_final">🤝 Consumidor final</label>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label>Número de identificación <span class="req">*</span></label>
+          <input class="input" id="iden" placeholder="1712345678" maxlength="20" autocomplete="off">
+          <div class="hint" id="iden-hint">Cédula: 10 dígitos</div>
+        </div>
+        <div class="field">
+          <label>Nombre o Razón Social <span class="req">*</span></label>
+          <input class="input" id="nombre" placeholder="Tu nombre completo" maxlength="220" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input class="input" id="email" type="email" placeholder="tu@email.com" autocomplete="email">
+          <div class="hint">La factura llega a este email</div>
+        </div>
+        <div class="field">
+          <label>Teléfono</label>
+          <input class="input" id="tel" type="tel" placeholder="0991234567" autocomplete="tel">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Dirección</label>
+          <input class="input" id="dir" placeholder="Av. ... · Ciudad" maxlength="300">
+          <div class="hint">Opcional · la de tu cédula o RUC</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-h">
+        <div class="section-num">2</div>
+        <div>
+          <div class="section-title">¿Qué pagaste?</div>
+          <small style="display:block;font-size:11px;color:var(--text-dim);margin-top:2px">Para describir el ítem en la factura</small>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Producto / Servicio <span class="req">*</span></label>
+        <div class="radio-cards">
+          <label class="radio-card"><input type="radio" name="producto" value="club" checked><span class="radio-card-emoji">🚀</span>Club de Importadores</label>
+          <label class="radio-card"><input type="radio" name="producto" value="curso"><span class="radio-card-emoji">📚</span>Curso individual</label>
+          <label class="radio-card"><input type="radio" name="producto" value="asesoria"><span class="radio-card-emoji">🎯</span>Asesoría 1:1</label>
+          <label class="radio-card"><input type="radio" name="producto" value="otro"><span class="radio-card-emoji">✨</span>Otro</label>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label>Monto pagado USD <span class="req">*</span></label>
+          <div class="monto-wrap"><input class="input" id="monto" type="number" step="0.01" min="0.01" placeholder="0.00"></div>
+          <div class="hint">Sin IVA · lo calculamos automático</div>
+        </div>
+        <div class="field">
+          <label>Fecha de pago</label>
+          <input class="input" id="fecha-pago" type="date">
+          <div class="hint">Opcional</div>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Concepto detallado</label>
+          <textarea class="area" id="desc" placeholder="Ej: Membresía Club de Importadores junio 2026, plan mensual..." maxlength="300"></textarea>
+          <div class="hint">Si elegiste "Otro", describilo. Para Club/Curso/Asesoría es opcional.</div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit" id="submit">
+      <span id="submit-label">🧾 Solicitar mi factura</span>
+    </button>
+
+    <p style="text-align:center;font-size:11.5px;color:var(--text-soft);margin-top:20px;line-height:1.6">
+      Al enviar aceptás que procesemos tus datos para emitir tu factura electrónica.<br>
+      Dudas: <a href="https://wa.me/593979120058" target="_blank" rel="noopener">WhatsApp +593 97 912 0058</a>
+    </p>
+  </form>
+
+  <div class="success" id="success">
+    <span class="success-icon">✅</span>
+    <h2 class="success-title">¡Recibimos tu solicitud!</h2>
+    <p class="success-sub">Nuestro equipo verifica los datos y te emite la factura electrónica al email en menos de <strong>24 horas hábiles</strong>.</p>
+    <div class="success-id">Solicitud # <span id="success-id">—</span></div>
+    <div class="success-actions">
+      <a href="/formularios" class="btn-ghost">← Volver</a>
+      <a id="success-wa" href="https://wa.me/593979120058?text=Hola%20envi%C3%A9%20solicitud%20de%20factura%20%23" target="_blank" rel="noopener" class="btn-wa">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487 2.981 1.287 2.981.858 3.518.804.537-.054 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Z"/></svg>
+        Avisar por WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <div class="foot">© <span id="year"></span> Daniel Bonilla · GRUPO IMPOR · IMPORFACTORY</div>
+
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+$('#year').textContent = new Date().getFullYear();
+$('#fecha-pago').value = new Date().toISOString().split('T')[0];
+
+$('#iden').addEventListener('input', e => {
+  const v = e.target.value.replace(/\D/g,'');
+  e.target.value = v;
+  const hint = $('#iden-hint');
+  if (v.length === 13 && document.querySelector('input[name="tipo"][value="cedula"]:checked')) {
+    document.querySelector('input[name="tipo"][value="ruc"]').checked = true;
+    hint.textContent = 'RUC detectado (13 dígitos)';
+  } else if (v.length === 10) hint.textContent = '✓ Cédula (10 dígitos)';
+  else if (v.length === 13) hint.textContent = '✓ RUC (13 dígitos)';
+  else if (v.length > 0) hint.textContent = `${v.length} dígitos`;
+});
+
+document.querySelectorAll('input[name="tipo"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const t = r.value, iden = $('#iden'), hint = $('#iden-hint');
+    if (t === 'cedula') { iden.placeholder='1712345678'; hint.textContent='Cédula: 10 dígitos'; iden.disabled=false; }
+    else if (t === 'ruc') { iden.placeholder='1712345678001'; hint.textContent='RUC: 13 dígitos'; iden.disabled=false; }
+    else if (t === 'pasaporte') { iden.placeholder='XYZ123456'; hint.textContent='Número de pasaporte'; iden.disabled=false; }
+    else { iden.placeholder='No aplica'; hint.textContent='Sin identificación (consumidor final)'; iden.value=''; iden.disabled=true; }
+  });
+});
+
+document.querySelectorAll('input[name="producto"]').forEach(r => {
+  r.addEventListener('change', () => { if (r.value==='otro') $('#desc').focus(); });
+});
+
+function showErr(msg) {
+  const el = $('#err');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(() => el.style.display='none', 6000);
+}
+
+$('#form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#err').style.display='none';
+
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const iden = $('#iden').value.trim();
+  const nombre = $('#nombre').value.trim();
+  const email = $('#email').value.trim();
+  const tel = $('#tel').value.trim();
+  const dir = $('#dir').value.trim();
+  const producto = document.querySelector('input[name="producto"]:checked').value;
+  const monto = parseFloat($('#monto').value);
+  const desc = $('#desc').value.trim();
+  const fechaPago = $('#fecha-pago').value;
+
+  if (tipo !== 'consumidor_final' && !iden) return showErr('Ingresá tu número de identificación');
+  if (tipo === 'cedula' && iden.length !== 10) return showErr('La cédula debe tener 10 dígitos');
+  if (tipo === 'ruc' && iden.length !== 13) return showErr('El RUC debe tener 13 dígitos');
+  if (nombre.length < 3) return showErr('Ingresá tu nombre completo');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Email inválido');
+  if (!monto || monto <= 0) return showErr('Ingresá el monto pagado');
+
+  const LABELS = { club:'Club de Importadores', curso:'Curso individual', asesoria:'Asesoría 1:1', otro:'Otro' };
+  let descFinal = LABELS[producto];
+  if (desc) descFinal += ' — ' + desc;
+  if (fechaPago) descFinal += ` (pago: ${fechaPago})`;
+
+  const payload = {
+    tipo_id: tipo, identificacion: iden || '9999999999999', nombre, email,
+    telefono: tel || null, direccion: dir || null,
+    producto, monto, descripcion: descFinal, fecha_pago: fechaPago || null,
+  };
+
+  const btn = $('#submit'), label = $('#submit-label');
+  btn.disabled = true;
+  label.innerHTML = '<span class="spinner"></span> Enviando…';
+
+  try {
+    const r = await fetch('/api/facturacion/factura/solicitar', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || 'Error ' + r.status);
+    }
+    const d = await r.json();
+    $('#form').style.display = 'none';
+    $('#success').classList.add('show');
+    const idStr = String(d.borrador_id).padStart(5,'0');
+    $('#success-id').textContent = idStr;
+    $('#success-wa').href = `https://wa.me/593979120058?text=Hola%20envi%C3%A9%20solicitud%20de%20factura%20%23${idStr}`;
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch (err) {
+    btn.disabled = false;
+    label.innerHTML = '🧾 Solicitar mi factura';
+    showErr('Algo falló: ' + err.message + '. Probá de nuevo o escribinos al WhatsApp.');
+  }
+});
+</script>
+</body>
+</html>
