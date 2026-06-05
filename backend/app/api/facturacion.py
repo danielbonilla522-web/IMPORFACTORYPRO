@@ -380,3 +380,68 @@ async def emitir_individual(
     if not r["ok"]:
         raise HTTPException(400, r.get("error", "Fallo emision"))
     return r
+
+
+# ═══════════════════════════════════════════════════════════
+# ENDPOINT PÚBLICO (alumnos) — crea borrador desde form simple
+# ═══════════════════════════════════════════════════════════
+
+class FacturaAlumnoPayload(BaseModel):
+    tipo_id: str = Field(default="cedula")
+    identificacion: str = Field(..., max_length=20)
+    nombre: str = Field(..., min_length=3, max_length=220)
+    email: EmailStr
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    producto: str = Field(..., max_length=40)  # club|curso|asesoria|otro
+    monto: float = Field(..., gt=0)
+    descripcion: str = Field(..., max_length=300)
+    fecha_pago: Optional[str] = None
+
+
+@router.post("/factura/solicitar")
+async def solicitar_factura_alumno(
+    payload: FacturaAlumnoPayload,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Endpoint PÚBLICO (sin auth) — alumno solicita factura.
+
+    Crea borrador en facturas_borrador con fuente=form_alumno.
+    Admin la revisa y emite desde /facturacion.
+    """
+    # Construir items_json (1 item con monto + IVA 15%)
+    items = [{
+        "descripcion": payload.descripcion[:300],
+        "cantidad": 1,
+        "precio_unitario": float(payload.monto),
+        "iva_pct": 15.0,
+        "codigo": payload.producto.upper(),
+    }]
+    sub, iva, tot = _calc_totales(items)
+
+    res = await db.execute(text("""
+        INSERT INTO facturas_borrador
+            (empresa_id, cliente_tipo_id, cliente_identificacion, cliente_razon_social,
+             cliente_email, cliente_telefono, cliente_direccion, items_json,
+             subtotal, iva_valor, total, fuente, estado)
+        VALUES
+            (5, :tid, :iden, :razon, :email, :tel, :dir, :items,
+             :sub, :iva, :tot, 'form_alumno', 'borrador')
+    """), {
+        "tid": payload.tipo_id,
+        "iden": payload.identificacion.strip() or "9999999999999",
+        "razon": payload.nombre.strip(),
+        "email": str(payload.email),
+        "tel": (payload.telefono or "").strip() or None,
+        "dir": (payload.direccion or "").strip() or None,
+        "items": json.dumps(items),
+        "sub": sub, "iva": iva, "tot": tot,
+    })
+    await db.commit()
+
+    return {
+        "ok": True,
+        "borrador_id": res.lastrowid,
+        "mensaje": "Solicitud recibida. Te emitiremos la factura en menos de 24h",
+    }

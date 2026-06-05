@@ -1,0 +1,299 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Solicitar factura{% endblock %}
+{% block topbar_title %}Formularios › Solicitar factura{% endblock %}
+
+{% block content %}
+<style>
+.ff-wrap{max-width:680px;margin:0 auto}
+.ff-hero{position:relative;padding:36px 32px;background:linear-gradient(135deg,rgba(0,191,255,0.1),rgba(124,92,255,0.05));border:1px solid var(--imf-cyan-glow);border-radius:18px;margin-bottom:24px;overflow:hidden}
+.ff-hero::before{content:"";position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,var(--imf-cyan-glow),transparent 60%)}
+.ff-hero__icon{font-size:42px;line-height:1;margin-bottom:14px;display:inline-block;filter:drop-shadow(0 4px 12px rgba(0,191,255,0.4))}
+.ff-hero__title{font-family:var(--ff-serif);font-size:30px;font-weight:800;letter-spacing:-0.02em;margin:0 0 8px;position:relative}
+.ff-hero__sub{font-size:14px;color:var(--imf-text-secondary);line-height:1.55;max-width:520px;position:relative}
+
+.ff-section{background:var(--imf-bg-surface);border:1px solid var(--imf-border);border-radius:14px;padding:24px;margin-bottom:18px}
+.ff-section__h{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.ff-section__num{width:30px;height:30px;border-radius:50%;background:var(--imf-cyan-dim);color:var(--imf-cyan);display:grid;place-items:center;font-weight:900;font-size:14px;flex-shrink:0}
+.ff-section__title{font-size:15px;font-weight:800;letter-spacing:0.2px}
+
+.ff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.ff-grid{grid-template-columns:1fr}}
+
+.ff-field{display:flex;flex-direction:column;gap:6px}
+.ff-field label{font-size:12px;font-weight:700;color:var(--imf-text-mut);text-transform:uppercase;letter-spacing:0.5px}
+.ff-field label .req{color:var(--imf-cyan)}
+.ff-input,.ff-select,.ff-area{padding:12px 14px;font-size:14px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:10px;color:var(--imf-text-primary);font-family:inherit;outline:none;transition:all 140ms ease}
+.ff-input:focus,.ff-select:focus,.ff-area:focus{border-color:var(--imf-cyan);background:rgba(0,191,255,0.04);box-shadow:0 0 0 3px var(--imf-cyan-dim)}
+.ff-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--imf-cyan) 50%),linear-gradient(135deg,var(--imf-cyan) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;cursor:pointer}
+.ff-select option{background:var(--imf-bg-surface);color:var(--imf-text-primary)}
+.ff-area{min-height:80px;resize:vertical;font-family:inherit}
+.ff-hint{font-size:11px;color:var(--imf-text-mut);margin-top:2px}
+
+.ff-tipo-id{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.ff-tipo-id label{cursor:pointer;padding:6px 14px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:999px;font-size:12px;font-weight:600;color:var(--imf-text-secondary);transition:all 140ms ease}
+.ff-tipo-id label:has(input:checked){background:var(--imf-cyan-dim);color:var(--imf-cyan);border-color:var(--imf-cyan)}
+.ff-tipo-id input{display:none}
+
+.ff-radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:600px){.ff-radio-group{grid-template-columns:1fr}}
+.ff-radio-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 140ms ease}
+.ff-radio-item:hover{border-color:var(--imf-cyan)}
+.ff-radio-item:has(input:checked){background:var(--imf-cyan-dim);border-color:var(--imf-cyan)}
+.ff-radio-item input{accent-color:var(--imf-cyan);width:16px;height:16px;cursor:pointer;flex-shrink:0}
+
+.ff-monto{position:relative}
+.ff-monto::before{content:"$";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--imf-text-mut);font-weight:700;font-size:15px}
+.ff-monto input{padding-left:30px;font-family:var(--ff-mono);font-weight:600;font-size:18px}
+
+.ff-submit{width:100%;padding:18px;background:linear-gradient(135deg,var(--imf-cyan),#33D6FF);color:var(--imf-navy);border:none;border-radius:14px;font-family:Montserrat,Inter;font-size:16px;font-weight:900;letter-spacing:0.8px;text-transform:uppercase;cursor:pointer;transition:all 200ms ease;box-shadow:0 14px 32px rgba(0,191,255,0.3);margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.ff-submit:hover{transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,191,255,0.45)}
+.ff-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+.ff-err{display:none;padding:12px 16px;background:rgba(255,77,79,0.1);border:1px solid var(--imf-danger);border-radius:10px;color:var(--imf-danger);font-size:13px;margin-bottom:14px}
+
+.ff-success-card{display:none;text-align:center;padding:48px 32px;background:linear-gradient(180deg,rgba(43,217,160,0.1),rgba(43,217,160,0.02));border:1px solid var(--imf-success);border-radius:18px;margin:24px 0}
+.ff-success-card.show{display:block}
+.ff-success-card__icon{font-size:54px;margin-bottom:14px;display:inline-block;filter:drop-shadow(0 6px 18px rgba(43,217,160,0.5))}
+.ff-success-card__title{font-family:var(--ff-serif);font-size:26px;font-weight:800;margin:0 0 8px;color:var(--imf-success)}
+.ff-success-card__sub{color:var(--imf-text-secondary);line-height:1.55;max-width:440px;margin:0 auto 22px;font-size:14px}
+.ff-success-card__id{font-family:var(--ff-mono);background:var(--imf-bg-base);padding:8px 16px;border-radius:8px;display:inline-block;color:var(--imf-cyan);font-weight:700;letter-spacing:0.5px}
+
+.ff-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(11,20,38,0.25);border-top-color:var(--imf-navy);border-radius:50%;animation:ff-spin 0.7s linear infinite}
+@keyframes ff-spin{to{transform:rotate(360deg)}}
+</style>
+
+<div class="ff-wrap">
+
+  <div class="ff-hero">
+    <span class="ff-hero__icon">🧾</span>
+    <h1 class="ff-hero__title">Solicitar mi factura</h1>
+    <p class="ff-hero__sub">Llená los datos abajo y nuestro equipo te emite la factura electrónica autorizada por el SRI. La recibís al email en menos de 24 horas hábiles.</p>
+  </div>
+
+  <form id="ff-form" novalidate>
+    <div class="ff-err" id="ff-err"></div>
+
+    <!-- SECCIÓN 1: TUS DATOS -->
+    <div class="ff-section">
+      <div class="ff-section__h">
+        <div class="ff-section__num">1</div>
+        <div class="ff-section__title">Tus datos</div>
+      </div>
+
+      <div class="ff-field" style="margin-bottom:14px">
+        <label>¿Cómo facturás?</label>
+        <div class="ff-tipo-id">
+          <label><input type="radio" name="tipo" value="cedula" checked> 🆔 Cédula</label>
+          <label><input type="radio" name="tipo" value="ruc"> 🏢 RUC</label>
+          <label><input type="radio" name="tipo" value="pasaporte"> 🌍 Pasaporte</label>
+          <label><input type="radio" name="tipo" value="consumidor_final"> 🤝 Consumidor final</label>
+        </div>
+      </div>
+
+      <div class="ff-grid">
+        <div class="ff-field">
+          <label>Número de identificación <span class="req">*</span></label>
+          <input class="ff-input" id="ff-iden" placeholder="1712345678" maxlength="20" autocomplete="off">
+          <div class="ff-hint" id="ff-iden-hint">Cédula 10 dígitos</div>
+        </div>
+        <div class="ff-field">
+          <label>Nombre completo o Razón Social <span class="req">*</span></label>
+          <input class="ff-input" id="ff-nombre" placeholder="Tu nombre completo" maxlength="220" autocomplete="name">
+        </div>
+        <div class="ff-field">
+          <label>Email <span class="req">*</span></label>
+          <input class="ff-input" id="ff-email" type="email" placeholder="tu@email.com" autocomplete="email">
+          <div class="ff-hint">La factura llega a este email</div>
+        </div>
+        <div class="ff-field">
+          <label>Teléfono</label>
+          <input class="ff-input" id="ff-tel" type="tel" placeholder="0991234567" autocomplete="tel">
+        </div>
+        <div class="ff-field" style="grid-column:1 / -1">
+          <label>Dirección</label>
+          <input class="ff-input" id="ff-dir" placeholder="Av. ... Ciudad" maxlength="300">
+          <div class="ff-hint">Opcional · usar la de tu cédula/RUC</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: ¿QUÉ PAGASTE? -->
+    <div class="ff-section">
+      <div class="ff-section__h">
+        <div class="ff-section__num">2</div>
+        <div class="ff-section__title">¿Qué pagaste?</div>
+      </div>
+
+      <div class="ff-field" style="margin-bottom:14px">
+        <label>Producto / Servicio <span class="req">*</span></label>
+        <div class="ff-radio-group" id="ff-producto">
+          <label class="ff-radio-item"><input type="radio" name="producto" value="club" checked> 🚀 Club de Importadores</label>
+          <label class="ff-radio-item"><input type="radio" name="producto" value="curso"> 📚 Curso individual</label>
+          <label class="ff-radio-item"><input type="radio" name="producto" value="asesoria"> 🎯 Asesoría 1:1</label>
+          <label class="ff-radio-item"><input type="radio" name="producto" value="otro"> ✨ Otro</label>
+        </div>
+      </div>
+
+      <div class="ff-grid">
+        <div class="ff-field">
+          <label>Monto pagado (USD) <span class="req">*</span></label>
+          <div class="ff-monto"><input class="ff-input" id="ff-monto" type="number" step="0.01" min="0.01" placeholder="0.00"></div>
+          <div class="ff-hint">Sin IVA · el sistema lo calcula automáticamente</div>
+        </div>
+        <div class="ff-field">
+          <label>Fecha de pago</label>
+          <input class="ff-input" id="ff-fecha-pago" type="date">
+          <div class="ff-hint">Opcional</div>
+        </div>
+        <div class="ff-field" style="grid-column:1 / -1">
+          <label>Descripción / Concepto detallado</label>
+          <textarea class="ff-area" id="ff-desc" placeholder="Ej: Membresía Club de Importadores junio 2026, plan mensual..." maxlength="300"></textarea>
+          <div class="ff-hint">Si tu producto es "Otro", describilo acá. Si es Club o Curso, opcional.</div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="ff-submit" id="ff-submit">
+      <span id="ff-submit-label">🧾 Solicitar mi factura</span>
+    </button>
+
+    <p style="text-align:center;font-size:11px;color:var(--imf-text-mut);margin-top:18px;line-height:1.6">
+      Al enviar este formulario aceptás que nuestro equipo procese tus datos para emitir tu factura electrónica.<br>
+      Cualquier duda escribinos por <a href="https://wa.me/593979120058" target="_blank" rel="noopener" style="color:var(--imf-cyan)">WhatsApp</a>.
+    </p>
+  </form>
+
+  <!-- Success state -->
+  <div class="ff-success-card" id="ff-success">
+    <span class="ff-success-card__icon">✅</span>
+    <h2 class="ff-success-card__title">¡Listo, recibimos tu solicitud!</h2>
+    <p class="ff-success-card__sub">Nuestro equipo verifica los datos y te emite la factura electrónica al email que ingresaste en menos de <strong>24 horas hábiles</strong>.</p>
+    <div class="ff-success-card__id">Solicitud # <span id="ff-success-id">—</span></div>
+    <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a href="/formularios" class="imf-btn imf-btn--secondary">← Volver a formularios</a>
+      <a href="https://wa.me/593979120058?text=Hola%20envi%C3%A9%20solicitud%20de%20factura%20%23" target="_blank" rel="noopener" class="imf-btn imf-btn--primary">💬 Avisar por WhatsApp</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+
+// Auto-detect tipo según dígitos
+$('#ff-iden').addEventListener('input', (e)=>{
+  const v = e.target.value.replace(/\D/g,'');
+  e.target.value = v;
+  const hint = $('#ff-iden-hint');
+  if (v.length === 13 && document.querySelector('input[name="tipo"][value="cedula"]:checked')) {
+    document.querySelector('input[name="tipo"][value="ruc"]').checked = true;
+    hint.textContent = 'RUC detectado (13 dígitos)';
+  } else if (v.length === 10) {
+    hint.textContent = 'Cédula ✓ (10 dígitos)';
+  } else if (v.length > 0 && v.length < 10) {
+    hint.textContent = `${v.length}/10 dígitos`;
+  }
+});
+
+// Cambio tipo update hint
+document.querySelectorAll('input[name="tipo"]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    const t = r.value;
+    const iden = $('#ff-iden');
+    const hint = $('#ff-iden-hint');
+    if (t==='cedula') { iden.placeholder='1712345678'; hint.textContent='Cédula 10 dígitos'; iden.disabled=false; }
+    else if (t==='ruc') { iden.placeholder='1712345678001'; hint.textContent='RUC 13 dígitos'; iden.disabled=false; }
+    else if (t==='pasaporte') { iden.placeholder='XYZ123456'; hint.textContent='Número de pasaporte'; iden.disabled=false; }
+    else { iden.placeholder='No aplica'; hint.textContent='Sin identificación (consumidor final)'; iden.value=''; iden.disabled=true; }
+  });
+});
+
+// Producto "Otro" → enfocar desc
+document.querySelectorAll('input[name="producto"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    if (r.value==='otro') $('#ff-desc').focus();
+  });
+});
+
+function showErr(msg){
+  const el = $('#ff-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>el.style.display='none', 6000);
+}
+
+$('#ff-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  $('#ff-err').style.display='none';
+
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const iden = $('#ff-iden').value.trim();
+  const nombre = $('#ff-nombre').value.trim();
+  const email = $('#ff-email').value.trim();
+  const tel = $('#ff-tel').value.trim();
+  const dir = $('#ff-dir').value.trim();
+  const producto = document.querySelector('input[name="producto"]:checked').value;
+  const monto = parseFloat($('#ff-monto').value);
+  const desc = $('#ff-desc').value.trim();
+  const fechaPago = $('#ff-fecha-pago').value;
+
+  // Validación
+  if (tipo !== 'consumidor_final' && !iden) return showErr('Ingresá tu número de identificación');
+  if (tipo === 'cedula' && iden.length !== 10) return showErr('La cédula debe tener 10 dígitos');
+  if (tipo === 'ruc' && iden.length !== 13) return showErr('El RUC debe tener 13 dígitos');
+  if (nombre.length < 3) return showErr('Ingresá tu nombre completo');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Email inválido');
+  if (!monto || monto <= 0) return showErr('Ingresá el monto pagado');
+
+  // Construir descripcion final
+  const PRODUCTO_LABEL = { club:'Club de Importadores', curso:'Curso individual', asesoria:'Asesoría 1:1', otro:'Otro' };
+  let descFinal = PRODUCTO_LABEL[producto];
+  if (desc) descFinal += ' — ' + desc;
+  if (fechaPago) descFinal += ` (pago: ${fechaPago})`;
+
+  const payload = {
+    tipo_id: tipo,
+    identificacion: iden || '9999999999999',
+    nombre: nombre,
+    email: email,
+    telefono: tel || null,
+    direccion: dir || null,
+    producto: producto,
+    monto: monto,
+    descripcion: descFinal,
+    fecha_pago: fechaPago || null,
+  };
+
+  const btn = $('#ff-submit');
+  const label = $('#ff-submit-label');
+  btn.disabled = true;
+  label.innerHTML = '<span class="ff-spinner"></span> Enviando…';
+
+  try {
+    const r = await fetch('/api/formularios/factura/solicitar', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({}));
+      throw new Error(err.detail || 'Error ' + r.status);
+    }
+    const d = await r.json();
+    $('#ff-form').style.display = 'none';
+    $('#ff-success').classList.add('show');
+    $('#ff-success-id').textContent = String(d.borrador_id).padStart(5,'0');
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch (err) {
+    btn.disabled = false;
+    label.innerHTML = '🧾 Solicitar mi factura';
+    showErr('Algo falló: ' + err.message + '. Intentá de nuevo o escribinos al WhatsApp.');
+  }
+});
+
+// Default fecha pago = hoy
+$('#ff-fecha-pago').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
