@@ -45,6 +45,7 @@ from api import imporfactory_youtube
 from api import imporfactory_finanzas
 from api import imporfactory_mensajeria
 from api import imporfactory_admin
+from api import cobranzas_tv
 
 
 # ────────────────────────────────────────
@@ -116,6 +117,7 @@ app.include_router(imporfactory_youtube.router)
 app.include_router(imporfactory_finanzas.router)
 app.include_router(imporfactory_mensajeria.router)
 app.include_router(imporfactory_admin.router)
+app.include_router(cobranzas_tv.router)
 
 
 # ────────────────────────────────────────
@@ -199,6 +201,22 @@ async def configuracion_page(request: Request):
 @app.get("/admin/formularios", response_class=HTMLResponse)
 async def admin_formularios_page(request: Request):
     return _no_cache_html(render_premium(request, "admin/formularios.html", {"active_item": "admin_formularios"}))
+
+
+@app.get("/tv/cobranzas", response_class=HTMLResponse)
+async def tv_cobranzas(request: Request, key: str = ""):
+    """Tablero TV de cobranzas — PÚBLICO protegido por clave (la tele lo abre sin login)."""
+    expected = os.environ.get("TV_COBRANZAS_KEY", "")
+    if not expected or key != expected:
+        return HTMLResponse(
+            '<body style="background:#0a0e1f;color:#94a3b8;font-family:system-ui;'
+            'display:grid;place-items:center;height:100vh;margin:0">'
+            '<div style="text-align:center"><div style="font-size:48px">🔒</div>'
+            '<h1 style="font-weight:800">Acceso restringido</h1>'
+            '<p>Este tablero requiere una clave válida.</p></div></body>',
+            status_code=403,
+        )
+    return _no_cache_html(render_premium(request, "tv/cobranzas.html", {"tv_key": key}))
 
 
 @app.get("/login", response_class=HTMLResponse)

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Tablero de Cobranzas · IMPORFACTORY</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#0a0e1f; --bg-1:#111a36; --card:#141d3c; --card-2:#0f1730;
+  --border:rgba(255,255,255,.08); --border-2:rgba(56,117,250,.22);
+  --primary:#2563eb; --accent:#06b6d4;
+  --text:#f1f5f9; --dim:#94a3b8; --soft:#64748b;
+  --gold:#fbbf24; --silver:#cbd5e1; --bronze:#d97757;
+  --green:#22c55e; --yellow:#f59e0b; --red:#ef4444;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Inter',-apple-system,system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 18% -5%, rgba(37,99,235,.28) 0%, transparent 42%),
+    radial-gradient(circle at 95% 100%, rgba(6,182,212,.20) 0%, transparent 40%),
+    var(--bg-0);
+  color:var(--text); height:100vh; display:flex; flex-direction:column;
+  padding:1.6vh 1.8vw; gap:1.4vh;
+}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* HEADER */
+.head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-logo{width:3.6vh;height:3.6vh;min-width:42px;min-height:42px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.8vh;color:#fff}
+.brand-txt b{display:block;font-size:2.2vh;font-weight:900;letter-spacing:-.02em;line-height:1}
+.brand-txt span{font-size:1.15vh;letter-spacing:.32em;color:var(--accent);font-weight:700;text-transform:uppercase}
+.head-right{display:flex;align-items:center;gap:1.4vw}
+.toggle{display:flex;background:var(--card-2);border:1px solid var(--border);border-radius:999px;padding:4px;gap:4px}
+.toggle button{background:none;border:none;color:var(--dim);font-family:inherit;font-weight:800;font-size:1.5vh;padding:.7vh 1.6vh;border-radius:999px;cursor:pointer;transition:all .2s}
+.toggle button.on{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+.clock{text-align:right}
+.clock .t{font-size:2.6vh;font-weight:800;letter-spacing:.04em;line-height:1}
+.clock .d{font-size:1.2vh;color:var(--dim);text-transform:capitalize}
+
+/* TEAM SCOREBOARD */
+.team{flex-shrink:0;background:linear-gradient(135deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border-2);border-radius:18px;padding:1.8vh 2vw;display:flex;align-items:center;justify-content:space-between;gap:2vw;position:relative;overflow:hidden}
+.team::after{content:"";position:absolute;top:-40%;right:-5%;width:30vh;height:30vh;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.18),transparent 65%);pointer-events:none}
+.team-l{position:relative;z-index:1}
+.team-l .lbl{font-size:1.3vh;text-transform:uppercase;letter-spacing:.22em;color:var(--accent);font-weight:800;margin-bottom:.4vh}
+.team-l .big{font-size:7.2vh;font-weight:900;line-height:.92;letter-spacing:-.03em}
+.team-l .big small{font-size:3vh;color:var(--dim);font-weight:800;margin-right:.3vh}
+.team-meta{display:flex;gap:2.4vw;position:relative;z-index:1}
+.team-meta .it{text-align:center}
+.team-meta .it .v{font-size:3.4vh;font-weight:900;line-height:1}
+.team-meta .it .k{font-size:1.2vh;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-top:.3vh}
+.team-bar-wrap{position:relative;z-index:1;flex:1;max-width:30vw}
+.team-bar-top{display:flex;justify-content:space-between;font-size:1.3vh;color:var(--dim);font-weight:700;margin-bottom:.7vh}
+.team-bar-top b{color:var(--text)}
+.team-bar{height:1.5vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.team-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 1s cubic-bezier(.2,.8,.2,1)}
+
+/* PODIUM */
+.podium{flex-shrink:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1.2vw;align-items:end}
+.pod{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:18px;padding:2vh 1vw 1.6vh;text-align:center;position:relative;transition:transform .4s}
+.pod.p1{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.25),0 1.4vh 4vh rgba(251,191,36,.18);padding-top:2.6vh}
+.pod.p2{border-color:rgba(203,213,225,.4)}
+.pod.p3{border-color:rgba(217,119,87,.4)}
+.medal{position:absolute;top:-2.2vh;left:50%;transform:translateX(-50%);width:4.4vh;height:4.4vh;min-width:48px;min-height:48px;border-radius:50%;display:grid;place-items:center;font-size:2.2vh;font-weight:900;box-shadow:0 .8vh 2vh rgba(0,0,0,.4)}
+.p1 .medal{background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#3a2800}
+.p2 .medal{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#1e293b}
+.p3 .medal{background:linear-gradient(135deg,#e9a178,#c2603a);color:#3a1d0e}
+.pod .av{width:7vh;height:7vh;min-width:74px;min-height:74px;border-radius:50%;margin:1vh auto .8vh;display:grid;place-items:center;font-size:3vh;font-weight:900;color:#fff}
+.p1 .av{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.p2 .av{background:linear-gradient(135deg,#64748b,#94a3b8)}
+.p3 .av{background:linear-gradient(135deg,#b45309,#d97757)}
+.pod .nm{font-size:2.4vh;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.pod .amt{font-size:4.4vh;font-weight:900;letter-spacing:-.03em;line-height:1;margin:.5vh 0}
+.p1 .amt{font-size:5.4vh;background:linear-gradient(135deg,#fcd34d,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pod .amt small{font-size:2.2vh;color:var(--dim);font-weight:800}
+.pod .sub{font-size:1.3vh;color:var(--dim);font-weight:700}
+.pod .pbar{height:.9vh;background:var(--card-2);border-radius:999px;overflow:hidden;margin-top:1vh;border:1px solid var(--border)}
+.pod .pbar i{display:block;height:100%;border-radius:999px;transition:width 1s}
+.pod .pct{font-size:1.5vh;font-weight:900;margin-top:.6vh}
+
+/* TABLE (rest) */
+.rest{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.rest-head{display:grid;grid-template-columns:5vw 1fr 26vw 13vw 11vw;padding:1vh 1.6vw;font-size:1.1vh;text-transform:uppercase;letter-spacing:.14em;color:var(--soft);font-weight:800;border-bottom:1px solid var(--border);flex-shrink:0}
+.rest-body{flex:1;overflow:hidden}
+.row{display:grid;grid-template-columns:5vw 1fr 26vw 13vw 11vw;align-items:center;padding:1.3vh 1.6vw;border-bottom:1px solid var(--border);transition:background .3s}
+.row:last-child{border-bottom:none}
+.row .rk{font-size:2.4vh;font-weight:900;color:var(--soft)}
+.row .who{display:flex;align-items:center;gap:1vw}
+.row .who .ini{width:4.4vh;height:4.4vh;min-width:46px;min-height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.8vh;color:#fff}
+.row .who .nm{font-size:2.2vh;font-weight:800}
+.row .who .cl{font-size:1.2vh;color:var(--dim);font-weight:600}
+.row .prog .pbar{height:1.1vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.row .prog .pbar i{display:block;height:100%;border-radius:999px;transition:width 1s}
+.row .prog .ptxt{font-size:1.2vh;color:var(--dim);font-weight:700;margin-top:.4vh;display:flex;justify-content:space-between}
+.row .amt{text-align:right;font-size:2.6vh;font-weight:900;letter-spacing:-.02em}
+.row .ven{text-align:right;font-size:1.9vh;font-weight:800;color:var(--red)}
+.row .ven.zero{color:var(--soft)}
+
+/* FOOTER */
+.foot{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;font-size:1.2vh;color:var(--soft);font-weight:600;padding:0 .4vw}
+.live{display:inline-flex;align-items:center;gap:.6vh}
+.dot{width:1vh;height:1vh;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite}
+.dot.mock{background:var(--yellow);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 1.2vh rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.fade{animation:fade .5s ease}
+@keyframes fade{from{opacity:.3;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+  <div class="head">
+    <div class="brand">
+      <div class="brand-logo">IF</div>
+      <div class="brand-txt"><b>Tablero de Cobranzas</b><span>IMPORFACTORY · Equipo de ventas</span></div>
+    </div>
+    <div class="head-right">
+      <div class="toggle">
+        <button id="t-hoy" onclick="setPeriodo('hoy')">HOY</button>
+        <button id="t-mes" class="on" onclick="setPeriodo('mes')">ESTE MES</button>
+      </div>
+      <div class="clock"><div class="t mono" id="clock">--:--</div><div class="d" id="date">—</div></div>
+    </div>
+  </div>
+
+  <div class="team">
+    <div class="team-l">
+      <div class="lbl" id="team-lbl">Cobrado este mes</div>
+      <div class="big mono"><small>$</small><span id="team-total">0</span></div>
+    </div>
+    <div class="team-bar-wrap">
+      <div class="team-bar-top"><span>Meta del equipo</span><b id="team-metatxt">$0</b></div>
+      <div class="team-bar"><i id="team-bar" style="width:0%"></i></div>
+      <div class="team-bar-top" style="margin-top:.5vh;margin-bottom:0"><span id="team-pct">0% de la meta</span></div>
+    </div>
+    <div class="team-meta">
+      <div class="it"><div class="v mono" id="team-pagos">0</div><div class="k">Pagos</div></div>
+      <div class="it"><div class="v mono" style="color:var(--red)" id="team-vencido">$0</div><div class="k">Vencido</div></div>
+    </div>
+  </div>
+
+  <div class="podium" id="podium"></div>
+
+  <div class="rest">
+    <div class="rest-head"><span>#</span><span>Asesor</span><span>Avance a meta</span><span style="text-align:right">Cobrado</span><span style="text-align:right">Vencido</span></div>
+    <div class="rest-body" id="rest-body"></div>
+  </div>
+
+  <div class="foot">
+    <span class="live"><span class="dot" id="live-dot"></span><span id="live-txt">Conectando…</span></span>
+    <span id="updated">—</span>
+  </div>
+
+<script>
+const KEY = "{{ tv_key }}";
+let periodo = "mes";
+let refreshTimer = null;
+
+const fmt = (n) => "$" + Math.round(Number(n||0)).toLocaleString("en-US");
+const fmtK = (n) => { n=Number(n||0); return n>=1000 ? "$"+(n/1000).toFixed(1).replace(/\.0$/,'')+"k" : "$"+Math.round(n); };
+const initials = (s) => String(s||"?").trim().split(/\s+/).map(w=>w[0]).join("").substring(0,2).toUpperCase();
+
+function barColor(pct){
+  if(pct==null) return "linear-gradient(90deg,var(--primary),var(--accent))";
+  if(pct>=100) return "linear-gradient(90deg,#16a34a,#22c55e)";
+  if(pct>=80)  return "linear-gradient(90deg,#0891b2,#06b6d4)";
+  if(pct>=50)  return "linear-gradient(90deg,#d97706,#f59e0b)";
+  return "linear-gradient(90deg,#dc2626,#ef4444)";
+}
+
+function setPeriodo(p){
+  periodo = p;
+  document.getElementById("t-hoy").classList.toggle("on", p==="hoy");
+  document.getElementById("t-mes").classList.toggle("on", p==="mes");
+  document.getElementById("team-lbl").textContent = p==="hoy" ? "Cobrado hoy" : "Cobrado este mes";
+  cargar();
+}
+
+function tick(){
+  const now = new Date();
+  document.getElementById("clock").textContent = now.toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("date").textContent = now.toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
+}
+
+async function cargar(){
+  try{
+    const r = await fetch(`/api/cobranzas/tv/ranking?periodo=${periodo}&key=${encodeURIComponent(KEY)}`,{cache:"no-store"});
+    if(!r.ok){ document.getElementById("live-txt").textContent = "Error "+r.status; return; }
+    const d = await r.json();
+    render(d);
+  }catch(e){ document.getElementById("live-txt").textContent = "Sin conexión"; }
+}
+
+function render(d){
+  const a = d.asesores || [];
+  // equipo
+  document.getElementById("team-total").textContent = Math.round(d.total_equipo||0).toLocaleString("en-US");
+  document.getElementById("team-pagos").textContent = d.total_pagos||0;
+  document.getElementById("team-vencido").textContent = fmtK(d.total_vencido||0);
+  document.getElementById("team-metatxt").textContent = fmt(d.meta_equipo||0);
+  const tpct = d.meta_equipo>0 ? Math.min(Math.round(d.total_equipo/d.meta_equipo*100),100) : 0;
+  const tpctReal = d.meta_equipo>0 ? Math.round(d.total_equipo/d.meta_equipo*100) : 0;
+  document.getElementById("team-bar").style.width = tpct+"%";
+  document.getElementById("team-pct").textContent = tpctReal+"% de la meta";
+
+  // podio: orden visual 2 - 1 - 3
+  const top = a.slice(0,3);
+  const order = [top[1], top[0], top[2]];
+  const cls = ["p2","p1","p3"];
+  const medal = ["2","1","3"];
+  document.getElementById("podium").innerHTML = order.map((p,idx)=>{
+    if(!p) return `<div class="pod ${cls[idx]}" style="visibility:hidden"></div>`;
+    const pct = p.pct_meta;
+    const pctClamp = pct==null?0:Math.min(pct,100);
+    return `<div class="pod ${cls[idx]} fade">
+      <div class="medal">${medal[idx]}</div>
+      <div class="av">${initials(p.asesor)}</div>
+      <div class="nm">${escapeHtml(p.asesor)}</div>
+      <div class="amt mono">${idx===1?"":"<small>$</small>"}${idx===1?fmt(p.total_cobrado):Math.round(p.total_cobrado).toLocaleString("en-US")}</div>
+      <div class="sub">${p.num_pagos} pagos · ${p.num_clientes} clientes</div>
+      <div class="pbar"><i style="width:${pctClamp}%;background:${barColor(pct)}"></i></div>
+      <div class="pct" style="color:${pct>=100?'var(--green)':pct>=50?'var(--yellow)':'var(--red)'}">${pct==null?'—':pct+"% meta"}</div>
+    </div>`;
+  }).join("");
+
+  // resto (rank 4+)
+  const rest = a.slice(3);
+  document.getElementById("rest-body").innerHTML = rest.length===0
+    ? `<div style="padding:3vh;text-align:center;color:var(--soft);font-size:1.8vh">Solo ${a.length} asesores en el ranking</div>`
+    : rest.map(p=>{
+      const pct = p.pct_meta; const pctClamp = pct==null?0:Math.min(pct,100);
+      return `<div class="row fade">
+        <span class="rk mono">${p.rank}</span>
+        <div class="who"><div class="ini">${initials(p.asesor)}</div><div><div class="nm">${escapeHtml(p.asesor)}</div><div class="cl">${p.num_clientes} clientes</div></div></div>
+        <div class="prog"><div class="pbar"><i style="width:${pctClamp}%;background:${barColor(pct)}"></i></div><div class="ptxt"><span>${pct==null?'sin meta':pct+'%'}</span><span>meta ${fmtK(p.meta)}</span></div></div>
+        <span class="amt mono">${fmt(p.total_cobrado)}</span>
+        <span class="ven mono ${p.monto_vencido>0?'':'zero'}">${p.monto_vencido>0?fmtK(p.monto_vencido):'—'}</span>
+      </div>`;
+    }).join("");
+
+  // estado
+  const dot = document.getElementById("live-dot");
+  const isMock = d.source === "mock";
+  dot.className = "dot" + (isMock?" mock":"");
+  document.getElementById("live-txt").textContent = isMock ? "Datos demo (esperando Carterachat)" : "En vivo · Carterachat";
+  document.getElementById("updated").textContent = "Actualizado " + new Date().toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+tick(); setInterval(tick, 1000);
+cargar();
+setInterval(cargar, 45000);
+</script>
+</body>
+</html>
