@@ -203,6 +203,14 @@ async def admin_formularios_page(request: Request):
     return _no_cache_html(render_premium(request, "admin/formularios.html", {"active_item": "admin_formularios"}))
 
 
+@app.get("/proyeccion", response_class=HTMLResponse)
+async def proyeccion_page(request: Request):
+    return _no_cache_html(render_premium(request, "proyeccion/index.html", {
+        "active_item": "proyeccion",
+        "tv_key": os.environ.get("TV_COBRANZAS_KEY", ""),
+    }))
+
+
 @app.get("/tv/cobranzas", response_class=HTMLResponse)
 async def tv_cobranzas(request: Request, key: str = ""):
     """Tablero TV de cobranzas — PÚBLICO protegido por clave (la tele lo abre sin login)."""

@@ -1,0 +1,174 @@
+{% extends "_shared/_imporfactory_premium_layout.html" %}
+
+{% block title %}Proyección de Ventas{% endblock %}
+{% block topbar_title %}Finanzas › Proyección de Ventas{% endblock %}
+
+{% block content %}
+<div class="imf-page-header">
+    <div>
+        <h1 class="imf-page-title">Proyección de Ventas</h1>
+        <p class="imf-page-subtitle">Metas fundamentadas en el histórico real + proyección por inversión en ads</p>
+    </div>
+    <div style="display:flex;gap:12px">
+        <a href="/tv/cobranzas?key={{ tv_key }}" target="_blank" class="imf-btn imf-btn--ghost">📺 Ver tablero TV</a>
+        <button class="imf-btn imf-btn--primary" id="btn-guardar">💾 Guardar metas</button>
+    </div>
+</div>
+
+<div class="imf-grid-2" style="margin-bottom:24px">
+    <!-- INPUTS -->
+    <div class="imf-card">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 4px">El mes que viene</h2>
+        <p style="font-size:12.5px;color:var(--imf-text-secondary);margin:0 0 20px">Movés estos números y las metas se recalculan al instante.</p>
+
+        <div style="margin-bottom:18px">
+            <label style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--imf-text-primary);margin-bottom:8px"><span>💰 Inversión en ads (mes)</span><span class="imf-badge imf-badge--info mono" id="lbl-ads">$5,000</span></label>
+            <input type="range" id="ads" min="0" max="30000" step="500" value="5000" style="width:100%;accent-color:var(--imf-cyan)">
+            <input type="number" id="ads-num" value="5000" min="0" step="500" style="width:100%;margin-top:8px;padding:9px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:var(--ff-mono)">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:8px">📈 ROAS (retorno x $1 ads)</label>
+                <input type="number" id="roas" value="3" min="0" step="0.5" style="width:100%;padding:9px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:var(--ff-mono)">
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:4px">$1 → $3 en ventas</div>
+            </div>
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:8px">🌱 Venta orgánica (mes)</label>
+                <input type="number" id="organica" value="5000" min="0" step="500" style="width:100%;padding:9px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:var(--ff-mono)">
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:4px">sin ads (grupos, referidos)</div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:8px">🎟️ Ticket promedio</label>
+                <input type="number" id="ticket" value="486" min="1" step="1" style="width:100%;padding:9px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:var(--ff-mono)">
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:4px">real: $486/venta</div>
+            </div>
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:8px">🎯 % a cobrar</label>
+                <input type="number" id="pctcob" value="100" min="0" max="100" step="5" style="width:100%;padding:9px 12px;background:var(--imf-bg-base);border:1px solid var(--imf-border);border-radius:var(--rd-md);color:var(--imf-text-primary);font-size:14px;font-family:var(--ff-mono)">
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:4px">meta cobranza vs vendido</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTADO EQUIPO -->
+    <div class="imf-card" style="background:linear-gradient(135deg,rgba(37,99,235,0.10),rgba(6,182,212,0.06));border-color:rgba(56,117,250,0.28)">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 20px">Meta proyectada del equipo</h2>
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:13px;color:var(--imf-text-muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700">Ventas a lograr</div>
+            <div style="font-size:52px;font-weight:900;letter-spacing:-.03em;line-height:1;font-family:var(--ff-mono)" id="r-ventas">$0</div>
+        </div>
+        <div class="imf-grid-3" style="gap:12px">
+            <div style="text-align:center;padding:14px;background:var(--imf-bg-base);border-radius:12px;border:1px solid var(--imf-border)">
+                <div style="font-size:26px;font-weight:900;font-family:var(--ff-mono)" id="r-alumnos">0</div>
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:2px">alumnos nuevos</div>
+            </div>
+            <div style="text-align:center;padding:14px;background:var(--imf-bg-base);border-radius:12px;border:1px solid var(--imf-border)">
+                <div style="font-size:26px;font-weight:900;font-family:var(--ff-mono);color:var(--imf-cyan)" id="r-ads">$0</div>
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:2px">vienen de ads</div>
+            </div>
+            <div style="text-align:center;padding:14px;background:var(--imf-bg-base);border-radius:12px;border:1px solid var(--imf-border)">
+                <div style="font-size:26px;font-weight:900;font-family:var(--ff-mono);color:var(--imf-gold,#fbbf24)" id="r-cobranza">$0</div>
+                <div style="font-size:11px;color:var(--imf-text-muted);margin-top:2px">meta cobranza</div>
+            </div>
+        </div>
+        <p style="font-size:11.5px;color:var(--imf-text-muted);margin:16px 0 0;line-height:1.5">El reparto por asesor usa el <b>share histórico real</b> (Adrian 41% · Eve 29% · Kathy 22% · Karito 5% · Diego 3%), calculado de $74.406 vendidos.</p>
+    </div>
+</div>
+
+<!-- METAS POR ASESOR -->
+<div class="imf-card">
+    <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0 0 16px">Meta por asesor</h2>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <thead>
+            <tr style="text-align:left;color:var(--imf-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border)">Asesor</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Share</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Meta ventas</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Meta cobranza</th>
+                <th style="padding:8px 12px;border-bottom:1px solid var(--imf-border);text-align:right">Alumnos</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"><tr><td colspan="5" style="padding:32px;text-align:center;color:var(--imf-text-muted)">Cargando...</td></tr></tbody>
+    </table>
+</div>
+
+<script>
+const tvKey = "{{ tv_key }}";
+let SHARE = [];  // [{asesor, share_pct}]
+
+const money = (n) => "$" + Math.round(Number(n||0)).toLocaleString("en-US");
+
+function val(id){ return parseFloat(document.getElementById(id).value) || 0; }
+
+function recalc(){
+    const ads = val("ads-num"), roas = val("roas"), org = val("organica"), ticket = val("ticket")||486, pctcob = val("pctcob");
+    const metaV = org + ads * roas;
+    const ventasAds = ads * roas;
+    const metaC = metaV * pctcob/100;
+    const alumnos = ticket>0 ? Math.round(metaV/ticket) : 0;
+    document.getElementById("r-ventas").textContent = money(metaV);
+    document.getElementById("r-alumnos").textContent = alumnos;
+    document.getElementById("r-ads").textContent = money(ventasAds);
+    document.getElementById("r-cobranza").textContent = money(metaC);
+    document.getElementById("lbl-ads").textContent = money(ads);
+    // tabla por asesor
+    document.getElementById("tbody").innerHTML = SHARE.map(a=>{
+        const mv = metaV * a.share_pct/100;
+        const mc = mv * pctcob/100;
+        const al = ticket>0 ? Math.round(mv/ticket) : 0;
+        return `<tr style="border-bottom:1px solid var(--imf-divider)">
+            <td style="padding:11px 12px;font-weight:700">${a.asesor}</td>
+            <td style="padding:11px 12px;text-align:right;font-family:var(--ff-mono);color:var(--imf-text-secondary)">${a.share_pct}%</td>
+            <td style="padding:11px 12px;text-align:right;font-family:var(--ff-mono);font-weight:800">${money(mv)}</td>
+            <td style="padding:11px 12px;text-align:right;font-family:var(--ff-mono);color:var(--imf-gold,#fbbf24)">${money(mc)}</td>
+            <td style="padding:11px 12px;text-align:right;font-family:var(--ff-mono)">${al}</td>
+        </tr>`;
+    }).join("") || '<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--imf-text-muted)">Sin asesores configurados</td></tr>';
+}
+
+// sync slider <-> number
+document.getElementById("ads").addEventListener("input", e=>{ document.getElementById("ads-num").value=e.target.value; recalc(); });
+document.getElementById("ads-num").addEventListener("input", e=>{ const v=Math.min(parseFloat(e.target.value)||0,30000); document.getElementById("ads").value=v; recalc(); });
+["roas","organica","ticket","pctcob"].forEach(id=>document.getElementById(id).addEventListener("input", recalc));
+
+document.getElementById("btn-guardar").addEventListener("click", async ()=>{
+    const btn = document.getElementById("btn-guardar");
+    btn.disabled = true; btn.textContent = "Guardando...";
+    try{
+        const r = await fetch("/api/cobranzas/proyeccion", {
+            method:"PUT", credentials:"include", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({
+                inversion_ads: val("ads-num"), roas: val("roas"), venta_organica: val("organica"),
+                ticket_promedio: val("ticket"), pct_cobranza: val("pctcob"),
+            }),
+        });
+        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.detail||r.status); }
+        btn.textContent = "✓ Metas guardadas";
+        setTimeout(()=>{ btn.textContent="💾 Guardar metas"; btn.disabled=false; }, 2000);
+    }catch(e){ alert("Error: "+e.message); btn.textContent="💾 Guardar metas"; btn.disabled=false; }
+});
+
+(async function init(){
+    try{
+        const r = await fetch("/api/cobranzas/proyeccion", {credentials:"include"});
+        if(r.ok){
+            const d = await r.json();
+            const c = d.config || {};
+            document.getElementById("ads").value = c.inversion_ads ?? 5000;
+            document.getElementById("ads-num").value = c.inversion_ads ?? 5000;
+            document.getElementById("roas").value = c.roas ?? 3;
+            document.getElementById("organica").value = c.venta_organica ?? 5000;
+            document.getElementById("ticket").value = c.ticket_promedio ?? 486;
+            document.getElementById("pctcob").value = c.pct_cobranza ?? 100;
+            SHARE = (d.asesores||[]).map(a=>({asesor:a.asesor, share_pct:a.share_pct}));
+        }
+    }catch(e){}
+    if(SHARE.length===0) SHARE = [{asesor:"Adrian",share_pct:41},{asesor:"Eve",share_pct:29},{asesor:"Kathy",share_pct:22},{asesor:"Karito",share_pct:5},{asesor:"Diego",share_pct:3}];
+    recalc();
+})();
+</script>
+{% endblock %}

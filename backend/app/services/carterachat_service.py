@@ -27,12 +27,13 @@ BASE = "https://new.imporsuitpro.com"
 TIMEOUT = 8.0
 
 # Datos demo (closers reales del ERP) para construir/probar la TV sin token.
+# Incluye VENDIDO (deudas creadas) y COBRADO (pagos) por asesor en el periodo.
 MOCK_RANKING = [
-    {"asesor": "Adrian", "total_cobrado": 6840.0, "num_pagos": 23, "monto_vencido": 1200.0, "num_clientes": 31},
-    {"asesor": "Eve",    "total_cobrado": 5210.0, "num_pagos": 19, "monto_vencido": 800.0,  "num_clientes": 24},
-    {"asesor": "Kathy",  "total_cobrado": 4980.0, "num_pagos": 18, "monto_vencido": 1500.0, "num_clientes": 22},
-    {"asesor": "Karito", "total_cobrado": 2730.0, "num_pagos": 11, "monto_vencido": 600.0,  "num_clientes": 9},
-    {"asesor": "Diego",  "total_cobrado": 1890.0, "num_pagos": 8,  "monto_vencido": 2100.0, "num_clientes": 7},
+    {"asesor": "Adrian", "total_vendido": 7300.0, "num_ventas": 15, "total_cobrado": 6840.0, "num_pagos": 23, "monto_vencido": 1200.0, "num_clientes": 31},
+    {"asesor": "Eve",    "total_vendido": 6100.0, "num_ventas": 13, "total_cobrado": 5210.0, "num_pagos": 19, "monto_vencido": 800.0,  "num_clientes": 24},
+    {"asesor": "Kathy",  "total_vendido": 3900.0, "num_ventas": 9,  "total_cobrado": 4980.0, "num_pagos": 18, "monto_vencido": 1500.0, "num_clientes": 22},
+    {"asesor": "Karito", "total_vendido": 1450.0, "num_ventas": 4,  "total_cobrado": 730.0,  "num_pagos": 5,  "monto_vencido": 600.0,  "num_clientes": 9},
+    {"asesor": "Diego",  "total_vendido": 700.0,  "num_ventas": 2,  "total_cobrado": 1890.0, "num_pagos": 8,  "monto_vencido": 2100.0, "num_clientes": 7},
 ]
 
 
@@ -61,6 +62,8 @@ def _headers(token: str) -> dict:
 def _normalize(x: dict) -> dict:
     return {
         "asesor": x.get("nombre_asesor") or x.get("asesor") or f"Asesor {x.get('id_asesor', '?')}",
+        "total_vendido": float(x.get("total_vendido") or x.get("monto_vendido") or 0),
+        "num_ventas": int(x.get("num_ventas") or x.get("num_deudas") or 0),
         "total_cobrado": float(x.get("total_cobrado") or 0),
         "num_pagos": int(x.get("num_pagos") or 0),
         "monto_vencido": float(x.get("monto_vencido") or x.get("monto_pendiente") or 0),

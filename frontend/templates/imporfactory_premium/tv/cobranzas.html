@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Tablero de Cobranzas · IMPORFACTORY</title>
+<title>Tablero de Ventas · IMPORFACTORY</title>
 <meta name="robots" content="noindex,nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -13,247 +13,193 @@
   --border:rgba(255,255,255,.08); --border-2:rgba(56,117,250,.22);
   --primary:#2563eb; --accent:#06b6d4;
   --text:#f1f5f9; --dim:#94a3b8; --soft:#64748b;
-  --gold:#fbbf24; --silver:#cbd5e1; --bronze:#d97757;
-  --green:#22c55e; --yellow:#f59e0b; --red:#ef4444;
+  --gold:#fbbf24; --green:#22c55e; --yellow:#f59e0b; --red:#ef4444;
 }
 html,body{height:100%;overflow:hidden}
 body{
   font-family:'Inter',-apple-system,system-ui,sans-serif;
-  background:
-    radial-gradient(circle at 18% -5%, rgba(37,99,235,.28) 0%, transparent 42%),
-    radial-gradient(circle at 95% 100%, rgba(6,182,212,.20) 0%, transparent 40%),
-    var(--bg-0);
-  color:var(--text); height:100vh; display:flex; flex-direction:column;
-  padding:1.6vh 1.8vw; gap:1.4vh;
+  background:radial-gradient(circle at 18% -5%, rgba(37,99,235,.28) 0%, transparent 42%),
+             radial-gradient(circle at 95% 100%, rgba(6,182,212,.20) 0%, transparent 40%),var(--bg-0);
+  color:var(--text); height:100vh; display:flex; flex-direction:column; padding:1.5vh 1.6vw; gap:1.2vh;
 }
 .mono{font-family:'JetBrains Mono',monospace}
-
-/* HEADER */
 .head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .brand{display:flex;align-items:center;gap:14px}
-.brand-logo{width:3.6vh;height:3.6vh;min-width:42px;min-height:42px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.8vh;color:#fff}
-.brand-txt b{display:block;font-size:2.2vh;font-weight:900;letter-spacing:-.02em;line-height:1}
-.brand-txt span{font-size:1.15vh;letter-spacing:.32em;color:var(--accent);font-weight:700;text-transform:uppercase}
+.brand-logo{width:3.4vh;height:3.4vh;min-width:40px;min-height:40px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.7vh;color:#fff}
+.brand-txt b{display:block;font-size:2.1vh;font-weight:900;letter-spacing:-.02em;line-height:1}
+.brand-txt span{font-size:1.1vh;letter-spacing:.3em;color:var(--accent);font-weight:700;text-transform:uppercase}
 .head-right{display:flex;align-items:center;gap:1.4vw}
 .toggle{display:flex;background:var(--card-2);border:1px solid var(--border);border-radius:999px;padding:4px;gap:4px}
-.toggle button{background:none;border:none;color:var(--dim);font-family:inherit;font-weight:800;font-size:1.5vh;padding:.7vh 1.6vh;border-radius:999px;cursor:pointer;transition:all .2s}
+.toggle button{background:none;border:none;color:var(--dim);font-family:inherit;font-weight:800;font-size:1.4vh;padding:.6vh 1.5vh;border-radius:999px;cursor:pointer;transition:all .2s}
 .toggle button.on{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
 .clock{text-align:right}
-.clock .t{font-size:2.6vh;font-weight:800;letter-spacing:.04em;line-height:1}
-.clock .d{font-size:1.2vh;color:var(--dim);text-transform:capitalize}
+.clock .t{font-size:2.4vh;font-weight:800;letter-spacing:.04em;line-height:1}
+.clock .d{font-size:1.1vh;color:var(--dim);text-transform:capitalize}
 
-/* TEAM SCOREBOARD */
-.team{flex-shrink:0;background:linear-gradient(135deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border-2);border-radius:18px;padding:1.8vh 2vw;display:flex;align-items:center;justify-content:space-between;gap:2vw;position:relative;overflow:hidden}
-.team::after{content:"";position:absolute;top:-40%;right:-5%;width:30vh;height:30vh;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.18),transparent 65%);pointer-events:none}
-.team-l{position:relative;z-index:1}
-.team-l .lbl{font-size:1.3vh;text-transform:uppercase;letter-spacing:.22em;color:var(--accent);font-weight:800;margin-bottom:.4vh}
-.team-l .big{font-size:7.2vh;font-weight:900;line-height:.92;letter-spacing:-.03em}
-.team-l .big small{font-size:3vh;color:var(--dim);font-weight:800;margin-right:.3vh}
-.team-meta{display:flex;gap:2.4vw;position:relative;z-index:1}
-.team-meta .it{text-align:center}
-.team-meta .it .v{font-size:3.4vh;font-weight:900;line-height:1}
-.team-meta .it .k{font-size:1.2vh;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-top:.3vh}
-.team-bar-wrap{position:relative;z-index:1;flex:1;max-width:30vw}
-.team-bar-top{display:flex;justify-content:space-between;font-size:1.3vh;color:var(--dim);font-weight:700;margin-bottom:.7vh}
-.team-bar-top b{color:var(--text)}
-.team-bar{height:1.5vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-.team-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 1s cubic-bezier(.2,.8,.2,1)}
+/* TEAM: dos marcadores */
+.team{flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:1.2vw}
+.scard{background:linear-gradient(135deg,var(--card),var(--card-2));border:1px solid var(--border-2);border-radius:16px;padding:1.5vh 1.6vw;position:relative;overflow:hidden}
+.scard.cob{border-color:rgba(251,191,36,.28)}
+.scard .lbl{font-size:1.2vh;text-transform:uppercase;letter-spacing:.2em;font-weight:800;margin-bottom:.3vh}
+.scard.ven .lbl{color:var(--accent)} .scard.cob .lbl{color:var(--gold)}
+.scard .row1{display:flex;align-items:baseline;justify-content:space-between;gap:1vw}
+.scard .big{font-size:5.4vh;font-weight:900;letter-spacing:-.03em;line-height:.95}
+.scard .big small{font-size:2.4vh;color:var(--dim);font-weight:800}
+.scard .meta{font-size:1.5vh;color:var(--dim);font-weight:700;text-align:right}
+.scard .meta b{color:var(--text)}
+.scard .bar{height:1.2vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border);margin-top:1vh}
+.scard .bar i{display:block;height:100%;border-radius:999px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.scard.ven .bar i{background:linear-gradient(90deg,var(--primary),var(--accent))}
+.scard.cob .bar i{background:linear-gradient(90deg,#d97706,var(--gold))}
+.scard .sub{display:flex;justify-content:space-between;font-size:1.1vh;color:var(--soft);font-weight:700;margin-top:.6vh}
 
-/* PODIUM */
-.podium{flex-shrink:0;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:1.2vw;align-items:end}
-.pod{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:18px;padding:2vh 1vw 1.6vh;text-align:center;position:relative;transition:transform .4s}
-.pod.p1{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.25),0 1.4vh 4vh rgba(251,191,36,.18);padding-top:2.6vh}
-.pod.p2{border-color:rgba(203,213,225,.4)}
-.pod.p3{border-color:rgba(217,119,87,.4)}
-.medal{position:absolute;top:-2.2vh;left:50%;transform:translateX(-50%);width:4.4vh;height:4.4vh;min-width:48px;min-height:48px;border-radius:50%;display:grid;place-items:center;font-size:2.2vh;font-weight:900;box-shadow:0 .8vh 2vh rgba(0,0,0,.4)}
+/* PODIUM (por vendido) */
+.podium{flex-shrink:0;display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:1vw;align-items:end}
+.pod{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:16px;padding:1.6vh .9vw 1.3vh;text-align:center;position:relative}
+.pod.p1{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.25),0 1.2vh 3.5vh rgba(251,191,36,.16);padding-top:2.4vh}
+.medal{position:absolute;top:-2vh;left:50%;transform:translateX(-50%);width:4vh;height:4vh;min-width:44px;min-height:44px;border-radius:50%;display:grid;place-items:center;font-size:2vh;font-weight:900;box-shadow:0 .7vh 1.8vh rgba(0,0,0,.4)}
 .p1 .medal{background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#3a2800}
 .p2 .medal{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#1e293b}
 .p3 .medal{background:linear-gradient(135deg,#e9a178,#c2603a);color:#3a1d0e}
-.pod .av{width:7vh;height:7vh;min-width:74px;min-height:74px;border-radius:50%;margin:1vh auto .8vh;display:grid;place-items:center;font-size:3vh;font-weight:900;color:#fff}
-.p1 .av{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
-.p2 .av{background:linear-gradient(135deg,#64748b,#94a3b8)}
-.p3 .av{background:linear-gradient(135deg,#b45309,#d97757)}
-.pod .nm{font-size:2.4vh;font-weight:800;letter-spacing:-.01em;line-height:1.1}
-.pod .amt{font-size:4.4vh;font-weight:900;letter-spacing:-.03em;line-height:1;margin:.5vh 0}
-.p1 .amt{font-size:5.4vh;background:linear-gradient(135deg,#fcd34d,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
-.pod .amt small{font-size:2.2vh;color:var(--dim);font-weight:800}
-.pod .sub{font-size:1.3vh;color:var(--dim);font-weight:700}
-.pod .pbar{height:.9vh;background:var(--card-2);border-radius:999px;overflow:hidden;margin-top:1vh;border:1px solid var(--border)}
-.pod .pbar i{display:block;height:100%;border-radius:999px;transition:width 1s}
-.pod .pct{font-size:1.5vh;font-weight:900;margin-top:.6vh}
+.pod .av{width:6vh;height:6vh;min-width:64px;min-height:64px;border-radius:50%;margin:.8vh auto .6vh;display:grid;place-items:center;font-size:2.6vh;font-weight:900;color:#fff}
+.p1 .av{background:linear-gradient(135deg,#f59e0b,#fbbf24)} .p2 .av{background:linear-gradient(135deg,#64748b,#94a3b8)} .p3 .av{background:linear-gradient(135deg,#b45309,#d97757)}
+.pod .nm{font-size:2.2vh;font-weight:800;line-height:1.1}
+.pod .amt{font-size:4vh;font-weight:900;letter-spacing:-.03em;line-height:1;margin:.4vh 0}
+.p1 .amt{font-size:4.8vh;background:linear-gradient(135deg,#fcd34d,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pod .amt small{font-size:2vh;color:var(--dim);font-weight:800}
+.pod .pct{font-size:1.4vh;font-weight:900;margin-top:.4vh}
+.pod .cob{font-size:1.4vh;color:var(--gold);font-weight:800;margin-top:.5vh}
+.pod .cob span{color:var(--soft);font-weight:600}
 
-/* TABLE (rest) */
-.rest{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.rest-head{display:grid;grid-template-columns:5vw 1fr 26vw 13vw 11vw;padding:1vh 1.6vw;font-size:1.1vh;text-transform:uppercase;letter-spacing:.14em;color:var(--soft);font-weight:800;border-bottom:1px solid var(--border);flex-shrink:0}
-.rest-body{flex:1;overflow:hidden}
-.row{display:grid;grid-template-columns:5vw 1fr 26vw 13vw 11vw;align-items:center;padding:1.3vh 1.6vw;border-bottom:1px solid var(--border);transition:background .3s}
+/* TABLE */
+.rest{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.rh{display:grid;grid-template-columns:4vw 1fr 22vw 22vw 10vw;padding:.9vh 1.4vw;font-size:1vh;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:800;border-bottom:1px solid var(--border);flex-shrink:0}
+.rb{flex:1;overflow:hidden}
+.row{display:grid;grid-template-columns:4vw 1fr 22vw 22vw 10vw;align-items:center;padding:1.1vh 1.4vw;border-bottom:1px solid var(--border)}
 .row:last-child{border-bottom:none}
-.row .rk{font-size:2.4vh;font-weight:900;color:var(--soft)}
-.row .who{display:flex;align-items:center;gap:1vw}
-.row .who .ini{width:4.4vh;height:4.4vh;min-width:46px;min-height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.8vh;color:#fff}
-.row .who .nm{font-size:2.2vh;font-weight:800}
-.row .who .cl{font-size:1.2vh;color:var(--dim);font-weight:600}
-.row .prog .pbar{height:1.1vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-.row .prog .pbar i{display:block;height:100%;border-radius:999px;transition:width 1s}
-.row .prog .ptxt{font-size:1.2vh;color:var(--dim);font-weight:700;margin-top:.4vh;display:flex;justify-content:space-between}
-.row .amt{text-align:right;font-size:2.6vh;font-weight:900;letter-spacing:-.02em}
-.row .ven{text-align:right;font-size:1.9vh;font-weight:800;color:var(--red)}
+.row .rk{font-size:2.2vh;font-weight:900;color:var(--soft)}
+.who{display:flex;align-items:center;gap:.8vw}
+.who .ini{width:4vh;height:4vh;min-width:42px;min-height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:1.6vh;color:#fff}
+.who .nm{font-size:2vh;font-weight:800}
+.who .cl{font-size:1.1vh;color:var(--dim);font-weight:600}
+.mini .pbar{height:1vh;background:var(--card-2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.mini .pbar i{display:block;height:100%;border-radius:999px;transition:width 1s}
+.mini .t{display:flex;justify-content:space-between;font-size:1.2vh;font-weight:700;margin-bottom:.3vh}
+.mini .t .amt{font-weight:900}
+.mini .t .mt{color:var(--soft);font-weight:600}
+.row .ven{text-align:right;font-size:1.8vh;font-weight:800;color:var(--red)}
 .row .ven.zero{color:var(--soft)}
 
-/* FOOTER */
-.foot{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;font-size:1.2vh;color:var(--soft);font-weight:600;padding:0 .4vw}
+.foot{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;font-size:1.1vh;color:var(--soft);font-weight:600;padding:0 .4vw}
 .live{display:inline-flex;align-items:center;gap:.6vh}
-.dot{width:1vh;height:1vh;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite}
+.dot{width:1vh;height:1vh;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 .dot.mock{background:var(--yellow);animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 1.2vh rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-.fade{animation:fade .5s ease}
-@keyframes fade{from{opacity:.3;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fade{animation:fade .5s ease}@keyframes fade{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
-
   <div class="head">
-    <div class="brand">
-      <div class="brand-logo">IF</div>
-      <div class="brand-txt"><b>Tablero de Cobranzas</b><span>IMPORFACTORY · Equipo de ventas</span></div>
-    </div>
+    <div class="brand"><div class="brand-logo">IF</div><div class="brand-txt"><b>Tablero de Ventas</b><span>IMPORFACTORY · Equipo</span></div></div>
     <div class="head-right">
-      <div class="toggle">
-        <button id="t-hoy" onclick="setPeriodo('hoy')">HOY</button>
-        <button id="t-mes" class="on" onclick="setPeriodo('mes')">ESTE MES</button>
-      </div>
+      <div class="toggle"><button id="t-hoy" onclick="setPeriodo('hoy')">HOY</button><button id="t-mes" class="on" onclick="setPeriodo('mes')">ESTE MES</button></div>
       <div class="clock"><div class="t mono" id="clock">--:--</div><div class="d" id="date">—</div></div>
     </div>
   </div>
 
   <div class="team">
-    <div class="team-l">
-      <div class="lbl" id="team-lbl">Cobrado este mes</div>
-      <div class="big mono"><small>$</small><span id="team-total">0</span></div>
+    <div class="scard ven">
+      <div class="lbl" id="ven-lbl">Vendido este mes</div>
+      <div class="row1"><div class="big mono"><small>$</small><span id="ven-total">0</span></div><div class="meta">meta<br><b id="ven-meta">$0</b></div></div>
+      <div class="bar"><i id="ven-bar" style="width:0%"></i></div>
+      <div class="sub"><span id="ven-pct">0% de la meta</span><span id="ven-cnt">0 ventas</span></div>
     </div>
-    <div class="team-bar-wrap">
-      <div class="team-bar-top"><span>Meta del equipo</span><b id="team-metatxt">$0</b></div>
-      <div class="team-bar"><i id="team-bar" style="width:0%"></i></div>
-      <div class="team-bar-top" style="margin-top:.5vh;margin-bottom:0"><span id="team-pct">0% de la meta</span></div>
-    </div>
-    <div class="team-meta">
-      <div class="it"><div class="v mono" id="team-pagos">0</div><div class="k">Pagos</div></div>
-      <div class="it"><div class="v mono" style="color:var(--red)" id="team-vencido">$0</div><div class="k">Vencido</div></div>
+    <div class="scard cob">
+      <div class="lbl" id="cob-lbl">Cobrado este mes</div>
+      <div class="row1"><div class="big mono"><small>$</small><span id="cob-total">0</span></div><div class="meta">meta<br><b id="cob-meta">$0</b></div></div>
+      <div class="bar"><i id="cob-bar" style="width:0%"></i></div>
+      <div class="sub"><span id="cob-pct">0% de la meta</span><span id="cob-cnt">0 pagos · vencido <b style="color:var(--red)" id="cob-ven">$0</b></span></div>
     </div>
   </div>
 
   <div class="podium" id="podium"></div>
 
   <div class="rest">
-    <div class="rest-head"><span>#</span><span>Asesor</span><span>Avance a meta</span><span style="text-align:right">Cobrado</span><span style="text-align:right">Vencido</span></div>
-    <div class="rest-body" id="rest-body"></div>
+    <div class="rh"><span>#</span><span>Asesor</span><span>Ventas vs meta</span><span>Cobranza vs meta</span><span style="text-align:right">Vencido</span></div>
+    <div class="rb" id="rb"></div>
   </div>
 
   <div class="foot">
-    <span class="live"><span class="dot" id="live-dot"></span><span id="live-txt">Conectando…</span></span>
+    <span class="live"><span class="dot" id="dot"></span><span id="livetxt">Conectando…</span></span>
     <span id="updated">—</span>
   </div>
 
 <script>
 const KEY = "{{ tv_key }}";
 let periodo = "mes";
-let refreshTimer = null;
+const fmt = (n)=>"$"+Math.round(Number(n||0)).toLocaleString("en-US");
+const fmtK = (n)=>{n=Number(n||0);return n>=1000?"$"+(n/1000).toFixed(1).replace(/\.0$/,'')+"k":"$"+Math.round(n);};
+const ini = (s)=>String(s||"?").trim().split(/\s+/).map(w=>w[0]).join("").substring(0,2).toUpperCase();
+const esc = (s)=>String(s||"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function barColor(p){if(p==null)return"linear-gradient(90deg,var(--primary),var(--accent))";if(p>=100)return"linear-gradient(90deg,#16a34a,#22c55e)";if(p>=80)return"linear-gradient(90deg,#0891b2,#06b6d4)";if(p>=50)return"linear-gradient(90deg,#d97706,#f59e0b)";return"linear-gradient(90deg,#dc2626,#ef4444)";}
+function pctColor(p){return p>=100?'var(--green)':p>=50?'var(--yellow)':'var(--red)';}
 
-const fmt = (n) => "$" + Math.round(Number(n||0)).toLocaleString("en-US");
-const fmtK = (n) => { n=Number(n||0); return n>=1000 ? "$"+(n/1000).toFixed(1).replace(/\.0$/,'')+"k" : "$"+Math.round(n); };
-const initials = (s) => String(s||"?").trim().split(/\s+/).map(w=>w[0]).join("").substring(0,2).toUpperCase();
-
-function barColor(pct){
-  if(pct==null) return "linear-gradient(90deg,var(--primary),var(--accent))";
-  if(pct>=100) return "linear-gradient(90deg,#16a34a,#22c55e)";
-  if(pct>=80)  return "linear-gradient(90deg,#0891b2,#06b6d4)";
-  if(pct>=50)  return "linear-gradient(90deg,#d97706,#f59e0b)";
-  return "linear-gradient(90deg,#dc2626,#ef4444)";
-}
-
-function setPeriodo(p){
-  periodo = p;
-  document.getElementById("t-hoy").classList.toggle("on", p==="hoy");
-  document.getElementById("t-mes").classList.toggle("on", p==="mes");
-  document.getElementById("team-lbl").textContent = p==="hoy" ? "Cobrado hoy" : "Cobrado este mes";
-  cargar();
-}
-
-function tick(){
-  const now = new Date();
-  document.getElementById("clock").textContent = now.toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit"});
-  document.getElementById("date").textContent = now.toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
-}
+function setPeriodo(p){periodo=p;document.getElementById("t-hoy").classList.toggle("on",p==="hoy");document.getElementById("t-mes").classList.toggle("on",p==="mes");
+  document.getElementById("ven-lbl").textContent=p==="hoy"?"Vendido hoy":"Vendido este mes";document.getElementById("cob-lbl").textContent=p==="hoy"?"Cobrado hoy":"Cobrado este mes";cargar();}
+function tick(){const n=new Date();document.getElementById("clock").textContent=n.toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit"});document.getElementById("date").textContent=n.toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});}
 
 async function cargar(){
-  try{
-    const r = await fetch(`/api/cobranzas/tv/ranking?periodo=${periodo}&key=${encodeURIComponent(KEY)}`,{cache:"no-store"});
-    if(!r.ok){ document.getElementById("live-txt").textContent = "Error "+r.status; return; }
-    const d = await r.json();
-    render(d);
-  }catch(e){ document.getElementById("live-txt").textContent = "Sin conexión"; }
+  try{const r=await fetch(`/api/cobranzas/tv/ranking?periodo=${periodo}&key=${encodeURIComponent(KEY)}`,{cache:"no-store"});
+    if(!r.ok){document.getElementById("livetxt").textContent="Error "+r.status;return;}render(await r.json());}
+  catch(e){document.getElementById("livetxt").textContent="Sin conexión";}
 }
 
 function render(d){
-  const a = d.asesores || [];
-  // equipo
-  document.getElementById("team-total").textContent = Math.round(d.total_equipo||0).toLocaleString("en-US");
-  document.getElementById("team-pagos").textContent = d.total_pagos||0;
-  document.getElementById("team-vencido").textContent = fmtK(d.total_vencido||0);
-  document.getElementById("team-metatxt").textContent = fmt(d.meta_equipo||0);
-  const tpct = d.meta_equipo>0 ? Math.min(Math.round(d.total_equipo/d.meta_equipo*100),100) : 0;
-  const tpctReal = d.meta_equipo>0 ? Math.round(d.total_equipo/d.meta_equipo*100) : 0;
-  document.getElementById("team-bar").style.width = tpct+"%";
-  document.getElementById("team-pct").textContent = tpctReal+"% de la meta";
+  const a=d.asesores||[];
+  // marcadores equipo
+  document.getElementById("ven-total").textContent=Math.round(d.total_vendido||0).toLocaleString("en-US");
+  document.getElementById("ven-meta").textContent=fmt(d.meta_ventas_equipo);
+  document.getElementById("ven-cnt").textContent=(d.total_ventas||0)+" ventas";
+  const vp=d.meta_ventas_equipo>0?Math.round(d.total_vendido/d.meta_ventas_equipo*100):0;
+  document.getElementById("ven-bar").style.width=Math.min(vp,100)+"%";document.getElementById("ven-pct").textContent=vp+"% de la meta";
+  document.getElementById("cob-total").textContent=Math.round(d.total_cobrado||0).toLocaleString("en-US");
+  document.getElementById("cob-meta").textContent=fmt(d.meta_cobranza_equipo);
+  document.getElementById("cob-cnt").innerHTML=(d.total_pagos||0)+' pagos · vencido <b style="color:var(--red)">'+fmtK(d.total_vencido||0)+'</b>';
+  const cp=d.meta_cobranza_equipo>0?Math.round(d.total_cobrado/d.meta_cobranza_equipo*100):0;
+  document.getElementById("cob-bar").style.width=Math.min(cp,100)+"%";document.getElementById("cob-pct").textContent=cp+"% de la meta";
 
-  // podio: orden visual 2 - 1 - 3
-  const top = a.slice(0,3);
-  const order = [top[1], top[0], top[2]];
-  const cls = ["p2","p1","p3"];
-  const medal = ["2","1","3"];
-  document.getElementById("podium").innerHTML = order.map((p,idx)=>{
-    if(!p) return `<div class="pod ${cls[idx]}" style="visibility:hidden"></div>`;
-    const pct = p.pct_meta;
-    const pctClamp = pct==null?0:Math.min(pct,100);
-    return `<div class="pod ${cls[idx]} fade">
-      <div class="medal">${medal[idx]}</div>
-      <div class="av">${initials(p.asesor)}</div>
-      <div class="nm">${escapeHtml(p.asesor)}</div>
-      <div class="amt mono">${idx===1?"":"<small>$</small>"}${idx===1?fmt(p.total_cobrado):Math.round(p.total_cobrado).toLocaleString("en-US")}</div>
-      <div class="sub">${p.num_pagos} pagos · ${p.num_clientes} clientes</div>
-      <div class="pbar"><i style="width:${pctClamp}%;background:${barColor(pct)}"></i></div>
-      <div class="pct" style="color:${pct>=100?'var(--green)':pct>=50?'var(--yellow)':'var(--red)'}">${pct==null?'—':pct+"% meta"}</div>
-    </div>`;
+  // podio por vendido
+  const top=a.slice(0,3),order=[top[1],top[0],top[2]],cls=["p2","p1","p3"],md=["2","1","3"];
+  document.getElementById("podium").innerHTML=order.map((p,i)=>{
+    if(!p)return `<div class="pod ${cls[i]}" style="visibility:hidden"></div>`;
+    const pv=p.pct_ventas;
+    return `<div class="pod ${cls[i]} fade"><div class="medal">${md[i]}</div><div class="av">${ini(p.asesor)}</div>
+      <div class="nm">${esc(p.asesor)}</div>
+      <div class="amt mono">${i===1?"":"<small>$</small>"}${i===1?fmt(p.vendido):Math.round(p.vendido).toLocaleString("en-US")}</div>
+      <div class="pct" style="color:${pv==null?'var(--soft)':pctColor(pv)}">${pv==null?'—':pv+"% meta ventas"}</div>
+      <div class="cob">💰 ${fmt(p.cobrado)} <span>cobrado</span></div></div>`;
   }).join("");
 
-  // resto (rank 4+)
-  const rest = a.slice(3);
-  document.getElementById("rest-body").innerHTML = rest.length===0
-    ? `<div style="padding:3vh;text-align:center;color:var(--soft);font-size:1.8vh">Solo ${a.length} asesores en el ranking</div>`
-    : rest.map(p=>{
-      const pct = p.pct_meta; const pctClamp = pct==null?0:Math.min(pct,100);
-      return `<div class="row fade">
-        <span class="rk mono">${p.rank}</span>
-        <div class="who"><div class="ini">${initials(p.asesor)}</div><div><div class="nm">${escapeHtml(p.asesor)}</div><div class="cl">${p.num_clientes} clientes</div></div></div>
-        <div class="prog"><div class="pbar"><i style="width:${pctClamp}%;background:${barColor(pct)}"></i></div><div class="ptxt"><span>${pct==null?'sin meta':pct+'%'}</span><span>meta ${fmtK(p.meta)}</span></div></div>
-        <span class="amt mono">${fmt(p.total_cobrado)}</span>
-        <span class="ven mono ${p.monto_vencido>0?'':'zero'}">${p.monto_vencido>0?fmtK(p.monto_vencido):'—'}</span>
-      </div>`;
+  // resto
+  const rest=a.slice(3);
+  document.getElementById("rb").innerHTML=rest.length===0
+    ?`<div style="padding:2.5vh;text-align:center;color:var(--soft);font-size:1.6vh">Solo ${a.length} asesores en el ranking</div>`
+    :rest.map(p=>{
+      const pv=p.pct_ventas,pc=p.pct_cobranza;
+      return `<div class="row fade"><span class="rk mono">${p.rank}</span>
+        <div class="who"><div class="ini">${ini(p.asesor)}</div><div><div class="nm">${esc(p.asesor)}</div><div class="cl">${p.num_clientes} clientes</div></div></div>
+        <div class="mini"><div class="t"><span class="amt">${fmt(p.vendido)}</span><span class="mt">${pv==null?'':pv+'% · '}meta ${fmtK(p.meta_ventas)}</span></div><div class="pbar"><i style="width:${pv==null?0:Math.min(pv,100)}%;background:${barColor(pv)}"></i></div></div>
+        <div class="mini"><div class="t"><span class="amt" style="color:var(--gold)">${fmt(p.cobrado)}</span><span class="mt">${pc==null?'':pc+'% · '}meta ${fmtK(p.meta_cobranza)}</span></div><div class="pbar"><i style="width:${pc==null?0:Math.min(pc,100)}%;background:${barColor(pc)}"></i></div></div>
+        <span class="ven mono ${p.monto_vencido>0?'':'zero'}">${p.monto_vencido>0?fmtK(p.monto_vencido):'—'}</span></div>`;
     }).join("");
 
-  // estado
-  const dot = document.getElementById("live-dot");
-  const isMock = d.source === "mock";
-  dot.className = "dot" + (isMock?" mock":"");
-  document.getElementById("live-txt").textContent = isMock ? "Datos demo (esperando Carterachat)" : "En vivo · Carterachat";
-  document.getElementById("updated").textContent = "Actualizado " + new Date().toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const isMock=d.source==="mock";
+  document.getElementById("dot").className="dot"+(isMock?" mock":"");
+  document.getElementById("livetxt").textContent=isMock?"Datos demo (esperando Carterachat)":"En vivo · Carterachat";
+  document.getElementById("updated").textContent="Actualizado "+new Date().toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 
-function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-tick(); setInterval(tick, 1000);
-cargar();
-setInterval(cargar, 45000);
+tick();setInterval(tick,1000);cargar();setInterval(cargar,45000);
 </script>
 </body>
 </html>
