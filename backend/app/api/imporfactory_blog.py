@@ -408,6 +408,34 @@ async def track_view(slug: str, request: Request, db: AsyncSession = Depends(get
     return _Resp(status_code=204, headers=headers)
 
 
+@public_router.post("/track-click/{slug}")
+@public_router.get("/track-click/{slug}")
+async def track_click(slug: str, request: Request, tipo: str = "club",
+                      db: AsyncSession = Depends(get_db)):
+    """Beacon de click en CTA (tipo: club | whatsapp). Responde 204.
+    Lo llaman los botones CTA del HTML estatico via navigator.sendBeacon.
+    """
+    tipo = tipo if tipo in ("club", "whatsapp") else "club"
+    row = (await db.execute(text("""
+        SELECT id FROM blog_articulos
+        WHERE empresa_id = 5 AND (slug = :s OR slug = :s2 OR seo_canonical_url LIKE :url)
+        LIMIT 1
+    """), {"s": slug, "s2": slug[9:] if len(slug) > 9 and slug[:8].isdigit() else slug,
+           "url": f"%/{slug}.html"})).first()
+    articulo_id = row[0] if row else None
+    ref = ""
+    try:
+        ref = (request.headers.get("referer") or "")[:300]
+    except Exception:
+        ref = ""
+    await db.execute(text("""
+        INSERT INTO blog_clics_cta (slug, tipo_cta, articulo_id, referrer)
+        VALUES (:slug, :tipo, :aid, :ref)
+    """), {"slug": slug[:220], "tipo": tipo, "aid": articulo_id, "ref": ref})
+    await db.commit()
+    return _Resp(status_code=204, headers={"Cache-Control": "no-store, no-cache, must-revalidate"})
+
+
 # ════════════════════════════════════════════════════════════
 # Stats blog para dashboard /blog (auth required)
 # ════════════════════════════════════════════════════════════
@@ -516,4 +544,70 @@ async def top_posts(
         LIMIT :limit
     """), {"d": dominio, "n": dias, "limit": limit})).mappings().all()
     return {"items": [dict(r) for r in rows]}
+
+
+@router.get("/{empresa_id}/stats/embudo")
+async def stats_embudo(
+    empresa_id: int,
+    dias: int = 30,
+    dominio: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    user: Usuario = Depends(get_current_user),
+):
+    """Embudo Visitas → Clicks CTA (club/whatsapp) + CTR por post."""
+    _ensure_empresa_5(empresa_id)
+    dom = "AND a.target_dominio = :d" if dominio else ""
+    params = {"n": dias}
+    if dominio:
+        params["d"] = dominio
+
+    visitas = (await db.execute(text(f"""
+        SELECT COALESCE(SUM(v.visitas), 0)
+        FROM blog_visitas_diarias v
+        JOIN blog_articulos a ON a.id = v.articulo_id
+        WHERE a.empresa_id = 5 {dom}
+          AND v.fecha >= DATE_SUB(CURDATE(), INTERVAL :n DAY)
+    """), params)).scalar() or 0
+
+    clicks_rows = (await db.execute(text(f"""
+        SELECT cc.tipo_cta, COUNT(*) AS n
+        FROM blog_clics_cta cc
+        LEFT JOIN blog_articulos a ON a.id = cc.articulo_id
+        WHERE cc.created_at >= DATE_SUB(NOW(), INTERVAL :n DAY) {dom}
+        GROUP BY cc.tipo_cta
+    """), params)).mappings().all()
+    clicks = {r["tipo_cta"]: int(r["n"]) for r in clicks_rows}
+    clicks_club = clicks.get("club", 0)
+    clicks_wa = clicks.get("whatsapp", 0)
+    clicks_total = clicks_club + clicks_wa
+    ctr = round(clicks_total / visitas * 100, 2) if visitas else 0.0
+
+    por_post = (await db.execute(text(f"""
+        SELECT a.slug, a.titulo, a.vistas_30d AS visitas, COALESCE(cc.clicks, 0) AS clicks
+        FROM blog_articulos a
+        LEFT JOIN (
+            SELECT articulo_id, COUNT(*) AS clicks FROM blog_clics_cta
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL :n DAY)
+            GROUP BY articulo_id
+        ) cc ON cc.articulo_id = a.id
+        WHERE a.empresa_id = 5 {dom} AND a.estado = 'publicado'
+        ORDER BY clicks DESC, a.vistas_30d DESC
+        LIMIT 15
+    """), params)).mappings().all()
+    por_post_out = []
+    for r in por_post:
+        v = int(r["visitas"] or 0)
+        cl = int(r["clicks"] or 0)
+        por_post_out.append({"slug": r["slug"], "titulo": r["titulo"], "visitas": v,
+                             "clicks": cl, "ctr": round(cl / v * 100, 1) if v else 0.0})
+
+    return {
+        "dias": dias,
+        "visitas": int(visitas),
+        "clicks_club": clicks_club,
+        "clicks_whatsapp": clicks_wa,
+        "clicks_total": clicks_total,
+        "ctr_pct": ctr,
+        "por_post": por_post_out,
+    }
 

@@ -264,6 +264,21 @@
     </div>
 </div>
 
+<!-- Embudo de conversión: Visitas → Clicks CTA -->
+<div class="imf-card anim-in" style="margin-bottom:32px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:var(--ff-serif);font-size:18px;font-weight:700;margin:0">Embudo de conversión (30d)</h2>
+        <div style="display:flex;gap:22px;flex-wrap:wrap" id="embudo-kpis"></div>
+    </div>
+    <div class="imf-grid-2" style="gap:24px;align-items:center">
+        <div id="chart-funnel" style="height:280px"></div>
+        <div>
+            <h3 style="font-size:13px;color:var(--imf-text-muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin:0 0 12px">Top posts por CTR</h3>
+            <div id="funnel-top" style="display:flex;flex-direction:column;gap:4px"><div style="padding:24px 0;text-align:center;color:var(--imf-text-muted);font-size:13px">Esperando datos…</div></div>
+        </div>
+    </div>
+</div>
+
 <!-- Filtros + posts grid -->
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:16px;flex-wrap:wrap">
     <h2 style="font-family:var(--ff-serif);font-size:24px;font-weight:800;margin:0;letter-spacing:-0.01em">Todos los artículos</h2>
@@ -306,6 +321,7 @@ const CHART_THEME = {
 };
 
 let chart = null;
+let funnelChart = null;
 let articulos = [];
 let _animatedKPIs = false;
 let authOk = true;
@@ -503,7 +519,41 @@ async function loadArticulos() {
   }).join('');
 }
 
-document.getElementById('filter-dominio').addEventListener('change', () => { loadStats(); loadChart(); loadTopPosts(); loadArticulos(); });
+async function loadEmbudo() {
+  const dom = document.getElementById('filter-dominio').value;
+  const d = await safeFetch('/api/imporfactory/blog/5/stats/embudo?dias=30' + (dom ? '&dominio=' + dom : ''));
+  if (!d) return;
+  document.getElementById('embudo-kpis').innerHTML = [
+    { l: 'Visitas', v: FMT_INT(d.visitas), c: 'var(--imf-cyan)' },
+    { l: 'Clicks CTA', v: FMT_INT(d.clicks_total), c: '#fbbf24' },
+    { l: 'CTR', v: (d.ctr_pct || 0) + '%', c: '#22c55e' },
+  ].map(k => `<div style="text-align:center"><div style="font-size:22px;font-weight:900;font-family:var(--ff-mono);color:${k.c}">${k.v}</div><div style="font-size:10px;color:var(--imf-text-muted);text-transform:uppercase;letter-spacing:.08em">${k.l}</div></div>`).join('');
+  const fdata = [
+    { x: 'Visitas', y: d.visitas || 0 },
+    { x: 'Clicks CTA', y: d.clicks_total || 0 },
+    { x: 'Club', y: d.clicks_club || 0 },
+    { x: 'WhatsApp', y: d.clicks_whatsapp || 0 },
+  ];
+  if (funnelChart) funnelChart.destroy();
+  funnelChart = new ApexCharts(document.getElementById('chart-funnel'), {
+    chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+    series: [{ name: 'Cantidad', data: fdata.map(f => f.y) }],
+    xaxis: { categories: fdata.map(f => f.x), labels: { style: { colors: 'rgba(255,255,255,0.5)', fontSize: '12px' } } },
+    plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true, barHeight: '68%' } },
+    colors: ['#06b6d4', '#fbbf24', '#22c55e', '#25D366'],
+    dataLabels: { enabled: true, style: { colors: ['#fff'], fontWeight: 800 }, formatter: v => FMT_INT(v) },
+    legend: { show: false },
+    grid: { borderColor: 'rgba(255,255,255,0.05)' },
+    tooltip: { theme: 'dark' },
+  });
+  funnelChart.render();
+  const tp = d.por_post || [];
+  document.getElementById('funnel-top').innerHTML = tp.filter(p => p.clicks > 0).length === 0
+    ? '<div style="padding:24px 0;text-align:center;color:var(--imf-text-muted);font-size:13px">Sin clicks aún — empezarán a registrarse cuando publiques con el nuevo tracking</div>'
+    : tp.slice(0, 6).map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--imf-divider);font-size:13px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:58%">${escapeHtml(p.titulo || p.slug)}</span><span style="font-family:var(--ff-mono);font-weight:700;white-space:nowrap"><span style="color:#22c55e">${p.ctr}%</span> <span style="color:var(--imf-text-muted);font-size:11px">${p.clicks}c·${FMT_INT(p.visitas)}v</span></span></div>`).join('');
+}
+
+document.getElementById('filter-dominio').addEventListener('change', () => { loadStats(); loadChart(); loadTopPosts(); loadEmbudo(); loadArticulos(); });
 document.getElementById('sort').addEventListener('change', loadArticulos);
 let st;
 document.getElementById('search').addEventListener('input', () => { clearTimeout(st); st = setTimeout(loadArticulos, 300); });
@@ -514,6 +564,7 @@ loadCategorias().then(() => loadArticulos());
 loadStats();
 loadChart();
 loadTopPosts();
+loadEmbudo();
 
 // auto refresh KPIs cada 30s (silencioso si auth fallo)
 setInterval(() => { if (authOk) loadStats(); }, 30000);

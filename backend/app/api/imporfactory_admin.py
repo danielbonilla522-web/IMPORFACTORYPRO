@@ -90,26 +90,6 @@ async def listar_alumnos(
 
 
 # ────────────────────────────────────────
-# CURSOS
-# ────────────────────────────────────────
-@router.get("/{empresa_id}/cursos")
-async def listar_cursos(
-    empresa_id: int,
-    db: AsyncSession = Depends(get_db_erp),
-    user: Usuario = Depends(get_current_user),
-):
-    """Lista cursos desde el ERP."""
-    _ensure_empresa_5(empresa_id)
-    rows = (await db.execute(text("""
-        SELECT id, slug, titulo, descripcion, imagen_url, instructor, paquete,
-               total_lecciones, total_modulos, duracion_total_min, orden, activo
-        FROM cursos
-        ORDER BY orden ASC, id ASC
-    """))).mappings().all()
-    return {"items": [dict(r) for r in rows]}
-
-
-# ────────────────────────────────────────
 # AGENDAMIENTOS (agenda_citas)
 # ────────────────────────────────────────
 @router.get("/{empresa_id}/agendamientos")

@@ -250,8 +250,8 @@ async def publish_to_danytravel(db: AsyncSession, articulo_id: int, target_domin
             # Logueo pero no fallo — el post ya esta escrito
             print(f"WARN rebuild_index fallo: {e}", file=sys.stderr)
 
-    # Persistir en blog_articulos el path del HTML generado
-    public_url = f"https://danytraveloficial.com/blog/posts/{post['filename']}"
+    # Persistir en blog_articulos el path del HTML generado (canonical por dominio)
+    public_url = f"{domconf['site_url']}/blog/posts/{post['filename']}"
     await db.execute(text("""
         UPDATE blog_articulos
         SET seo_canonical_url = :url

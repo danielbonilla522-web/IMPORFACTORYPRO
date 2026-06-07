@@ -185,11 +185,6 @@ async def alumnos_page(request: Request):
     return _no_cache_html(render_premium(request, "alumnos/index.html", {"active_item": "alumnos"}))
 
 
-@app.get("/cursos", response_class=HTMLResponse)
-async def cursos_page(request: Request):
-    return _no_cache_html(render_premium(request, "cursos/index.html", {"active_item": "cursos"}))
-
-
 @app.get("/agendamiento", response_class=HTMLResponse)
 async def agendamiento_page(request: Request):
     return _no_cache_html(render_premium(request, "agendamiento/index.html", {"active_item": "agendamiento"}))
