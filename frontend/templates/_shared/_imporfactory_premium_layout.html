@@ -74,6 +74,19 @@
         });
       })();
     </script>
+    <script>
+      // Guard de sesión: si no hay sesión válida, manda a /login conservando el destino.
+      (function() {
+        fetch('/api/auth/me', { credentials: 'include' })
+          .then(function(r) {
+            if (r.status === 401 || r.status === 403) {
+              var dest = encodeURIComponent(location.pathname + location.search);
+              location.replace('/login?redirect=' + dest);
+            }
+          })
+          .catch(function() { /* red caída: no expulsar */ });
+      })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -46,6 +46,7 @@ from api import imporfactory_finanzas
 from api import imporfactory_mensajeria
 from api import imporfactory_admin
 from api import cobranzas_tv
+from api import auth
 
 
 # ────────────────────────────────────────
@@ -118,6 +119,7 @@ app.include_router(imporfactory_finanzas.router)
 app.include_router(imporfactory_mensajeria.router)
 app.include_router(imporfactory_admin.router)
 app.include_router(cobranzas_tv.router)
+app.include_router(auth.router)
 
 
 # ────────────────────────────────────────
@@ -229,8 +231,8 @@ async def tv_cobranzas(request: Request, key: str = ""):
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    """Redirige al login del ERP — JWT compartido."""
-    return HTMLResponse('<meta http-equiv="refresh" content="0; url=https://erp.imporchina.com/?redirect=https://impor.imporchina.com/dashboard">')
+    """Login propio de premium (formulario). Valida contra usuarios del ERP (bcrypt)."""
+    return _no_cache_html(render_premium(request, "login.html"))
 
 
 
