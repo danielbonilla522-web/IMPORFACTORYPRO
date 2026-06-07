@@ -4,7 +4,7 @@
    2026-05-27 Fase 0 (Foundation)
    ═══════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root[data-theme='dark'], :root {
   /* ── Fondos editoriales ── */
@@ -58,8 +58,9 @@
   --rd-xl: 20px; --rd-pill: 999px;
 
   /* ── Tipografía ── */
-  --ff-sans:  'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --ff-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+  /* Fuente del WMS (IMPORSHOP): stack de sistema sans-serif. Sin serif Spectral. */
+  --ff-sans:  -apple-system, 'Inter', 'Segoe UI', Roboto, system-ui, BlinkMacSystemFont, sans-serif;
+  --ff-serif: -apple-system, 'Inter', 'Segoe UI', Roboto, system-ui, BlinkMacSystemFont, sans-serif;
   --ff-mono:  'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
 }
 
