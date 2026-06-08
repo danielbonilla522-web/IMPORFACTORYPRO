@@ -48,10 +48,12 @@ GEN_VENV = "/home/ubuntu/sistema/backend/venv/bin/python"
 META = {
     "danytravel": "/home/ubuntu/blog-danytravel/posts_meta.json",
     "imporfactory": "/home/ubuntu/blog-danytravel/posts_meta_imporfactory.json",
+    "club": "/home/ubuntu/blog-danytravel/posts_meta_club.json",
 }
 SITE = {
     "danytravel": "https://danytraveloficial.com",
     "imporfactory": "https://blog.imporfactory.com",
+    "club": "https://clubdeimportadoresoficial.com",
 }
 CAT_TO_BLOG_CAT_ID = {
     "importaciones": 1, "ecommerce": 2, "dropshipping": 12,
@@ -144,7 +146,7 @@ async def notificar_jeff(total: int, n_dany: int, n_impor: int):
                 INSERT INTO whatsapp_queue
                     (empresa_id, telefono, jid, mensaje, wacli_store, scheduled_at,
                      estado, trigger_origen)
-                VALUES (5, :tel, :jid, :msg, '/home/ubuntu/.wacli-imporfactory', NOW(),
+                VALUES (5, :tel, :jid, :msg, '/home/ubuntu/.wacli', NOW(),
                         'PENDIENTE', 'blog_batch')
             """), {"tel": telefono, "jid": jid, "msg": msg})
             await db.commit()
@@ -159,7 +161,7 @@ async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--count", type=int, default=20, help="Total de blogs (se reparte 50/50 entre dominios)")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--solo-dominio", choices=["danytravel", "imporfactory"], help="Generar solo un dominio")
+    ap.add_argument("--solo-dominio", choices=["danytravel", "imporfactory", "club"], help="Generar solo un dominio")
     args = ap.parse_args()
 
     if args.solo_dominio:

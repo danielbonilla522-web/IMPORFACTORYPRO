@@ -45,6 +45,12 @@ DOMINIOS = {
         "site_url": "https://blog.imporfactory.com",
         "blog_url": "https://blog.imporfactory.com/blog",
     },
+    "club": {
+        "posts_dir": Path("/var/www/club-importadores/blog/posts"),
+        "blog_dir": Path("/var/www/club-importadores/blog"),
+        "site_url": "https://clubdeimportadoresoficial.com",
+        "blog_url": "https://clubdeimportadoresoficial.com/blog",
+    },
 }
 
 
