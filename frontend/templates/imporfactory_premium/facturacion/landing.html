@@ -209,13 +209,14 @@ INSERT INTO empresa_config (empresa_id, clave, valor) VALUES
         <th>Identificación</th>
         <th>Email</th>
         <th style="text-align:right">Total</th>
+        <th>Origen</th>
         <th>Estado</th>
         <th>N° / Auth</th>
         <th></th>
       </tr>
     </thead>
     <tbody id="rows">
-      <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Cargando…</td></tr>
+      <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-mut)">Cargando…</td></tr>
     </tbody>
   </table>
 </div>
@@ -325,9 +326,11 @@ async function loadInfo() {
   } else {
     strip.classList.add('disabled');
     $('#es-icon').textContent = '⚠';
-    metaHtml = `<span class="badge warn">SIN CONFIG DATIL</span>`;
+    metaHtml = `<span class="badge warn">EMISIÓN PAUSADA · falta Datil</span>`;
     $('#setup-panel').classList.add('show');
-    $('#panel-rows').classList.add('disabled');
+    // El panel de borradores queda USABLE: podés ver, crear, editar y borrar
+    // solicitudes aunque Datil no esté. Solo "Emitir" se bloquea hasta configurarlo.
+    $('#panel-rows').classList.remove('disabled');
     const ul = $('#missing-list');
     ul.innerHTML = (d.missing_keys||[]).map(k=>`<li>${esc(k)}</li>`).join('');
   }
@@ -348,9 +351,15 @@ function renderRows() {
   const tbody = $('#rows');
   $('#cnt-info').textContent = `${borradores.length} registros`;
   if (borradores.length===0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-mut)">Sin facturas. Click <strong style="color:var(--cyan)">+ Nueva factura</strong> arriba.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-mut)">Sin facturas. Click <strong style="color:var(--cyan)">+ Nueva factura</strong> arriba.</td></tr>`;
     return;
   }
+  const ORIGEN = {
+    form_alumno:'<span class="badge info">🧾 Alumno</span>',
+    form:'<span class="badge" style="background:var(--bg3);color:var(--text-mut)">✏️ Manual</span>',
+    csv_bulk:'<span class="badge" style="background:var(--bg3);color:var(--text-mut)">📑 CSV</span>',
+    api:'<span class="badge" style="background:var(--bg3);color:var(--text-mut)">🔌 API</span>',
+  };
   tbody.innerHTML = borradores.map(b=>{
     const estadoBadge = {
       borrador:'<span class="badge info">Borrador</span>',
@@ -372,6 +381,7 @@ function renderRows() {
           <div style="font-size:10px;color:var(--text-mut)">${esc(b.cliente_tipo_id)}</div></td>
       <td style="font-size:11px;color:var(--text-mut)">${esc(b.cliente_email||'—')}</td>
       <td style="text-align:right;font-family:'JetBrains Mono';font-weight:700">${fmt(b.total)}</td>
+      <td>${ORIGEN[b.fuente] || esc(b.fuente||'—')}</td>
       <td>${estadoBadge}</td>
       <td>${numCol}</td>
       <td style="text-align:right;white-space:nowrap">
@@ -444,7 +454,6 @@ $('#btn-refresh').addEventListener('click',()=>{loadInfo();loadBorradores();});
 
 // Modal
 function openModal(b=null) {
-  if (!datilHabilitado) return toast('Configurá Datil primero','error');
   editingId = b?.id || null;
   $('#modal-title').textContent = b ? `✎ Editar factura #${b.id}` : '+ Nueva factura';
   $('#f-tipo').value = b?.cliente_tipo_id || 'cedula';
