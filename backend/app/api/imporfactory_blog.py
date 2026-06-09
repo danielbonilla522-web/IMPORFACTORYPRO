@@ -96,7 +96,8 @@ async def listar_articulos(
 
     rows = (await db.execute(text(f"""
         SELECT a.id, a.slug, a.titulo, a.subtitulo, a.estado, a.fecha_publicacion,
-               a.miniatura_url, a.vistas, a.tiempo_lectura_min,
+               a.miniatura_url, a.vistas, a.tiempo_lectura_min, a.seo_canonical_url,
+               (a.contenido_html IS NOT NULL AND a.contenido_html <> '') AS editable,
                a.llm_optimization_score, a.generado_con_ai, a.revisado_humano,
                c.nombre AS categoria_nombre, c.slug AS categoria_slug, c.color AS categoria_color
         FROM blog_articulos a

@@ -428,7 +428,8 @@ async function loadTopPosts() {
     const pct = Math.max(3, (it.vistas_periodo / max) * 100);
     const rankClass = i === 0 ? 'top-post-rank--1' : i === 1 ? 'top-post-rank--2' : i === 2 ? 'top-post-rank--3' : 'top-post-rank--other';
     const thumb = it.miniatura_url ? `<img src="${it.miniatura_url}" alt="" class="top-post-thumb">` : `<div class="top-post-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--imf-text-muted);font-size:14px">—</div>`;
-    return `<a href="/blog/editor/${it.id}" class="top-post-row" style="text-decoration:none;color:inherit">
+    const tpUrl = it.seo_canonical_url || `/blog/editor/${it.id}`;
+    return `<a href="${escapeHtml(tpUrl)}" ${it.seo_canonical_url ? 'target="_blank" rel="noopener"' : ''} class="top-post-row" style="text-decoration:none;color:inherit">
       <div class="top-post-rank ${rankClass}">${i+1}</div>
       ${thumb}
       <div class="top-post-info">
@@ -501,7 +502,15 @@ async function loadArticulos() {
       ? `<img src="${it.miniatura_url}" alt="${escapeHtml(it.titulo)}" loading="lazy">`
       : `<div class="post-card-brutal__no-image"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Pendiente miniatura</span></div>`;
     const pendingBadge = noMini ? '<span class="imf-badge imf-badge--warn" style="font-size:9px;font-weight:700">PENDIENTE</span>' : '';
-    return `<a href="/blog/editor/${it.id}" class="post-card-brutal anim-in" style="text-decoration:none;color:inherit;animation-delay:${Math.min(i*30, 300)}ms">
+    // Click en la card = VER el artículo publicado (su URL real). Si aún no está
+    // publicado (sin canonical), abre el editor. Botón ✎ para editar los editables.
+    const verUrl = it.seo_canonical_url || `/blog/editor/${it.id}`;
+    const esPublicado = !!it.seo_canonical_url;
+    const editBtn = it.editable
+      ? `<button onclick="event.preventDefault();event.stopPropagation();location.href='/blog/editor/${it.id}'" title="Editar" style="position:absolute;top:10px;left:10px;z-index:3;width:34px;height:34px;border-radius:9px;border:none;background:rgba(11,20,38,.78);color:#fff;cursor:pointer;font-size:15px;backdrop-filter:blur(4px)">✎</button>`
+      : '';
+    return `<a href="${escapeHtml(verUrl)}" ${esPublicado ? 'target="_blank" rel="noopener"' : ''} class="post-card-brutal anim-in" style="position:relative;text-decoration:none;color:inherit;animation-delay:${Math.min(i*30, 300)}ms">
+      ${editBtn}
       <div class="post-card-brutal__media">
         ${media}
         <div class="post-card-brutal__badges">${aiBadge}${pendingBadge}</div>
@@ -511,7 +520,7 @@ async function loadArticulos() {
         <div class="post-card-brutal__cat" style="color:${catColor}">${escapeHtml(it.categoria_nombre || '—')}</div>
         <h3 class="post-card-brutal__title">${escapeHtml(it.titulo)}</h3>
         <div class="post-card-brutal__footer">
-          <span><span class="post-card-brutal__estado-dot" style="background:${dot}"></span>${lab}</span>
+          <span><span class="post-card-brutal__estado-dot" style="background:${dot}"></span>${esPublicado ? 'Ver ↗' : lab}</span>
           <span>${it.tiempo_lectura_min || '—'} min</span>
         </div>
       </div>
