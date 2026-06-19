@@ -6,8 +6,8 @@ que openai_images_service.py), sin depender del SDK `stripe`. Lee la clave
 secreta desde STRIPE_SECRET_KEY (env o empresa_config, empresa_id=5).
 
 Ofertas (según Playbook de Lanzamiento IMPORCHAT):
-  - principal : $497 pago único — Implementación Completa + 1 año de sistema.
-  - cuotas    : 3 × $197 = $591 — mismo paquete, suscripción mensual (3 cargos).
+  - principal : $297 pago único — Implementación Completa + 1 año de sistema.
+  - cuotas    : 3 × $109 = $327 — mismo paquete, suscripción mensual (3 cargos).
   - lite      : $197 pago único — IMPORCHAT LITE (downsell, 6 meses, sin 1-1).
 
 2026-06-19.
@@ -36,17 +36,17 @@ OFERTAS: dict[str, dict] = {
             "setup técnico, agente vendedor con file_search, 3 remarketing "
             "automáticos, capacitación 1-1 y todos los bonos del webinar."
         ),
-        "monto_centavos": 49700,   # $497.00
+        "monto_centavos": 29700,   # $297.00
         "mode": "payment",
         "cuotas_total": None,
     },
     "cuotas": {
-        "nombre": "IMPORCHAT — Plan de Pagos (3 cuotas de $197)",
+        "nombre": "IMPORCHAT — Plan de Pagos (3 cuotas de $109)",
         "descripcion": (
             "Exactamente el mismo paquete completo, pagado en 3 cuotas "
-            "mensuales de $197 ($591 total). Mismos bonos, misma garantía."
+            "mensuales de $109 ($327 total). Mismos bonos, misma garantía."
         ),
-        "monto_centavos": 19700,   # $197.00 / mes × 3
+        "monto_centavos": 10900,   # $109.00 / mes × 3
         "mode": "subscription",
         "recurring_interval": "month",
         "cuotas_total": 3,

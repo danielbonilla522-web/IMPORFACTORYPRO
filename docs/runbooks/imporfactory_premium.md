@@ -48,8 +48,8 @@ Tres ofertas (`backend/app/services/stripe_service.py` → `OFERTAS`):
 
 | Plan | Precio | Modo Stripe |
 |---|---|---|
-| `principal` | $497 pago único | `payment` |
-| `cuotas` | 3 × $197 ($591) | `subscription` mensual, cancelada tras la 3ª cuota vía webhook |
+| `principal` | $297 pago único | `payment` |
+| `cuotas` | 3 × $109 ($327) | `subscription` mensual, cancelada tras la 3ª cuota vía webhook |
 | `lite` | $197 pago único (downsell) | `payment` |
 
 **Credenciales** (env o `empresa_config` empresa_id=5):
