@@ -1,0 +1,52 @@
+{# ────────────────────────────────────────────────────────────────────
+   Página de gracias — post Stripe Checkout exitoso de IMPORCHAT.
+   Sirve en GET /imporchat/gracias?session_id=...
+   2026-06-19
+   ──────────────────────────────────────────────────────────────────── #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>¡Bienvenido a IMPORCHAT! · Compra confirmada</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300BFFF'/><text x='16' y='22' font-family='Inter,sans-serif' font-size='16' font-weight='800' text-anchor='middle' fill='%230B1426'>IC</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cyan:#00BFFF;--gold:#E6B800;--navy:#0B1426;--text:#F5F7FA;--text-mut:#AEB8D0;--text-dim:#6E7894;--surface:#151D31;--border:rgba(255,255,255,.08);--success:#2BD9A0}
+  body{font-family:Inter,system-ui,sans-serif;color:var(--text);min-height:100vh;display:grid;place-items:center;padding:24px;
+    background:radial-gradient(at 30% 0%,rgba(0,191,255,.12),transparent 50%),linear-gradient(180deg,#000,#0A0E1A)}
+  .card{max-width:560px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:48px 36px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+  .check{width:88px;height:88px;border-radius:50%;background:rgba(43,217,160,.14);border:2px solid var(--success);display:grid;place-items:center;margin:0 auto 24px;font-size:44px;color:var(--success)}
+  h1{font-family:Montserrat;font-size:30px;font-weight:900;margin-bottom:12px}
+  p.sub{color:var(--text-mut);font-size:17px;margin-bottom:28px}
+  .steps{text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:28px}
+  .steps h3{font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
+  .steps li{list-style:none;padding:9px 0 9px 32px;position:relative;color:var(--text-mut);font-size:15px}
+  .steps li::before{content:"";position:absolute;left:0;top:13px;width:18px;height:18px;border-radius:50%;background:rgba(0,191,255,.15);border:1px solid var(--cyan)}
+  .steps li b{color:var(--text)}
+  .ref{font-size:12px;color:var(--text-dim);margin-bottom:24px;word-break:break-all}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cyan),#0093d6);color:var(--navy);font-weight:800;padding:14px 28px;border-radius:12px;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">✓</div>
+    <h1>¡Bienvenido a IMPORCHAT!</h1>
+    <p class="sub">Tu compra fue confirmada. Acabas de tomar la decisión que cambia tu operación de WhatsApp.</p>
+
+    <div class="steps">
+      <h3>Qué sigue ahora</h3>
+      <ul>
+        <li>Te enviamos un <b>correo de confirmación</b> con tu acceso y recibo.</li>
+        <li>Un <b>implementador del equipo</b> te escribirá por WhatsApp para agendar tu sesión 1-1.</li>
+        <li>Ten listo tu <b>catálogo y precios</b> para configurar tu primer agente vendedor.</li>
+      </ul>
+    </div>
+
+    {% if session_id %}<p class="ref">Referencia de orden: {{ session_id }}</p>{% endif %}
+    <a class="btn" href="/imporchat">Volver al inicio</a>
+  </div>
+</body>
+</html>

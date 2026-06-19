@@ -46,6 +46,7 @@ from api import imporfactory_finanzas
 from api import imporfactory_mensajeria
 from api import imporfactory_admin
 from api import cobranzas_tv
+from api import imporchat_ventas
 from api import auth
 
 
@@ -119,6 +120,7 @@ app.include_router(imporfactory_finanzas.router)
 app.include_router(imporfactory_mensajeria.router)
 app.include_router(imporfactory_admin.router)
 app.include_router(cobranzas_tv.router)
+app.include_router(imporchat_ventas.router)
 app.include_router(auth.router)
 
 
@@ -251,6 +253,23 @@ async def reto_certificado(request: Request, folio: str):
 @app.get("/facturacion", response_class=HTMLResponse)
 async def facturacion_masiva(request: Request):
     return _no_cache_html(render_premium(request, "facturacion/landing.html"))
+
+
+# ════════════════════════════════════════════════════════════
+# IMPORCHAT — Landing de venta del webinar high-ticket (PÚBLICO)
+# Checkout vía Stripe: ver api/imporchat_ventas.py
+# ════════════════════════════════════════════════════════════
+
+@app.get("/imporchat", response_class=HTMLResponse)
+@app.get("/imporchat/lanzamiento", response_class=HTMLResponse)
+async def imporchat_landing(request: Request):
+    return _no_cache_html(render_premium(request, "imporchat/landing.html"))
+
+
+@app.get("/imporchat/gracias", response_class=HTMLResponse)
+async def imporchat_gracias(request: Request, session_id: str | None = None):
+    return _no_cache_html(render_premium(request, "imporchat/gracias.html",
+                                         {"session_id": session_id}))
 
 
 @app.get("/formularios", response_class=HTMLResponse)

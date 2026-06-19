@@ -36,6 +36,39 @@ DB: MySQL grupo_impor (mismo backend que ERP y IMPORSHOP)
 | `/configuracion` | staff | (Reusa /os-config legacy) |
 | `/api/blog/public/sitemap.xml` | público | Sitemap para Google |
 | `/api/blog/public/articulos/{slug}` | público | JSON detalle artículo |
+| `/imporchat` · `/imporchat/lanzamiento` | público | Landing de venta webinar IMPORCHAT (oferta $497) |
+| `/imporchat/gracias` | público | Confirmación post-pago Stripe |
+| `/api/imporchat/checkout` | público | Crea Stripe Checkout Session (plan: principal/cuotas/lite) |
+| `/api/imporchat/webhook` | Stripe | Eventos de pago (confirmación, cuotas, refund) |
+
+## IMPORCHAT — Landing de venta (Stripe Checkout)
+
+Landing high-ticket del webinar IMPORCHAT, basada en el Playbook de Lanzamiento.
+Tres ofertas (`backend/app/services/stripe_service.py` → `OFERTAS`):
+
+| Plan | Precio | Modo Stripe |
+|---|---|---|
+| `principal` | $297 pago único | `payment` |
+| `cuotas` | 3 × $109 ($327) | `subscription` mensual, cancelada tras la 3ª cuota vía webhook |
+| `lite` | $197 pago único (downsell) | `payment` |
+
+**Credenciales** (env o `empresa_config` empresa_id=5):
+```sql
+INSERT INTO empresa_config (empresa_id, clave, valor) VALUES
+  (5, 'STRIPE_SECRET_KEY', 'sk_live_...'),
+  (5, 'STRIPE_WEBHOOK_SECRET', 'whsec_...')
+ON DUPLICATE KEY UPDATE valor = VALUES(valor);
+```
+Sin `STRIPE_SECRET_KEY` el endpoint `/api/imporchat/checkout` responde 503 y la
+landing muestra un aviso (no rompe). El webhook acepta sin verificar firma solo
+si no hay `STRIPE_WEBHOOK_SECRET` (modo sandbox).
+
+**Webhook Stripe:** apuntar a `https://impor.imporchina.com/api/imporchat/webhook`,
+eventos `checkout.session.completed`, `invoice.paid`,
+`customer.subscription.deleted`, `charge.refunded`.
+
+**Migración:** `backend/migrations/imporchat_ventas_001.sql` (tabla
+`imporchat_ordenes` en la BD propia). Rollback: `DROP TABLE imporchat_ordenes;`
 
 ## Crons activos
 
